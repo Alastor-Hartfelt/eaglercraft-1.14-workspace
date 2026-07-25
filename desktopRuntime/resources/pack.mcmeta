@@ -1,0 +1,613 @@
+{
+    "pack": {
+        "description": "The default data for Minecraft",
+        "pack_format": 4
+    },
+    "language": {
+        "af_za": {
+            "name": "Afrikaans",
+            "region": "Suid-Afrika",
+            "bidirectional": false
+        },
+        "ar_sa": {
+            "name": "\u0627\u0644\u0639\u0631\u0628\u064a\u0629",
+            "region": "\u0627\u0644\u0639\u0627\u0644\u0645 \u0627\u0644\u0639\u0631\u0628\u064a",
+            "bidirectional": true
+        },
+        "ast_es": {
+            "name": "Asturianu",
+            "region": "Asturies",
+            "bidirectional": false
+        },
+        "az_az": {
+            "name": "Az\u0259rbaycanca",
+            "region": "Az\u0259rbaycan",
+            "bidirectional": false
+        },
+        "ba_ru": {
+            "name": "\u0411\u0430\u0448\u04a1\u043e\u0440\u0442\u0441\u0430",
+            "region": "\u0411\u0430\u0448\u04a1\u043e\u0440\u0442\u043e\u0441\u0442\u0430\u043d",
+            "bidirectional": false
+        },
+        "bar": {
+            "name": "Boarisch",
+            "region": "Bayern",
+            "bidirectional": false
+        },
+        "be_by": {
+            "name": "\u0411\u0435\u043b\u0430\u0440\u0443\u0441\u043a\u0430\u044f",
+            "region": "\u0411\u0435\u043b\u0430\u0440\u0443\u0441\u044c",
+            "bidirectional": false
+        },
+        "bg_bg": {
+            "name": "\u0411\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438",
+            "region": "\u0411\u044a\u043b\u0433\u0430\u0440\u0438\u044f",
+            "bidirectional": false
+        },
+        "br_fr": {
+            "name": "Brezhoneg",
+            "region": "Breizh",
+            "bidirectional": false
+        },
+        "brb": {
+            "name": "Braobans",
+            "region": "Braobant",
+            "bidirectional": false
+        },
+        "bs_ba": {
+            "name": "Bosanski",
+            "region": "Bosna i Hercegovina",
+            "bidirectional": false
+        },
+        "ca_es": {
+            "name": "Catal\u00e0",
+            "region": "Catalunya",
+            "bidirectional": false
+        },
+        "cs_cz": {
+            "name": "\u010ce\u0161tina",
+            "region": "\u010cesk\u00e1 republika",
+            "bidirectional": false
+        },
+        "cy_gb": {
+            "name": "Cymraeg",
+            "region": "Cymru",
+            "bidirectional": false
+        },
+        "da_dk": {
+            "name": "Dansk",
+            "region": "Danmark",
+            "bidirectional": false
+        },
+        "de_at": {
+            "name": "Deutsch",
+            "region": "\u00d6sterreich",
+            "bidirectional": false
+        },
+        "de_ch": {
+            "name": "Deutsch",
+            "region": "Schweiz",
+            "bidirectional": false
+        },
+        "de_de": {
+            "name": "Deutsch",
+            "region": "Deutschland",
+            "bidirectional": false
+        },
+        "el_gr": {
+            "name": "\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac",
+            "region": "\u0395\u03bb\u03bb\u03ac\u03b4\u03b1",
+            "bidirectional": false
+        },
+        "en_au": {
+            "name": "English",
+            "region": "Australia",
+            "bidirectional": false
+        },
+        "en_ca": {
+            "name": "English",
+            "region": "Canada",
+            "bidirectional": false
+        },
+        "en_gb": {
+            "name": "English",
+            "region": "United Kingdom",
+            "bidirectional": false
+        },
+        "en_nz": {
+            "name": "English",
+            "region": "New Zealand",
+            "bidirectional": false
+        },
+        "en_pt": {
+            "name": "Pirate Speak",
+            "region": "Piraten",
+            "bidirectional": false
+        },
+        "en_ud": {
+            "name": "uosl\u1e8dp u\u01dd\u0131pu\u01dd",
+            "region": "pu\u01ddl\u01dd\u0253\u01ddW \u01dd\u0265\u0287",
+            "bidirectional": false
+        },
+        "en_us": {
+            "name": "English",
+            "region": "US",
+            "bidirectional": false
+        },
+        "enp": {
+            "name": "Anglish",
+            "region": "Oned Riches",
+            "bidirectional": false
+        },
+        "enws": {
+            "name": "Shakespearean English",
+            "region": "Verily Royaume",
+            "bidirectional": false
+        },
+        "eo_uy": {
+            "name": "Esperanto",
+            "region": "Esperantujo",
+            "bidirectional": false
+        },
+        "es_ar": {
+            "name": "Espa\u00f1ol",
+            "region": "Argentina",
+            "bidirectional": false
+        },
+        "es_cl": {
+            "name": "Espa\u00f1ol",
+            "region": "Chile",
+            "bidirectional": false
+        },
+        "es_ec": {
+            "name": "Espa\u00f1ol",
+            "region": "Ecuador",
+            "bidirectional": false
+        },
+        "es_es": {
+            "name": "Espa\u00f1ol",
+            "region": "Espa\u00f1a",
+            "bidirectional": false
+        },
+        "es_mx": {
+            "name": "Espa\u00f1ol",
+            "region": "M\u00e9xico",
+            "bidirectional": false
+        },
+        "es_uy": {
+            "name": "Espa\u00f1ol",
+            "region": "Uruguay",
+            "bidirectional": false
+        },
+        "es_ve": {
+            "name": "Espa\u00f1ol",
+            "region": "Venezuela",
+            "bidirectional": false
+        },
+        "et_ee": {
+            "name": "Eesti keel",
+            "region": "Eesti",
+            "bidirectional": false
+        },
+        "eu_es": {
+            "name": "Euskara",
+            "region": "Euskal Herria",
+            "bidirectional": false
+        },
+        "fa_ir": {
+            "name": "\u0641\u0627\u0631\u0633\u06cc",
+            "region": "\u0627\u06cc\u0631\u0627\u0646",
+            "bidirectional": true
+        },
+        "fi_fi": {
+            "name": "Suomi",
+            "region": "Suomi",
+            "bidirectional": false
+        },
+        "fil_ph": {
+            "name": "Filipino",
+            "region": "Pilipinas",
+            "bidirectional": false
+        },
+        "fr_ca": {
+            "name": "Fran\u00e7ais",
+            "region": "Canada",
+            "bidirectional": false
+        },
+        "fr_fr": {
+            "name": "Fran\u00e7ais",
+            "region": "France",
+            "bidirectional": false
+        },
+        "fra_de": {
+            "name": "Frenkisch",
+            "region": "Frenkisch",
+            "bidirectional": false
+        },
+        "fur_it": {
+            "name": "Furlan",
+            "region": "Friûl",
+            "bidirectional": false
+        },
+        "fy_nl": {
+            "name": "Frysk",
+            "region": "Frysl\u00e2n",
+            "bidirectional": false
+        },
+        "ga_ie": {
+            "name": "Gaeilge",
+            "region": "\u00c9ire",
+            "bidirectional": false
+        },
+        "gd_gb": {
+            "name": "G\u00e0idhlig",
+            "region": "Alba",
+            "bidirectional": false
+        },
+        "gl_es": {
+            "name": "Galego",
+            "region": "Galicia",
+            "bidirectional": false
+        },
+        "gt_gh": {
+            "name": "Twi",
+            "region": "Ghana",
+            "bidirectional": false
+        },
+        "gu_in": {
+            "name": "\u0a97\u0ac1\u0a9c\u0ab0\u0abe\u0aa4\u0ac0",
+            "region": "\u0a97\u0ac1\u0a9c\u0ab0\u0abe\u0aa4",
+            "bidirectional": false
+        },
+        "he_il": {
+            "name": "\u05e2\u05d1\u05e8\u05d9\u05ea",
+            "region": "\u05d9\u05e9\u05e8\u05d0\u05dc",
+            "bidirectional": true
+        },
+        "hi_in": {
+            "name": "\u0939\u093f\u0928\u094d\u0926\u0940",
+            "region": "\u092d\u093e\u0930\u0924",
+            "bidirectional": false
+        },
+        "hr_hr": {
+            "name": "Hrvatski",
+            "region": "Hrvatska",
+            "bidirectional": false
+        },
+        "hu_hu": {
+            "name": "Magyar",
+            "region": "Magyarorsz\u00e1g",
+            "bidirectional": false
+        },
+        "hy_am": {
+            "name": "\u0570\u0561\u0575\u0565\u0580\u0565\u0576",
+            "region": "\u0540\u0561\u0575\u0561\u057d\u057f\u0561\u0576",
+            "bidirectional": false
+        },
+        "id_id": {
+            "name": "Bahasa Indonesia",
+            "region": "Indonesia",
+            "bidirectional": false
+        },
+        "ig_ng": {
+            "name": "Igbo",
+            "region": "Naij\u00e0",
+            "bidirectional": false
+        },
+        "io_en": {
+            "name": "Ido",
+            "region": "Idolande",
+            "bidirectional": false
+        },
+        "is_is": {
+            "name": "\u00cdslenska",
+            "region": "\u00cdsland",
+            "bidirectional": false
+        },
+        "it_it": {
+            "name": "Italiano",
+            "region": "Italia",
+            "bidirectional": false
+        },
+        "ja_jp": {
+            "name": "\u65e5\u672c\u8a9e",
+            "region": "\u65e5\u672c",
+            "bidirectional": false
+        },
+        "jbo_en": {
+            "name": "la .lojban.",
+            "region": "la .lojban.",
+            "bidirectional": false
+        },
+        "ka_ge": {
+            "name": "\u10e5\u10d0\u10e0\u10d7\u10e3\u10da\u10d8",
+            "region": "\u10e1\u10d0\u10e5\u10d0\u10e0\u10d7\u10d5\u10d4\u10da\u10dd",
+            "bidirectional": false
+        },
+        "kk_kz": {
+            "name": "\u049a\u0430\u0437\u0430\u049b\u0448\u0430",
+            "region": "\u049a\u0430\u0437\u0430\u049b\u0441\u0442\u0430\u043d",
+            "bidirectional": false
+        },
+        "km_kh": {
+            "name": "\u1797\u17b6\u179f\u17b6\u1781\u17d2\u1798\u17c2\u179a",
+            "region": "\u1780\u1798\u17d2\u1796\u17bb\u1787\u17b6",
+            "bidirectional": false
+        },
+        "ko_kr": {
+            "name": "\ud55c\uad6d\uc5b4",
+            "region": "\ub300\ud55c\ubbfc\uad6d",
+            "bidirectional": false
+        },
+        "ksh": {
+            "name": "K\u00f6lsch",
+            "region": "Rhein\u00e4nd",
+            "bidirectional": false
+        },
+        "kw_gb": {
+            "name": "Kernewek",
+            "region": "Kernow",
+            "bidirectional": false
+        },
+        "la_la": {
+            "name": "Lorem Ipsum",
+            "region": "Lorem Ipsum",
+            "bidirectional": false
+        },
+        "lb_lu": {
+            "name": "L\u00ebtzebuergesch",
+            "region": "L\u00ebtzebuergesch",
+            "bidirectional": false
+        },
+        "li_li": {
+            "name": "Limburgs",
+            "region": "Limburg",
+            "bidirectional": false
+        },
+        "lol_us": {
+            "name": "LOLCAT",
+            "region": "Heimr \u00c6sgarthr",
+            "bidirectional": false
+        },
+        "lt_lt": {
+            "name": "Lietuvi\u0173",
+            "region": "Lietuva",
+            "bidirectional": false
+        },
+        "lv_lv": {
+            "name": "Latvie\u0161u",
+            "region": "Latvija",
+            "bidirectional": false
+        },
+        "mi_nz": {
+            "name": "M\u0101ori",
+            "region": "Aotearoa",
+            "bidirectional": false
+        },
+        "mk_mk": {
+            "name": "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438",
+            "region": "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0438\u0458\u0430",
+            "bidirectional": false
+        },
+        "mn_mn": {
+            "name": "\u041c\u043e\u043d\u0433\u043e\u043b",
+            "region": "\u041c\u043e\u043d\u0433\u043e\u043b",
+            "bidirectional": false
+        },
+        "ms_my": {
+            "name": "Bahasa Melayu",
+            "region": "Malaysia",
+            "bidirectional": false
+        },
+        "mt_mt": {
+            "name": "Malti",
+            "region": "Malta",
+            "bidirectional": false
+        },
+        "nds_de": {
+            "name": "Platdietsch",
+            "region": "Nedderdietschland",
+            "bidirectional": false
+        },
+        "nl_be": {
+            "name": "Vlaams",
+            "region": "Vlaanderen",
+            "bidirectional": false
+        },
+        "nl_nl": {
+            "name": "Nederlands",
+            "region": "Nederland",
+            "bidirectional": false
+        },
+        "nn_no": {
+            "name": "Norsk Nynorsk",
+            "region": "Noreg",
+            "bidirectional": false
+        },
+        "nb_no": {
+            "name": "Norsk Bokm\u00e5l",
+            "region": "Norge",
+            "bidirectional": false
+        },
+        "oc_fr": {
+            "name": "Occitan",
+            "region": "Occitanie",
+            "bidirectional": false
+        },
+        "oj_oj": {
+            "name": "Ojibw\u00e9mowin",
+            "region": "Anishinaabewi-minis",
+            "bidirectional": false
+        },
+        "ovd": {
+            "name": "\u00d6vdalian",
+            "region": "\u00d6vdalingen",
+            "bidirectional": false
+        },
+        "pl_pl": {
+            "name": "Polski",
+            "region": "Polska",
+            "bidirectional": false
+        },
+        "pt_br": {
+            "name": "Portugu\u00eas",
+            "region": "Brasil",
+            "bidirectional": false
+        },
+        "pt_pt": {
+            "name": "Portugu\u00eas",
+            "region": "Portugal",
+            "bidirectional": false
+        },
+        "qcb_es": {
+            "name": "C\u00e1ntabru/Monta\u00f1\u00e9s",
+            "region": "Cantabria",
+            "bidirectional": false
+        },
+        "ro_ro": {
+            "name": "Rom\u00e2n\u0103",
+            "region": "Rom\u00e2nia",
+            "bidirectional": false
+        },
+        "ru_ru": {
+            "name": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
+            "region": "\u0420\u043e\u0441\u0441\u0438\u044f",
+            "bidirectional": false
+        },
+        "se_no": {
+            "name": "Davvis\u00e1megiella",
+            "region": "S\u00e1pmi",
+            "bidirectional": false
+        },
+        "sk_sk": {
+            "name": "Sloven\u010dina",
+            "region": "Slovensko",
+            "bidirectional": false
+        },
+        "sl_si": {
+            "name": "Sloven\u0161\u010dina",
+            "region": "Slovenija",
+            "bidirectional": false
+        },
+        "so_so": {
+            "name": "Soomaali",
+            "region": "Soomaaliya",
+            "bidirectional": false
+        },
+        "sq_al": {
+            "name": "Shqip",
+            "region": "Shqip\u00ebria",
+            "bidirectional": false
+        },
+        "sr_cs": {
+            "name": "\u0421\u0440\u043f\u0441\u043a\u0438",
+            "region": "\u0421\u0440\u0431\u0438\u0458\u0430",
+            "bidirectional": false
+        },
+        "sr_latn": {
+            "name": "Srpski",
+            "region": "Srbija",
+            "bidirectional": false
+        },
+        "sv_se": {
+            "name": "Svenska",
+            "region": "Sverige",
+            "bidirectional": false
+        },
+        "sw_ke": {
+            "name": "Kiswahili",
+            "region": "Afrika ya Mashariki",
+            "bidirectional": false
+        },
+        "szl": {
+            "name": "\u015al\u016fnski",
+            "region": "\u015al\u016fnsk",
+            "bidirectional": false
+        },
+        "ta_in": {
+            "name": "\u0ba4\u0bae\u0bbf\u0bb4\u0bcd",
+            "region": "\u0b87\u0ba8\u0bcd\u0ba4\u0bbf\u0baf\u0bbe",
+            "bidirectional": false
+        },
+        "th_th": {
+            "name": "\u0e20\u0e32\u0e29\u0e32\u0e44\u0e17\u0e22",
+            "region": "\u0e44\u0e17\u0e22",
+            "bidirectional": false
+        },
+        "tl_ph": {
+            "name": "Tagalog",
+            "region": "Pilipinas",
+            "bidirectional": false
+        },
+        "tlh_aa": {
+            "name": "tlhIngan-Hol",
+            "region": "Qo'noS",
+            "bidirectional": false
+        },
+        "tok": {
+            "name": "toki pona",
+            "region": "ma toki",
+            "bidirectional": false
+        },
+        "tr_tr": {
+            "name": "T\u00fcrk\u00e7e",
+            "region": "T\u00fcrkiye",
+            "bidirectional": false
+        },
+        "tt_ru": {
+            "name": "\u0422\u0430\u0442\u0430\u0440\u0447\u0430",
+            "region": "\u0422\u0430\u0442\u0430\u0440\u0441\u0442\u0430\u043d",
+            "bidirectional": false
+        },
+        "uk_ua": {
+            "name": "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430",
+            "region": "\u0423\u043a\u0440\u0430\u0457\u043d\u0430",
+            "bidirectional": false
+        },
+        "val_es": {
+            "name": "Catal\u00e0 (Valenci\u00e0)",
+            "region": "Pa\u00eds Valenci\u00e0",
+            "bidirectional": false
+        },
+        "vec_it": {
+            "name": "V\u00e8neto",
+            "region": "V\u00e8neto",
+            "bidirectional": false
+        },
+        "vi_vn": {
+            "name": "Ti\u1ebfng Vi\u1ec7t",
+            "region": "Vi\u1ec7t Nam",
+            "bidirectional": false
+        },
+        "yi_de": {
+            "name": "\u05d9\u05d9\u05d3\u05d9\u05e9",
+            "region": "\u05d3\u05d9\u05d9\u05e6\u05e9\u05dc\u05d0\u05e0\u05d3",
+            "bidirectional": true
+        },
+        "yo_ng": {
+            "name": "Yor\u00f9b\u00e1",
+            "region": "Nij\u00edr\u00eca",
+            "bidirectional": false
+        },
+        "zh_cn": {
+            "name": "\u4e2d\u6587",
+            "region": "\u4e2d\u56fd\u5927\u9646",
+            "bidirectional": false
+        },
+        "zh_hk": {
+            "name": "\u4e2d\u6587",
+            "region": "\u9999\u6e2f",
+            "bidirectional": false
+        },
+        "zh_tw": {
+            "name": "\u4e2d\u6587",
+            "region": "\u53f0\u7063",
+            "bidirectional": false
+        },
+        "zlm_arab": {
+            "name": "Bahasa Melayu",
+            "region": "Dunia Melayu",
+            "bidirectional": true
+        }
+    }
+}
