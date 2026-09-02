@@ -47,8 +47,13 @@ jobs:
       - name: Build WASM-GC client
         run: ./gradlew :target_teavm_wasm_gc:makeMainWasmClientBundle --no-daemon
 
+      - name: Prepare GitHub Pages entry point
+        working-directory: target_teavm_wasm_gc/javascript_dist
+        run: cp Eaglercraft_1.14.4_WASM-GC_Offline_Download.html index.html
+
       - name: Verify playable bundle
         run: |
+          test -f target_teavm_wasm_gc/javascript_dist/index.html
           test -f target_teavm_wasm_gc/javascript_dist/bootstrap.js
           test -f target_teavm_wasm_gc/javascript_dist/assets.epw
           echo "Playable WASM-GC bundle created successfully."
