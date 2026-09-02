@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -31,8 +31,27 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
+      - name: Compile WASM-GC bootstrap
+        working-directory: target_teavm_wasm_gc
+        run: |
+          mkdir -p javascript_dist
+          java -jar buildtools/closure-compiler.jar \
+            --compilation_level ADVANCED_OPTIMIZATIONS \
+            --assume_function_wrapper \
+            --emit_use_strict \
+            --isolation_mode IIFE \
+            --js ../src/wasm-gc-teavm-bootstrap/js/externs.js \
+            --js ../src/wasm-gc-teavm-bootstrap/js/main.js \
+            --js_output_file javascript_dist/bootstrap.js
+
       - name: Build WASM-GC client
         run: ./gradlew :target_teavm_wasm_gc:makeMainWasmClientBundle --no-daemon
+
+      - name: Verify playable bundle
+        run: |
+          test -f target_teavm_wasm_gc/javascript_dist/bootstrap.js
+          test -f target_teavm_wasm_gc/javascript_dist/assets.epw
+          echo "Playable WASM-GC bundle created successfully."
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
