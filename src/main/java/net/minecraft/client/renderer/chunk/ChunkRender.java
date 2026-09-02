@@ -1,9 +1,10 @@
 package net.minecraft.client.renderer.chunk;
 
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.GLX;
+import java.util.Collections;
 import java.util.HashSet;
 import net.lax1dude.eaglercraft.Random;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import java.util.Set;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.fluid.IFluidState;
@@ -27,6 +29,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkSection;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -64,21 +67,16 @@ public class ChunkRender {
 
    });
    private final ChunkRender[] neighborChunks = new ChunkRender[6];
-   private static final ThreadLocal<boolean[]> REBUILD_BOOLEAN_CACHE = ThreadLocal.withInitial(() -> new boolean[BlockRenderLayer._VALUES.length]);
+   private static final boolean[] REBUILD_BOOLEAN_CACHE = new boolean[BlockRenderLayer._VALUES.length];
+   private static final VisGraph REBUILD_VIS_GRAPH_CACHE = new VisGraph();
    private final BlockPos.MutableBlockPos chunkCachePos1 = new BlockPos.MutableBlockPos();
    private final BlockPos.MutableBlockPos chunkCachePos2 = new BlockPos.MutableBlockPos();
-   private final Random rebuildRandom = new Random();
+   private final Random rebuildRandom = new XoRoShiRoRandom();
    private boolean needsImmediateUpdate;
 
    public ChunkRender(World worldIn, WorldRenderer worldRendererIn) {
       this.world = worldIn;
       this.renderGlobal = worldRendererIn;
-      if (GLX.useVbo()) {
-         for(int i = 0; i < BlockRenderLayer._VALUES.length; ++i) {
-            this.vertexBuffers[i] = new VertexBuffer(DefaultVertexFormats.BLOCK);
-         }
-      }
-
    }
 
    private static boolean isChunkEmpty(BlockPos pos, World worldIn) {
@@ -105,7 +103,12 @@ public class ChunkRender {
    }
 
    public VertexBuffer getVertexBufferByLayer(int layer) {
-      return this.vertexBuffers[layer];
+      VertexBuffer vertexBuffer = this.vertexBuffers[layer];
+      if (vertexBuffer == null) {
+         vertexBuffer = new VertexBuffer(DefaultVertexFormats.BLOCK);
+         this.vertexBuffers[layer] = vertexBuffer;
+      }
+      return vertexBuffer;
    }
 
    public void setPosition(int x, int y, int z) {
@@ -139,113 +142,142 @@ public class ChunkRender {
          compiledchunk.reset();
       }
       BlockPos blockpos = this.position.toImmutable();
-      BlockPos blockpos1 = blockpos.add(15, 15, 15);
       World world = this.world;
       if (world != null) {
          if (generator.getStatus() != ChunkRenderTask.Status.COMPILING) {
             return;
          }
          generator.setCompiledChunk(compiledchunk);
-         VisGraph visgraph = new VisGraph();
-         HashSet lvt_11_1_ = Sets.newHashSetWithExpectedSize(8);
+         VisGraph visgraph = REBUILD_VIS_GRAPH_CACHE;
+         visgraph.reset();
+         Set<TileEntity> globalTileEntities = null;
          ChunkRenderCache cache = generator.takeChunkRenderCache();
          if (cache != null) {
             ++renderChunksUpdated;
-            boolean[] aboolean = REBUILD_BOOLEAN_CACHE.get();
+            boolean[] aboolean = REBUILD_BOOLEAN_CACHE;
             java.util.Arrays.fill(aboolean, false);
-            BlockModelRenderer.enableCache();
+            BlockModelRenderer.enableCache(blockpos);
             BlockRendererDispatcher blockrendererdispatcher = this.renderGlobal.getBlockRendererDispatcher();
+            TextureAtlasSprite.beginAnimationCollection(compiledchunk.getAnimatedSprites());
 
-            for(BlockPos blockpos2 : BlockPos.getAllInBoxMutable(blockpos, blockpos1)) {
-               BlockState blockstate = cache.getBlockState(blockpos2);
-               boolean isOpaque = blockstate.isOpaqueCube(cache, blockpos2);
-               if (isOpaque) {
-                  visgraph.setOpaqueCube(blockpos2);
-               }
+            try {
+               int baseX = blockpos.getX(), baseY = blockpos.getY(), baseZ = blockpos.getZ();
+               int sectionIdx = baseY >> 4;
+               int centralCx = (baseX >> 4) - cache.chunkStartX;
+               int centralCz = (baseZ >> 4) - cache.chunkStartZ;
+               Chunk centralChunk = cache.chunks[centralCx][centralCz];
+               ChunkSection centralSection = centralChunk.getSections()[sectionIdx];
 
-               if (blockstate.getBlock().hasTileEntity()) {
-                  TileEntity tileentity = cache.getTileEntity(blockpos2, Chunk.CreateEntityType.CHECK);
-                  if (tileentity != null) {
-                     TileEntityRenderer<TileEntity> tileentityrenderer = TileEntityRendererDispatcher.instance.getRenderer(tileentity);
-                     if (tileentityrenderer != null) {
-                        compiledchunk.addTileEntity(tileentity);
-                        if (tileentityrenderer.isGlobalRenderer(tileentity)) {
-                           lvt_11_1_.add(tileentity);
+               if (centralSection != null && !centralSection.isEmpty()) {
+                  BlockPos.MutableBlockPos blockpos2 = new BlockPos.MutableBlockPos();
+                  int endX = baseX + 16, endY = baseY + 16, endZ = baseZ + 16;
+                  for (int curY = baseY; curY < endY; ++curY) {
+                     int subY = curY & 15;
+                     for (int curZ = baseZ; curZ < endZ; ++curZ) {
+                        int subZ = curZ & 15;
+                        for (int curX = baseX; curX < endX; ++curX) {
+                           int subX = curX & 15;
+                           blockpos2.setPos(curX, curY, curZ);
+
+                           BlockState blockstate = centralSection.getBlockState(subX, subY, subZ);
+                           boolean isOpaque = blockstate.isOpaqueCube(cache, blockpos2);
+                           if (isOpaque) {
+                              visgraph.setOpaqueCube(blockpos2);
+                           }
+
+                           if (blockstate.getBlock().hasTileEntity()) {
+                              TileEntity tileentity = cache.getTileEntity(blockpos2, Chunk.CreateEntityType.CHECK);
+                              if (tileentity != null) {
+                                 TileEntityRenderer<TileEntity> tileentityrenderer = TileEntityRendererDispatcher.instance.getRenderer(tileentity);
+                                 if (tileentityrenderer != null) {
+                                    compiledchunk.addTileEntity(tileentity);
+                                    if (tileentityrenderer.isGlobalRenderer(tileentity)) {
+                                       if (globalTileEntities == null) {
+                                          globalTileEntities = Sets.newHashSetWithExpectedSize(4);
+                                       }
+                                       globalTileEntities.add(tileentity);
+                                    }
+                                 }
+                              }
+                           }
+
+                           if (blockstate.isAir()) continue;
+
+                           IFluidState ifluidstate = blockstate.getFluidState();
+                           if (!ifluidstate.isEmpty()) {
+                              BlockRenderLayer blockrenderlayer1 = ifluidstate.getRenderLayer();
+                              int j = blockrenderlayer1.ordinal();
+                              BufferBuilder bufferbuilder = generator.getRegionRenderCacheBuilder().getBuilder(j);
+                              if (!compiledchunk.isLayerStarted(blockrenderlayer1)) {
+                                 compiledchunk.setLayerStarted(blockrenderlayer1);
+                                 this.preRenderBlocks(bufferbuilder, blockpos);
+                              }
+                              aboolean[j] |= blockrendererdispatcher.renderFluid(blockpos2, cache, bufferbuilder, ifluidstate);
+                           }
+
+                           if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
+                              if (isOpaque) {
+                                 boolean allOpaque = true;
+                                 for (int f2 = 0; f2 < FACINGS.length; ++f2) {
+                                    Direction dir = FACINGS[f2];
+                                    this.scratchNeighborPos.setPos(blockpos2).move(dir);
+                                    if (!cache.getBlockState(this.scratchNeighborPos).isOpaqueCube(cache, this.scratchNeighborPos)) {
+                                       allOpaque = false;
+                                       break;
+                                    }
+                                 }
+                                 if (allOpaque) continue;
+                              }
+                              BlockRenderLayer blockrenderlayer2 = blockstate.getBlock().getRenderLayer();
+                              int k = blockrenderlayer2.ordinal();
+                              BufferBuilder bufferbuilder1 = generator.getRegionRenderCacheBuilder().getBuilder(k);
+                              if (!compiledchunk.isLayerStarted(blockrenderlayer2)) {
+                                 compiledchunk.setLayerStarted(blockrenderlayer2);
+                                 this.preRenderBlocks(bufferbuilder1, blockpos);
+                              }
+                              aboolean[k] |= blockrendererdispatcher.func_215330_a(blockstate, blockpos2, cache, bufferbuilder1, this.rebuildRandom);
+                           }
                         }
                      }
                   }
                }
 
-               if (blockstate.isAir()) continue;
-
-               IFluidState ifluidstate = blockstate.getFluidState();
-               if (!ifluidstate.isEmpty()) {
-                  BlockRenderLayer blockrenderlayer1 = ifluidstate.getRenderLayer();
-                  int j = blockrenderlayer1.ordinal();
-                  BufferBuilder bufferbuilder = generator.getRegionRenderCacheBuilder().getBuilder(j);
-                  if (!compiledchunk.isLayerStarted(blockrenderlayer1)) {
-                     compiledchunk.setLayerStarted(blockrenderlayer1);
-                     this.preRenderBlocks(bufferbuilder, blockpos);
+               for(BlockRenderLayer blockrenderlayer : BlockRenderLayer._VALUES) {
+                  if (aboolean[blockrenderlayer.ordinal()]) {
+                     compiledchunk.setLayerUsed(blockrenderlayer);
                   }
-                  aboolean[j] |= blockrendererdispatcher.renderFluid(blockpos2, cache, bufferbuilder, ifluidstate);
+                  if (compiledchunk.isLayerStarted(blockrenderlayer)) {
+                     this.postRenderBlocks(blockrenderlayer, x, y, z, generator.getRegionRenderCacheBuilder().getBuilder(blockrenderlayer), compiledchunk);
+                  }
                }
-
-               if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
-                  if (isOpaque) {
-                     boolean allOpaque = true;
-                     for (int f2 = 0; f2 < FACINGS.length; ++f2) {
-                        Direction dir = FACINGS[f2];
-                        this.scratchNeighborPos.setPos(blockpos2).move(dir);
-                        if (!cache.getBlockState(this.scratchNeighborPos).isOpaqueCube(cache, this.scratchNeighborPos)) {
-                           allOpaque = false;
-                           break;
-                        }
-                     }
-                     if (allOpaque) continue;
-                  }
-                  BlockRenderLayer blockrenderlayer2 = blockstate.getBlock().getRenderLayer();
-                  int k = blockrenderlayer2.ordinal();
-                  BufferBuilder bufferbuilder1 = generator.getRegionRenderCacheBuilder().getBuilder(k);
-                  if (!compiledchunk.isLayerStarted(blockrenderlayer2)) {
-                     compiledchunk.setLayerStarted(blockrenderlayer2);
-                     this.preRenderBlocks(bufferbuilder1, blockpos);
-                  }
-                  aboolean[k] |= blockrendererdispatcher.func_215330_a(blockstate, blockpos2, cache, bufferbuilder1, this.rebuildRandom);
-               }
+            } finally {
+               TextureAtlasSprite.endAnimationCollection();
+               BlockModelRenderer.disableCache();
             }
-
-            for(BlockRenderLayer blockrenderlayer : BlockRenderLayer._VALUES) {
-               if (aboolean[blockrenderlayer.ordinal()]) {
-                  compiledchunk.setLayerUsed(blockrenderlayer);
-               }
-               if (compiledchunk.isLayerStarted(blockrenderlayer)) {
-                  this.postRenderBlocks(blockrenderlayer, x, y, z, generator.getRegionRenderCacheBuilder().getBuilder(blockrenderlayer), compiledchunk);
-               }
-            }
-
-            BlockModelRenderer.disableCache();
          }
 
-         compiledchunk.setVisibility(visgraph.computeVisibility());
+         visgraph.computeVisibility(compiledchunk.getVisibility());
 
-         try {
-            Set<TileEntity> set = new java.util.HashSet<>(lvt_11_1_.size() + 4);
-            set.addAll(lvt_11_1_);
-            Set<TileEntity> set1 = new java.util.HashSet<>(this.setTileEntities.size() + 4);
-            set1.addAll(this.setTileEntities);
-            set.removeAll(this.setTileEntities);
-            set1.removeAll(lvt_11_1_);
+         if (globalTileEntities == null) {
+            if (!this.setTileEntities.isEmpty()) {
+               Set<TileEntity> removed = new HashSet<>(this.setTileEntities);
+               this.setTileEntities.clear();
+               this.renderGlobal.updateTileEntities(removed, Collections.emptySet());
+            }
+         } else if (!this.setTileEntities.equals(globalTileEntities)) {
+            Set<TileEntity> added = new HashSet<>(globalTileEntities);
+            added.removeAll(this.setTileEntities);
+            Set<TileEntity> removed = new HashSet<>(this.setTileEntities);
+            removed.removeAll(globalTileEntities);
             this.setTileEntities.clear();
-            this.setTileEntities.addAll(lvt_11_1_);
-            this.renderGlobal.updateTileEntities(set1, set);
-         } finally {
+            this.setTileEntities.addAll(globalTileEntities);
+            this.renderGlobal.updateTileEntities(removed, added);
          }
 
       }
    }
 
    protected void finishCompileTask() {
-      // lock removed
 
       try {
          if (this.compileTask != null && this.compileTask.getStatus() != ChunkRenderTask.Status.DONE) {
@@ -253,7 +285,6 @@ public class ChunkRender {
             this.compileTask = null;
          }
       } finally {
-         // unlock removed
       }
 
    }
@@ -261,30 +292,64 @@ public class ChunkRender {
    public Object getLockCompileTask() {
       return null;
    }
+   public boolean trySetEmptyCompiledChunk() {
+      World currentWorld = this.world;
+      if (currentWorld == null) {
+         return false;
+      }
+
+      BlockPos blockpos = this.position;
+      int sectionY = blockpos.getY() >> 4;
+      Chunk chunk = currentWorld.getChunk(blockpos.getX() >> 4, blockpos.getZ() >> 4);
+      ChunkSection[] sections = chunk.getSections();
+      ChunkSection section = sectionY >= 0 && sectionY < sections.length
+            ? sections[sectionY] : Chunk.EMPTY_SECTION;
+      if (!ChunkSection.isEmpty(section)) {
+         return false;
+      }
+
+      this.finishCompileTask();
+      CompiledChunk compiledchunk = this.compiledChunk;
+      if (compiledchunk == CompiledChunk.DUMMY) {
+         compiledchunk = new CompiledChunk();
+      } else {
+         compiledchunk.reset();
+      }
+      compiledchunk.getVisibility().setAllVisible(true);
+
+      if (!this.setTileEntities.isEmpty()) {
+         Set<TileEntity> removed = new HashSet<>(this.setTileEntities);
+         this.setTileEntities.clear();
+         this.renderGlobal.updateTileEntities(removed, Collections.emptySet());
+      }
+
+      this.setCompiledChunk(compiledchunk);
+      return true;
+   }
 
    public ChunkRenderTask makeCompileTaskChunk() {
-      // lock removed
 
       ChunkRenderTask chunkrendertask;
       try {
+         if (this.trySetEmptyCompiledChunk()) {
+            return null;
+         }
+
          this.finishCompileTask();
          BlockPos blockpos = this.position.toImmutable();
-         int i = 1;
          this.chunkCachePos1.setPos(blockpos).move(-1, -1, -1);
          this.chunkCachePos2.setPos(blockpos).move(16, 16, 16);
          ChunkRenderCache chunkrendercache = ChunkRenderCache.generateCache(this.world, this.chunkCachePos1, this.chunkCachePos2, 1);
+
          this.compileTask = new ChunkRenderTask(this, ChunkRenderTask.Type.REBUILD_CHUNK, this.getDistanceSq(), chunkrendercache);
          chunkrendertask = this.compileTask;
       } finally {
-         // unlock removed
       }
 
       return chunkrendertask;
    }
 
-
    public ChunkRenderTask makeCompileTaskTransparency() {
-      // lock removed
 
       ChunkRenderTask chunkrendertask;
       try {
@@ -302,7 +367,6 @@ public class ChunkRender {
 
          chunkrendertask = null;
       } finally {
-         // unlock removed
       }
 
       return chunkrendertask;
@@ -318,16 +382,22 @@ public class ChunkRender {
 
    private void preRenderBlocks(BufferBuilder bufferBuilderIn, BlockPos pos) {
       bufferBuilderIn.begin(7, DefaultVertexFormats.BLOCK);
-      bufferBuilderIn.setTranslation((double)(-pos.getX()), (double)(-pos.getY()), (double)(-pos.getZ()));
+      bufferBuilderIn.setTranslation((double)(-this.getBufferOriginX()), (double)(-this.getBufferOriginY()), (double)(-this.getBufferOriginZ()));
+   }
+
+   protected int getBufferOriginX() {
+      return this.position.getX();
+   }
+
+   protected int getBufferOriginY() {
+      return this.position.getY();
+   }
+
+   protected int getBufferOriginZ() {
+      return this.position.getZ();
    }
 
    private void postRenderBlocks(BlockRenderLayer layer, float x, float y, float z, BufferBuilder bufferBuilderIn, CompiledChunk compiledChunkIn) {
-      if (layer == BlockRenderLayer.TRANSLUCENT && !compiledChunkIn.isLayerEmpty(layer)) {
-         // eagler: disabled - sortVertexData causes corrupting-blue-tint for translucent block layer
-         // bufferBuilderIn.sortVertexData(x, y, z);
-         compiledChunkIn.setState(bufferBuilderIn.getVertexState());
-      }
-
       bufferBuilderIn.finishDrawing();
    }
 
@@ -336,12 +406,10 @@ public class ChunkRender {
    }
 
    public void setCompiledChunk(CompiledChunk compiledChunkIn) {
-      // lock removed
 
       try {
          this.compiledChunk = compiledChunkIn;
       } finally {
-         // unlock removed
       }
 
    }

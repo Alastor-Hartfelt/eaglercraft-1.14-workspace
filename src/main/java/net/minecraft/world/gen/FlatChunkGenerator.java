@@ -142,11 +142,9 @@ public class FlatChunkGenerator extends ChunkGenerator<FlatGenerationSettings> {
       return this.biome.hasStructure(structureIn);
    }
 
-
    public <C extends IFeatureConfig> C getStructureConfig(Biome biomeIn, Structure<C> structureIn) {
       return this.biome.getStructureConfig(structureIn);
    }
-
 
    public BlockPos findNearestStructure(World worldIn, String name, BlockPos pos, int radius, boolean p_211403_5_) {
       return !this.settings.getWorldFeatures().keySet().contains(name.toLowerCase(Locale.ROOT)) ? null : super.findNearestStructure(worldIn, name, pos, radius, p_211403_5_);

@@ -47,11 +47,9 @@ public class NetherDimension extends Dimension {
         return false;
     }
 
-
     public BlockPos findSpawn(ChunkPos chunkPosIn, boolean checkValid) {
         return null;
     }
-
 
     public BlockPos findSpawn(int posX, int posZ, boolean checkValid) {
         return null;

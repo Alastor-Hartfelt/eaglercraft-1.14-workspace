@@ -86,7 +86,6 @@ public class TileEntityRendererDispatcher {
       return (TileEntityRenderer<T>)tileentityrenderer;
    }
 
-
    public <T extends TileEntity> TileEntityRenderer<T> getRenderer( TileEntity tileEntityIn) {
       return tileEntityIn == null ? null : this.getRenderer(tileEntityIn.getClass());
    }
@@ -103,7 +102,8 @@ public class TileEntityRendererDispatcher {
    }
 
    public void render(TileEntity tileentityIn, float partialTicks, int destroyStage) {
-      double maxDistSq = net.minecraft.client.Minecraft.getInstance().gameSettings.fastTileEntityRender ? tileentityIn.getMaxRenderDistanceSquared() / 4.0D : net.minecraft.client.Minecraft.getInstance().gameSettings.tileEntityRenderDistSq;
+      double maxDistSq = tileentityIn.getMaxRenderDistanceSquared()
+            * (net.minecraft.client.Minecraft.getInstance().gameSettings.fastTileEntityRender ? 0.25D : 1.0D);
       if (tileentityIn.getDistanceSq(this.renderInfo.getProjectedView().x, this.renderInfo.getProjectedView().y, this.renderInfo.getProjectedView().z) < maxDistSq) {
          RenderHelper.enableStandardItemLighting();
          int i = this.world.getCombinedLight(tileentityIn.getPos(), 0);

@@ -129,7 +129,6 @@ public class PillagerEntity extends AbstractIllagerEntity implements ICrossbowUs
         return 1;
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         this.setEquipmentBasedOnDifficulty(difficultyIn);
         this.setEnchantmentBasedOnDifficulty(difficultyIn);

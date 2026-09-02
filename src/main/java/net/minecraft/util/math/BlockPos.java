@@ -56,7 +56,6 @@ public class BlockPos extends Vec3i {
         this(source.getX(), source.getY(), source.getZ());
     }
 
-
     public static long offset(long pos, Direction p_218289_2_) {
         return offset(pos, p_218289_2_.getXOffset(), p_218289_2_.getYOffset(), p_218289_2_.getZOffset());
     }

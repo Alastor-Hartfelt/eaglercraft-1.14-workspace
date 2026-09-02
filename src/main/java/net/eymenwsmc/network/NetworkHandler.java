@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Nodejs handler
@@ -38,10 +37,10 @@ public class NetworkHandler {
     public static OpenWorldInfo ourOpenWorld = null;
 
     // Pending join requests FROM other players (we are the host)
-    public static final List<JoinRequestInfo> pendingJoinRequests = new CopyOnWriteArrayList<>();
+    public static final List<JoinRequestInfo> pendingJoinRequests = new ArrayList<>();
 
     // Pending invites FROM us (or invites we received — reusing JoinRequestInfo)
-    public static final List<JoinRequestInfo> pendingInvites = new CopyOnWriteArrayList<>();
+    public static final List<JoinRequestInfo> pendingInvites = new ArrayList<>();
 
     public static class JoinRequestInfo {
         public final String from;
@@ -56,11 +55,13 @@ public class NetworkHandler {
     
     private static IWebSocketClient webSocket;
     private static final String SERVER_URI = "wss://git.eymenwsmc.site";
+    private static final int MAX_CONNECT_ATTEMPTS = 2;
+    private static int connectAttempts = 0;
     
-    public static final List<GuiSocialScreen.SocialPlayerEntry> friends = new CopyOnWriteArrayList<>();
-    public static final List<GuiSocialScreen.SocialPlayerEntry> pendingRequests = new CopyOnWriteArrayList<>();
-    public static final List<GuiSocialScreen.SocialPlayerEntry> pendingRequestsOutgoing = new CopyOnWriteArrayList<>();
-    public static final List<GuiSocialScreen.SocialPlayerEntry> searchResults = new CopyOnWriteArrayList<>();
+    public static final List<GuiSocialScreen.SocialPlayerEntry> friends = new ArrayList<>();
+    public static final List<GuiSocialScreen.SocialPlayerEntry> pendingRequests = new ArrayList<>();
+    public static final List<GuiSocialScreen.SocialPlayerEntry> pendingRequestsOutgoing = new ArrayList<>();
+    public static final List<GuiSocialScreen.SocialPlayerEntry> searchResults = new ArrayList<>();
     public static final Map<String, List<GuiSocialScreen.SocialMessage>> conversations = new ConcurrentHashMap<>();
     
     public static boolean isConnecting = false;
@@ -88,12 +89,13 @@ public class NetworkHandler {
         }
     }
     
-    public static final List<SocialNotification> activeNotifications = new CopyOnWriteArrayList<>();
+    public static final List<SocialNotification> activeNotifications = new ArrayList<>();
 
     public static void connect() {
         if (webSocket != null && webSocket.isOpen()) return;
-        if (isConnecting) return;
+        if (isConnecting || connectAttempts >= MAX_CONNECT_ATTEMPTS) return;
 
+        ++connectAttempts;
         isConnecting = true;
         isAuthenticated = false;
         loggedInUsername = null;
@@ -175,9 +177,11 @@ public class NetworkHandler {
             if (state != EnumEaglerConnectionState.CONNECTING) {
                 isConnecting = false;
                 if (state == EnumEaglerConnectionState.CONNECTED) {
+                    connectAttempts = 0;
                     System.out.println("[Socials] Connected to Socials server.");
                 } else {
-                    System.out.println("[Socials] Failed to connect.");
+//                    System.out.println("[Socials] Failed to connect.");
+                    //shut the fuck up
                     webSocket = null;
                     return;
                 }
@@ -367,7 +371,7 @@ public class NetworkHandler {
                     long timestamp = json.get("timestamp").getAsLong();
                     
                     if (!conversations.containsKey(sender)) {
-                        conversations.put(sender, new CopyOnWriteArrayList<>());
+                        conversations.put(sender, new ArrayList<>());
                     }
                     
                     boolean markRead = false;
@@ -696,7 +700,7 @@ public class NetworkHandler {
             webSocket.send(req.toString());
             
             if (!conversations.containsKey(target)) {
-                conversations.put(target, new CopyOnWriteArrayList<>());
+                conversations.put(target, new ArrayList<>());
             }
             String me = loggedInUsername != null ? loggedInUsername : EaglerProfile.username;
             conversations.get(target).add(new GuiSocialScreen.SocialMessage(me, text, System.currentTimeMillis(), true));
@@ -734,7 +738,7 @@ public class NetworkHandler {
                     for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
                         String target = entry.getKey();
                         JsonArray arr = entry.getValue().getAsJsonArray();
-                        List<GuiSocialScreen.SocialMessage> list = new CopyOnWriteArrayList<>();
+                        List<GuiSocialScreen.SocialMessage> list = new ArrayList<>();
                         for (JsonElement el : arr) {
                             JsonObject mObj = el.getAsJsonObject();
                             String sender = mObj.get("s").getAsString();

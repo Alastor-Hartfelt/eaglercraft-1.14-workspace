@@ -19,6 +19,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
+    private final Random random = new Random();
+    private final BlockPos.MutableBlockPos entityPos = new BlockPos.MutableBlockPos();
+    private final BlockPos.MutableBlockPos renderPos = new BlockPos.MutableBlockPos();
+
     public FallingBlockRenderer(EntityRendererManager renderManagerIn) {
         super(renderManagerIn);
         this.shadowSize = 0.5F;
@@ -28,7 +32,7 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
         BlockState blockstate = entity.getBlockState();
         if (blockstate.getRenderType() == BlockRenderType.MODEL) {
             World world = entity.getWorldObj();
-            if (blockstate != world.getBlockState(new BlockPos(entity)) && blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
+            if (blockstate != world.getBlockState(this.entityPos.setPos(entity)) && blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
                 this.bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
                 GlStateManager.pushMatrix();
                 GlStateManager.disableLighting();
@@ -40,10 +44,10 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
                 }
 
                 bufferbuilder.begin(7, DefaultVertexFormats.BLOCK);
-                BlockPos blockpos = new BlockPos(entity.posX, entity.getBoundingBox().maxY, entity.posZ);
+                BlockPos blockpos = this.renderPos.setPos(entity.posX, entity.getBoundingBox().maxY, entity.posZ);
                 GlStateManager.translatef((float) (x - (double) blockpos.getX() - 0.5D), (float) (y - (double) blockpos.getY()), (float) (z - (double) blockpos.getZ() - 0.5D));
                 BlockRendererDispatcher blockrendererdispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
-                blockrendererdispatcher.getBlockModelRenderer().renderModel(world, blockrendererdispatcher.getModelForState(blockstate), blockstate, blockpos, bufferbuilder, false, new Random(), blockstate.getPositionRandom(entity.getOrigin()));
+                blockrendererdispatcher.getBlockModelRenderer().renderModel(world, blockrendererdispatcher.getModelForState(blockstate), blockstate, blockpos, bufferbuilder, false, this.random, blockstate.getPositionRandom(entity.getOrigin()));
                 tessellator.draw();
                 if (this.renderOutlines) {
                     GlStateManager.tearDownSolidRenderingTextureCombine();

@@ -221,6 +221,7 @@ public class PlayerController {
    }
 
    public void tick() {
+      this.connection.getNotifManager().runTick();
       this.syncCurrentPlayItem();
       if (this.connection.getNetworkManager().isChannelOpen()) {
          this.connection.getNetworkManager().tick();

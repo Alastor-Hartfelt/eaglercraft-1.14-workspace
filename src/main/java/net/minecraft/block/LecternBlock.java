@@ -89,7 +89,6 @@ public class LecternBlock extends ContainerBlock {
         builder.add(FACING, POWERED, HAS_BOOK);
     }
 
-
     public TileEntity createNewTileEntity(IBlockReader worldIn) {
         return new LecternTileEntity();
     }
@@ -211,7 +210,6 @@ public class LecternBlock extends ContainerBlock {
             return false;
         }
     }
-
 
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
         return !state.get(HAS_BOOK) ? null : super.getContainer(state, worldIn, pos);

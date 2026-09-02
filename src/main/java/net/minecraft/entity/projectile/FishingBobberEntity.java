@@ -423,7 +423,6 @@ public class FishingBobberEntity extends Entity {
 
    }
 
-   
    public PlayerEntity getAngler() {
       return this.angler;
    }

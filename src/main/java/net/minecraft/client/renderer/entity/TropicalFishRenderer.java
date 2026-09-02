@@ -21,7 +21,6 @@ public class TropicalFishRenderer extends MobRenderer<TropicalFishEntity, Entity
         this.addLayer(new TropicalFishPatternLayer(this));
     }
 
-
     protected ResourceLocation getEntityTexture(TropicalFishEntity entity) {
         return entity.getBodyTexture();
     }

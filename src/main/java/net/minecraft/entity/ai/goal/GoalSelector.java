@@ -37,19 +37,23 @@ public class GoalSelector {
    }
 
    public void removeGoal(Goal task) {
-      this.goals.stream().filter((p_220882_1_) -> {
-         return p_220882_1_.getGoal() == task;
-      }).filter(PrioritizedGoal::isRunning).forEach(PrioritizedGoal::resetTask);
-      this.goals.removeIf((p_220884_1_) -> {
-         return p_220884_1_.getGoal() == task;
-      });
+      Iterator<PrioritizedGoal> iterator = this.goals.iterator();
+      while (iterator.hasNext()) {
+         PrioritizedGoal goal = iterator.next();
+         if (goal.getGoal() == task) {
+            goal.resetTask();
+            iterator.remove();
+         }
+      }
    }
 
    public void tick() {
       this.profiler.startSection("goalCleanup");
-      this.getRunningGoals().filter((p_220881_1_) -> {
-         return !p_220881_1_.isRunning() || p_220881_1_.getMutexFlags().stream().anyMatch(this.disabledFlags::contains) || !p_220881_1_.shouldContinueExecuting();
-      }).forEach(Goal::resetTask);
+      for (PrioritizedGoal goal : this.goals) {
+         if (goal.isRunning() && (this.hasDisabledFlag(goal) || !goal.shouldContinueExecuting())) {
+            goal.resetTask();
+         }
+      }
       Iterator<Map.Entry<Goal.Flag, PrioritizedGoal>> iterator = this.flagGoals.entrySet().iterator();
       while (iterator.hasNext()) {
          if (!iterator.next().getValue().isRunning()) {
@@ -58,26 +62,43 @@ public class GoalSelector {
       }
       this.profiler.endSection();
       this.profiler.startSection("goalUpdate");
-      this.goals.stream().filter((p_220883_0_) -> {
-         return !p_220883_0_.isRunning();
-      }).filter((p_220879_1_) -> {
-         return p_220879_1_.getMutexFlags().stream().noneMatch(this.disabledFlags::contains);
-      }).filter((p_220889_1_) -> {
-         return p_220889_1_.getMutexFlags().stream().allMatch((p_220887_2_) -> {
-            return this.flagGoals.getOrDefault(p_220887_2_, DUMMY).isPreemptedBy(p_220889_1_);
-         });
-      }).filter(PrioritizedGoal::shouldExecute).forEach((p_220877_1_) -> {
-         p_220877_1_.getMutexFlags().forEach((p_220876_2_) -> {
-            PrioritizedGoal prioritizedgoal = this.flagGoals.getOrDefault(p_220876_2_, DUMMY);
-            prioritizedgoal.resetTask();
-            this.flagGoals.put(p_220876_2_, p_220877_1_);
-         });
-         p_220877_1_.startExecuting();
-      });
+      for (PrioritizedGoal goal : this.goals) {
+         if (goal.isRunning() || this.hasDisabledFlag(goal) || !this.areFlagsAvailable(goal) || !goal.shouldExecute()) {
+            continue;
+         }
+         for (Goal.Flag flag : goal.getMutexFlags()) {
+            PrioritizedGoal current = this.flagGoals.getOrDefault(flag, DUMMY);
+            current.resetTask();
+            this.flagGoals.put(flag, goal);
+         }
+         goal.startExecuting();
+      }
       this.profiler.endSection();
       this.profiler.startSection("goalTick");
-      this.getRunningGoals().forEach(PrioritizedGoal::tick);
+      for (PrioritizedGoal goal : this.goals) {
+         if (goal.isRunning()) {
+            goal.tick();
+         }
+      }
       this.profiler.endSection();
+   }
+
+   private boolean hasDisabledFlag(PrioritizedGoal goal) {
+      for (Goal.Flag flag : goal.getMutexFlags()) {
+         if (this.disabledFlags.contains(flag)) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private boolean areFlagsAvailable(PrioritizedGoal goal) {
+      for (Goal.Flag flag : goal.getMutexFlags()) {
+         if (!this.flagGoals.getOrDefault(flag, DUMMY).isPreemptedBy(goal)) {
+            return false;
+         }
+      }
+      return true;
    }
 
    public Stream<PrioritizedGoal> getRunningGoals() {

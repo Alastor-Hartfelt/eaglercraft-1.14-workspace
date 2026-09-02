@@ -70,6 +70,7 @@ public class PlatformOpenGL {
 
 	static final int CAP_B_BIT_HDR_LINEAR16F = 1;
 	static final int CAP_B_BIT_HDR_LINEAR32F = 2;
+	static final int CAP_B_BIT_WEBGL_MULTI_DRAW = 4;
 	static int capBBits = 0;
 
 	static void initContext() {
@@ -341,6 +342,9 @@ public class PlatformOpenGL {
 
 	@Import(module = "platformOpenGL", name = "glBufferData")
 	public static native void _wglBufferData(int target, int size, int usage);
+
+	@Import(module = "platformOpenGL", name = "glCopyBufferSubData")
+	public static native void _wglCopyBufferSubData(int readTarget, int writeTarget, int readOffset, int writeOffset, int size);
 
 	public static void _wglBufferData(int target, ByteBuffer buffer, int usage) {
 		if (glesVers == 200) {
@@ -657,6 +661,24 @@ public class PlatformOpenGL {
 	@Import(module = "platformOpenGL", name = "glDrawArrays")
 	public static native void _wglDrawArrays(int mode, int first, int count);
 
+	public static void _wglMultiDrawArrays(int mode, IntBuffer firsts, IntBuffer counts, int drawCount) {
+		_wglMultiDrawArraysN(mode, MemoryViews.i32, WASMGCBufferAllocator.getIntBufferViewIndex(firsts),
+				MemoryViews.i32, WASMGCBufferAllocator.getIntBufferViewIndex(counts), drawCount);
+	}
+
+	@Import(module = "platformOpenGL", name = "glMultiDrawArrays")
+	static native void _wglMultiDrawArraysN(int mode, ArrayBufferView firsts, int firstsOffset,
+			ArrayBufferView counts, int countsOffset, int drawCount);
+
+	public static void _wglMultiDrawElements(int mode, IntBuffer counts, int type, IntBuffer offsets, int drawCount) {
+		_wglMultiDrawElementsN(mode, MemoryViews.i32, WASMGCBufferAllocator.getIntBufferViewIndex(counts), type,
+				MemoryViews.i32, WASMGCBufferAllocator.getIntBufferViewIndex(offsets), drawCount);
+	}
+
+	@Import(module = "platformOpenGL", name = "glMultiDrawElements")
+	static native void _wglMultiDrawElementsN(int mode, ArrayBufferView counts, int countsOffset, int type,
+			ArrayBufferView offsets, int offsetsOffset, int drawCount);
+
 	@Import(module = "platformOpenGL", name = "glDrawElements")
 	public static native void _wglDrawElements(int mode, int count, int type, int offset);
 
@@ -945,6 +967,10 @@ public class PlatformOpenGL {
 		default:
 			return false;
 		}
+	}
+
+	public static boolean checkMultiDrawCapable() {
+		return glesVers >= 300 && (capBBits & CAP_B_BIT_WEBGL_MULTI_DRAW) != 0;
 	}
 
 	// legacy

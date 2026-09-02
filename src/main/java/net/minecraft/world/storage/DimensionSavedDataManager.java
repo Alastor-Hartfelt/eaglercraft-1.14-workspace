@@ -43,7 +43,6 @@ public class DimensionSavedDataManager {
         }
     }
 
-
     public <T extends WorldSavedData> T get(Supplier<T> defaultSupplier, String name) {
         WorldSavedData worldsaveddata = this.savedDatum.get(name);
         if (worldsaveddata == null && !this.savedDatum.containsKey(name)) {
@@ -53,7 +52,6 @@ public class DimensionSavedDataManager {
 
         return (T) worldsaveddata;
     }
-
 
     private <T extends WorldSavedData> T func_223409_c(Supplier<T> p_223409_1_, String p_223409_2_) {
         try {

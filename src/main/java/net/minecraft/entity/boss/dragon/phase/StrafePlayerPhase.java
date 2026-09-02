@@ -167,7 +167,6 @@ public class StrafePlayerPhase extends Phase {
 
     }
 
-
     public Vec3d getTargetLocation() {
         return this.targetLocation;
     }

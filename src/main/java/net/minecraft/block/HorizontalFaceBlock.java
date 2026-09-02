@@ -25,7 +25,6 @@ public class HorizontalFaceBlock extends HorizontalBlock {
       return p_220185_0_.getBlockState(blockpos).func_224755_d(p_220185_0_, blockpos, p_220185_2_.getOpposite());
    }
 
-
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       for(Direction direction : context.getNearestLookingDirections()) {
          BlockState blockstate;

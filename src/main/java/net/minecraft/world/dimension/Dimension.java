@@ -40,7 +40,6 @@ public abstract class Dimension {
         return (int) (worldTime / 24000L % 8L + 8L) % 8;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public float[] calcSunriseSunsetColors(float celestialAngle, float partialTicks) {
         float f = 0.4F;
@@ -69,7 +68,6 @@ public abstract class Dimension {
     public boolean isSkyColored() {
         return true;
     }
-
 
     public BlockPos getSpawnCoordinate() {
         return null;
@@ -108,9 +106,7 @@ public abstract class Dimension {
 
     public abstract ChunkGenerator<?> createChunkGenerator();
 
-
     public abstract BlockPos findSpawn(ChunkPos chunkPosIn, boolean checkValid);
-
 
     public abstract BlockPos findSpawn(int posX, int posZ, boolean checkValid);
 

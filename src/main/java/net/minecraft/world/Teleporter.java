@@ -64,7 +64,6 @@ public class Teleporter {
       }
    }
 
-
    public BlockPattern.PortalInfo func_222272_a(BlockPos p_222272_1_, Vec3d p_222272_2_, Direction p_222272_3_, double p_222272_4_, double p_222272_6_, boolean p_222272_8_) {
       int i = 128;
       boolean flag = true;

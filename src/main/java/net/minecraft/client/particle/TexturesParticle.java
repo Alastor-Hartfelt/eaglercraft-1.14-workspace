@@ -20,7 +20,6 @@ public class TexturesParticle {
       this.textures = p_i51017_1_;
    }
 
-
    public List<ResourceLocation> getTextures() {
       return this.textures;
    }

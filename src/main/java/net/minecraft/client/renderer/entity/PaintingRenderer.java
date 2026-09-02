@@ -20,6 +20,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class PaintingRenderer extends EntityRenderer<PaintingEntity> {
+   private final BlockPos.MutableBlockPos lightmapPos = new BlockPos.MutableBlockPos();
+
    public PaintingRenderer(EntityRendererManager renderManagerIn) {
       super(renderManagerIn);
    }
@@ -140,7 +142,7 @@ public class PaintingRenderer extends EntityRenderer<PaintingEntity> {
          k = MathHelper.floor(painting.posZ + (double)(p_77008_2_ / 16.0F));
       }
 
-      int l = this.renderManager.world.getCombinedLight(new BlockPos(i, j, k), 0);
+      int l = this.renderManager.world.getCombinedLight(this.lightmapPos.setPos(i, j, k), 0);
       int i1 = l % 65536;
       int j1 = l / 65536;
       GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, (float)i1, (float)j1);

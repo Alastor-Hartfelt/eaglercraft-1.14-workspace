@@ -5,7 +5,7 @@ import com.mojang.datafixers.util.Either;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.stream.Stream;
@@ -91,13 +91,11 @@ public class ChunkHolder {
       return this.field_222983_h;
    }
 
-
    public Chunk func_219298_c() {
       CompletableFuture<Either<Chunk, ChunkHolder.IChunkLoadingError>> completablefuture = this.func_219296_a();
       Either<Chunk, ChunkHolder.IChunkLoadingError> either = completablefuture.getNow((Either<Chunk, ChunkHolder.IChunkLoadingError>)null);
       return either == null ? null : either.left().orElse((Chunk)null);
    }
-
 
    @OnlyIn(Dist.CLIENT)
    public ChunkStatus func_219285_d() {
@@ -111,7 +109,6 @@ public class ChunkHolder {
 
       return null;
    }
-
 
    public IChunk func_219287_e() {
       for(int i = CHUNK_STATUS_LIST.size() - 1; i >= 0; --i) {

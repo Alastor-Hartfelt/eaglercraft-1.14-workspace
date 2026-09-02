@@ -41,6 +41,12 @@ public enum TextFormatting {
       return p_199747_0_;
    }));
    private static final Pattern FORMATTING_CODE_PATTERN = Pattern.compile("(?i)\u00a7[0-9A-FK-OR]");
+   private static final TextFormatting[] FORMATTING_BY_CODE = new TextFormatting[128];
+   static {
+      for (TextFormatting formatting : values()) {
+         FORMATTING_BY_CODE[formatting.formattingCode] = formatting;
+      }
+   }
    private final String name;
    private final char formattingCode;
    private final boolean fancyStyling;
@@ -106,7 +112,6 @@ public enum TextFormatting {
       return !this.fancyStyling && this != RESET;
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public Integer getColor() {
       return this.color;
@@ -125,16 +130,13 @@ public enum TextFormatting {
       return this.controlString;
    }
 
-
    public static String getTextWithoutFormattingCodes( String text) {
       return text == null ? null : FORMATTING_CODE_PATTERN.matcher(text).replaceAll("");
    }
 
-
    public static TextFormatting getValueByName( String friendlyName) {
       return friendlyName == null ? null : NAME_MAPPING.get(lowercaseAlpha(friendlyName));
    }
-
 
    public static TextFormatting fromColorIndex(int index) {
       if (index < 0) {
@@ -150,18 +152,13 @@ public enum TextFormatting {
       }
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public static TextFormatting fromFormattingCode(char formattingCodeIn) {
-      char c0 = Character.toString(formattingCodeIn).toLowerCase(Locale.ROOT).charAt(0);
-
-      for(TextFormatting textformatting : values()) {
-         if (textformatting.formattingCode == c0) {
-            return textformatting;
-         }
+      int code = formattingCodeIn;
+      if (code >= 'A' && code <= 'Z') {
+         code += 'a' - 'A';
       }
-
-      return null;
+      return code < FORMATTING_BY_CODE.length ? FORMATTING_BY_CODE[code] : null;
    }
 
    public static Collection<String> getValidValues(boolean getColor, boolean getFancyStyling) {

@@ -16,6 +16,7 @@ import net.lax1dude.eaglercraft.internal.teavm.TeaVMClientConfigAdapter;
 import net.lax1dude.eaglercraft.internal.teavm.WebGL2RenderingContext;
 import net.lax1dude.eaglercraft.internal.teavm.WebGLANGLEInstancedArrays;
 import net.lax1dude.eaglercraft.internal.teavm.WebGLBackBuffer;
+import net.lax1dude.eaglercraft.internal.teavm.WebGLMultiDraw;
 import net.lax1dude.eaglercraft.internal.teavm.WebGLOESVertexArrayObject;
 import net.lax1dude.eaglercraft.internal.teavm.WebGLVertexArray;
 import net.lax1dude.eaglercraft.opengl.EaglercraftGPU;
@@ -39,6 +40,8 @@ public class PlatformOpenGL {
 
     private static final Logger logger = LogManager.getLogger("PlatformOpenGL");
 
+    // arlen was here
+
     static WebGL2RenderingContext ctx = null;
     static int glesVers = -1;
 
@@ -57,6 +60,7 @@ public class PlatformOpenGL {
 
     static WebGLANGLEInstancedArrays ANGLEInstancedArrays = null;
     static WebGLOESVertexArrayObject OESVertexArrayObject = null;
+    static WebGLMultiDraw WEBGLMultiDraw = null;
 
     static boolean hasFBO16FSupport = false;
     static boolean hasFBO32FSupport = false;
@@ -93,6 +97,8 @@ public class PlatformOpenGL {
                 hasOESTextureHalfFloat = glesVersIn == 200 && ctx.getExtension("OES_texture_half_float") != null;
                 hasOESTextureHalfFloatLinear = glesVersIn == 200 && ctx.getExtension("OES_texture_half_float_linear") != null;
                 hasEXTTextureFilterAnisotropic = ctx.getExtension("EXT_texture_filter_anisotropic") != null;
+                WEBGLMultiDraw = glesVersIn >= 300
+                        ? (WebGLMultiDraw) ctx.getExtension("WEBGL_multi_draw") : null;
             } else {
                 hasANGLEInstancedArrays = false;
                 hasEXTColorBufferFloat = false;
@@ -105,6 +111,7 @@ public class PlatformOpenGL {
                 hasOESTextureHalfFloat = false;
                 hasOESTextureHalfFloatLinear = false;
                 hasEXTTextureFilterAnisotropic = false;
+                WEBGLMultiDraw = null;
             }
             hasWEBGLDebugRendererInfo = ctx.getExtension("WEBGL_debug_renderer_info") != null;
 
@@ -141,6 +148,7 @@ public class PlatformOpenGL {
             hasWEBGLDebugRendererInfo = false;
             ANGLEInstancedArrays = null;
             OESVertexArrayObject = null;
+            WEBGLMultiDraw = null;
             hasFBO16FSupport = false;
             hasFBO32FSupport = false;
             hasLinearHDR16FSupport = false;
@@ -162,7 +170,12 @@ public class PlatformOpenGL {
         if (hasOESTextureHalfFloatLinear) exts.add("OES_texture_half_float_linear");
         if (hasEXTTextureFilterAnisotropic) exts.add("EXT_texture_filter_anisotropic");
         if (hasWEBGLDebugRendererInfo) exts.add("WEBGL_debug_renderer_info");
+        if (WEBGLMultiDraw != null) exts.add("WEBGL_multi_draw");
         return exts;
+    }
+
+    public static final boolean checkMultiDrawCapable() {
+        return glesVers >= 300 && WEBGLMultiDraw != null;
     }
 
     public static final void _wglEnable(int glEnum) {
@@ -387,6 +400,11 @@ public class PlatformOpenGL {
         ctx.bufferSubData(target, offset, EaglerArrayBufferAllocator.getDataView32F(data));
     }
 
+    public static final void _wglCopyBufferSubData(int readTarget, int writeTarget, int readOffset, int writeOffset,
+                                                    int size) {
+        ctx.copyBufferSubData(readTarget, writeTarget, readOffset, writeOffset, size);
+    }
+
     public static final void _wglBindVertexArray(IVertexArrayGL obj) {
         WebGLVertexArray ptr = obj != null ? ((OpenGLObjects.VertexArrayGL) obj).ptr : null;
         switch (vertexArrayImpl) {
@@ -573,6 +591,26 @@ public class PlatformOpenGL {
         //checkErr("_wglDrawArrays(" + mode + ", " + first + ", " + count + ");");
     }
 
+    public static final void _wglMultiDrawArrays(int mode, IntBuffer firsts, IntBuffer counts, int drawCount) {
+        if (firsts == null || counts == null || drawCount <= 0) {
+            return;
+        }
+
+        if (WEBGLMultiDraw != null) {
+            WEBGLMultiDraw.multiDrawArraysWEBGL(mode, EaglerArrayBufferAllocator.getDataView32(firsts), 0,
+                    EaglerArrayBufferAllocator.getDataView32(counts), 0, drawCount);
+        } else {
+            int firstsPos = firsts.position();
+            int countsPos = counts.position();
+            for (int i = 0; i < drawCount; ++i) {
+                int count = counts.get(countsPos + i);
+                if (count > 0) {
+                    ctx.drawArrays(mode, firsts.get(firstsPos + i), count);
+                }
+            }
+        }
+    }
+
     public static final void _wglDrawArraysInstanced(int mode, int first, int count, int instances) {
         switch (instancingImpl) {
             case INSTANCE_IMPL_CORE:
@@ -590,6 +628,31 @@ public class PlatformOpenGL {
     public static final void _wglDrawElements(int mode, int count, int type, int offset) {
         ctx.drawElements(mode, count, type, offset);
         //checkErr("_wglDrawElements(" + mode + ", " + count + ", " + type + ", " + offset + ");");
+    }
+
+    public static final void _wglDrawRangeElements(int mode, int start, int end, int count, int type, int offset) {
+        ctx.drawRangeElements(mode, start, end, count, type, offset);
+    }
+
+    public static final void _wglMultiDrawElements(int mode, IntBuffer counts, int type, IntBuffer offsets,
+                                                    int drawCount) {
+        if (counts == null || offsets == null || drawCount <= 0) {
+            return;
+        }
+
+        if (WEBGLMultiDraw != null) {
+            WEBGLMultiDraw.multiDrawElementsWEBGL(mode, EaglerArrayBufferAllocator.getDataView32(counts), 0, type,
+                    EaglerArrayBufferAllocator.getDataView32(offsets), 0, drawCount);
+        } else {
+            int countsPos = counts.position();
+            int offsetsPos = offsets.position();
+            for (int i = 0; i < drawCount; ++i) {
+                int count = counts.get(countsPos + i);
+                if (count > 0) {
+                    ctx.drawElements(mode, count, type, offsets.get(offsetsPos + i));
+                }
+            }
+        }
     }
 
     public static final void _wglDrawElementsInstanced(int mode, int count, int type, int offset, int instances) {

@@ -351,16 +351,13 @@ public interface ITextComponent extends Message, Iterable<ITextComponent> {
             return GSON.toJsonTree(p_200528_0_);
         }
 
-
         public static ITextComponent fromJson(String json) {
             return JSONUtils.fromJson(GSON, json, ITextComponent.class, false);
         }
 
-
         public static ITextComponent fromJson(JsonElement p_197672_0_) {
             return GSON.fromJson(p_197672_0_, ITextComponent.class);
         }
-
 
         public static ITextComponent fromJsonLenient(String json) {
             return JSONUtils.fromJson(GSON, json, ITextComponent.class, true);
@@ -371,15 +368,71 @@ public interface ITextComponent extends Message, Iterable<ITextComponent> {
                 JsonReader jsonreader = new JsonReader(new StringReader(p_197671_0_.getRemaining()));
                 jsonreader.setLenient(false);
                 ITextComponent itextcomponent = GSON.getAdapter(ITextComponent.class).read(jsonreader);
-                p_197671_0_.setCursor(p_197671_0_.getCursor() + getPos(jsonreader));
+                p_197671_0_.setCursor(p_197671_0_.getCursor() + getJsonValueLength(p_197671_0_.getRemaining()));
                 return itextcomponent;
             } catch (IOException ioexception) {
                 throw new JsonParseException(ioexception);
             }
         }
 
-        private static int getPos(JsonReader p_197673_0_) {
-            return 0;
+        private static int getJsonValueLength(String s) {
+            int i = 0;
+            int len = s.length();
+            while (i < len && s.charAt(i) <= ' ') {
+                ++i;
+            }
+            if (i >= len) {
+                return i;
+            }
+            char c = s.charAt(i);
+            if (c == '"') {
+                ++i;
+                while (i < len) {
+                    char ch = s.charAt(i);
+                    if (ch == '\\') {
+                        i += 2;
+                        continue;
+                    }
+                    ++i;
+                    if (ch == '"') {
+                        break;
+                    }
+                }
+            } else if (c == '{' || c == '[') {
+                char open = c;
+                char close = open == '{' ? '}' : ']';
+                int depth = 1;
+                ++i;
+                while (i < len && depth > 0) {
+                    char ch = s.charAt(i);
+                    if (ch == '"') {
+                        ++i;
+                        while (i < len) {
+                            char ch2 = s.charAt(i);
+                            if (ch2 == '\\') {
+                                i += 2;
+                                continue;
+                            }
+                            ++i;
+                            if (ch2 == '"') {
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+                    if (ch == open) {
+                        ++depth;
+                    } else if (ch == close) {
+                        --depth;
+                    }
+                    ++i;
+                }
+            } else {
+                while (i < len && s.charAt(i) != ',' && s.charAt(i) != '}' && s.charAt(i) != ']' && !Character.isWhitespace(s.charAt(i))) {
+                    ++i;
+                }
+            }
+            return i;
         }
     }
 }

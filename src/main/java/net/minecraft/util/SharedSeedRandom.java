@@ -1,6 +1,5 @@
 package net.minecraft.util;
 
-
 import net.lax1dude.eaglercraft.Random;
 
 public class SharedSeedRandom extends Random {

@@ -34,7 +34,6 @@ public class ScreenManager {
         }
     }
 
-
     private static <T extends Container> ScreenManager.IScreenFactory<T, ?> getFactory(ContainerType<T> type) {
         return (ScreenManager.IScreenFactory<T, ?>) FACTORIES.get(type);
     }

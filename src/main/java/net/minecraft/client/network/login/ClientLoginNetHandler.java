@@ -56,7 +56,6 @@ public class ClientLoginNetHandler implements IClientLoginNetHandler {
 
    }
 
-
    private ITextComponent joinServer(String p_209522_1_) {
       try {
          this.getSessionService().joinServer(this.mc.getSession().getProfile(), this.mc.getSession().getToken(), p_209522_1_);
@@ -78,9 +77,7 @@ public class ClientLoginNetHandler implements IClientLoginNetHandler {
       this.statusMessageConsumer.accept(new TranslationTextComponent("connect.joining"));
       this.gameProfile = packetIn.getProfile();
       this.networkManager.setConnectionState(ProtocolType.PLAY);
-      
       ClientPlayNetHandler netHandler = new ClientPlayNetHandler(this.mc, this.previousGuiScreen, this.networkManager, this.gameProfile);
-      
       int p = packetIn.getSelectedProtocol();
       net.lax1dude.eaglercraft.socket.protocol.GamePluginMessageProtocol mp = net.lax1dude.eaglercraft.socket.protocol.GamePluginMessageProtocol.getByVersion(p);
       if (mp != null) {
@@ -89,7 +86,6 @@ public class ClientLoginNetHandler implements IClientLoginNetHandler {
                           net.lax1dude.eaglercraft.socket.protocol.client.GameProtocolMessageController.createClientHandler(p, netHandler),
                           (ch, msg) -> netHandler.sendPacket(new net.minecraft.network.play.client.CCustomPayloadPacket(new net.minecraft.util.ResourceLocation(net.lax1dude.eaglercraft.socket.protocol.GamePluginMessageConstants.toResourceLocation(ch)), msg))));
       }
-      
       this.networkManager.setNetHandler(netHandler);
    }
 

@@ -74,7 +74,6 @@ public class UnicodeTextureGlyphProvider implements IGlyphProvider {
         return new ResourceLocation(resourcelocation.getNamespace(), "textures/" + resourcelocation.getPath());
     }
 
-
     public IGlyphInfo func_212248_a(char p_212248_1_) {
         byte b0 = this.sizes[p_212248_1_];
         if (b0 != 0) {
@@ -87,7 +86,6 @@ public class UnicodeTextureGlyphProvider implements IGlyphProvider {
 
         return null;
     }
-
 
     private NativeImage loadTexture(ResourceLocation p_211255_1_) {
         try (IResource iresource = this.resourceManager.getResource(p_211255_1_)) {
@@ -120,7 +118,6 @@ public class UnicodeTextureGlyphProvider implements IGlyphProvider {
         public static IGlyphProviderFactory deserialize(JsonObject p_211629_0_) {
             return new UnicodeTextureGlyphProvider.Factory(new ResourceLocation(JSONUtils.getString(p_211629_0_, "sizes")), JSONUtils.getString(p_211629_0_, "template"));
         }
-
 
         public IGlyphProvider create(IResourceManager resourceManagerIn) {
             try (IResource iresource = Minecraft.getInstance().getResourceManager().getResource(this.sizes)) {

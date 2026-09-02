@@ -7,6 +7,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.DisplayEffectsScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
@@ -311,7 +312,7 @@ public class CreativeScreen extends DisplayEffectsScreen<CreativeScreen.Creative
 
                     return true;
                 } else {
-                    return this.searchField.isFocused() && this.searchField.getVisible() && p_keyPressed_1_ != 256 ? true : super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+                    return this.searchField.isFocused() && this.searchField.getVisible() && !Screen.isCloseKey(p_keyPressed_1_, p_keyPressed_2_) ? true : super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
                 }
             }
         }
@@ -880,7 +881,6 @@ public class CreativeScreen extends DisplayEffectsScreen<CreativeScreen.Creative
         public int getItemStackLimit(ItemStack stack) {
             return this.slot.getItemStackLimit(stack);
         }
-
 
         public String getSlotTexture() {
             return this.slot.getSlotTexture();

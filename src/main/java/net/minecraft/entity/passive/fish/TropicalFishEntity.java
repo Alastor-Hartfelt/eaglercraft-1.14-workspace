@@ -157,7 +157,6 @@ public class TropicalFishEntity extends AbstractGroupFishEntity {
       return BODY_TEXTURES[func_212325_s(this.getVariant())];
    }
 
-
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason,  ILivingEntityData spawnDataIn,  CompoundNBT dataTag) {
       spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
       if (dataTag != null && dataTag.contains("BucketVariantTag", 3)) {

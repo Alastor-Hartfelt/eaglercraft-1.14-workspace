@@ -1,21 +1,32 @@
 package net.minecraft.client.gui;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import net.eymenwsmc.network.NetworkHandler;import net.lax1dude.eaglercraft.Random;
-import java.util.stream.Collectors;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import net.eymenwsmc.network.NetworkHandler;import net.lax1dude.eaglercraft.Random;
+
+import net.lax1dude.eaglercraft.EagRuntime;
 import net.lax1dude.eaglercraft.HString;
+import net.lax1dude.eaglercraft.PointerInputAbstraction;
+import net.lax1dude.eaglercraft.Touch;
 import net.lax1dude.eaglercraft.sp.SingleplayerServerController;
+import net.lax1dude.eaglercraft.touch_gui.EnumTouchControl;
+import net.lax1dude.eaglercraft.touch_gui.TouchControls;
+import net.lax1dude.eaglercraft.touch_gui.TouchOverlayRenderer;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.GameSettings;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.IChatListener;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -46,6 +57,9 @@ import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.world.LightType;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -107,6 +121,27 @@ public class IngameGui extends AbstractGui {
    private int scaledWidth;
    private int scaledHeight;
    private final Map<ChatType, List<IChatListener>> chatListeners = Maps.newHashMap();
+   private final List<Score> sidebarScoreScratch = new ArrayList<>(16);
+   private final List<SidebarEntry> sidebarEntries = new ArrayList<>(15);
+   private int hotbarAreaX = -1;
+   private int hotbarAreaY = -1;
+   private int hotbarAreaW = -1;
+   private int hotbarAreaH = -1;
+   private int currentHotbarSlotTouch = -1;
+   private long hotbarSlotTouchStart = -1l;
+   private boolean hotbarSlotTouchAlreadySelected = false;
+   private int interactButtonX = -1;
+   private int interactButtonY = -1;
+   private int interactButtonW = -1;
+   private int interactButtonH = -1;
+   private int touchVPosX = -1;
+   private int touchVPosY = -1;
+   private int touchEventUID = -1;
+   private ScoreObjective cachedSidebarObjective;
+   private int cachedSidebarTick = Integer.MIN_VALUE;
+   private String cachedSidebarTitle = "";
+   private int cachedSidebarTitleWidth;
+   private int cachedSidebarWidth;
 
    public IngameGui(Minecraft mcIn) {
       this.mc = mcIn;
@@ -165,6 +200,7 @@ public class IngameGui extends AbstractGui {
          this.spectatorGui.renderTooltip(partialTicks);
       } else if (!this.mc.gameSettings.hideGUI) {
          this.renderHotbar(partialTicks);
+         this.drawEaglerInteractButton();
       }
 
       if (!this.mc.gameSettings.hideGUI) {
@@ -326,6 +362,18 @@ public class IngameGui extends AbstractGui {
          this.persistantChatGUI.render(this.ticks);
          this.mc.getProfiler().endSection();
          GlStateManager.popMatrix();
+
+         if (this.mc.notifRenderer != null) {
+            this.mc.getProfiler().startSection("server_notifications");
+            this.mc.notifRenderer.renderOverlay(0, 0);
+            this.mc.getProfiler().endSection();
+         }
+
+         if (this.mc.voiceOverlay != null) {
+            this.mc.getProfiler().startSection("voice_overlay");
+            this.mc.voiceOverlay.drawOverlay();
+            this.mc.getProfiler().endSection();
+         }
          scoreobjective1 = scoreboard.getObjectiveInDisplaySlot(0);
          if (!this.mc.gameSettings.keyBindPlayerList.isKeyDown() || this.mc.isIntegratedServerRunning() && this.mc.player.connection.getPlayerInfoMap().size() <= 1 && scoreobjective1 == null) {
             this.overlayPlayerList.setVisible(false);
@@ -334,10 +382,18 @@ public class IngameGui extends AbstractGui {
             this.overlayPlayerList.render(this.scaledWidth, scoreboard, scoreobjective1);
          }
       }
-      //added ts cuz im tuff
       drawFps();
 
       drawSingleplayerStats();
+
+      if (mc.player != null && !mc.gameSettings.showDebugInfo) {
+         if (mc.gameSettings.hudWorld) {
+            drawWorldHUD(2, this.scaledHeight - 2);
+         }
+         if (mc.gameSettings.hudStats) {
+            drawStatsHUD(this.scaledWidth - 2, this.scaledHeight - 2);
+         }
+      }
 
       GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
       GlStateManager.disableLighting();
@@ -360,7 +416,7 @@ public class IngameGui extends AbstractGui {
 
             GlStateManager.enableBlend();
             GlStateManager.enableAlphaTest();
-            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F); // Başlangıç rengini temizle
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
             if (gamesettings.showDebugInfo && !gamesettings.hideGUI && !this.mc.player.hasReducedDebug() && !gamesettings.reducedDebugInfo) {
                GlStateManager.pushMatrix();
@@ -436,16 +492,22 @@ public class IngameGui extends AbstractGui {
          double pY = this.mc.player.posY;
          double pZ = this.mc.player.posZ;
          String xyzText = HString.format("X: %.2f Y: %.2f Z: %.2f", pX, pY, pZ);
-         //pov: my java skills
          float currentY = 5.0F;
          if (mc.gameSettings.showFps) {
-            getFontRenderer().drawStringWithShadow(fpsText, 5.0F, currentY, 0xFFFFFF);
-            currentY += 10.0F;
-         }
+            getFontRenderer().beginBatch();
+            try {
+               getFontRenderer().drawStringWithShadow(fpsText, 5.0F, currentY, 0xFFFFFF);
+               currentY += 10.0F;
 
-         if (mc.gameSettings.showXYZ) {
+               if (mc.gameSettings.showXYZ) {
+                  getFontRenderer().drawStringWithShadow(xyzText, 5.0F, currentY, 0xFFFFFF);
+                  currentY += 10.0F;
+               }
+            } finally {
+               getFontRenderer().endBatch();
+            }
+         } else if (mc.gameSettings.showXYZ) {
             getFontRenderer().drawStringWithShadow(xyzText, 5.0F, currentY, 0xFFFFFF);
-            currentY += 10.0F;
          }
 
          GlStateManager.enableDepthTest();
@@ -496,6 +558,140 @@ public class IngameGui extends AbstractGui {
       }
       return i > 0 ? i + 2 : i;
    }
+
+   private int getSingleplayerStatsHeight() {
+      if (mc.isDemo() || mc.gameSettings.showDebugInfo) {
+         return 0;
+      }
+      int i = 0;
+      if (SingleplayerServerController.isWorldRunning()) {
+         if (SingleplayerServerController.getTPSAge() < 20000l) {
+            List<String> strs = SingleplayerServerController.getTPS();
+            if (SingleplayerServerController.isRunningSingleThreadMode()) {
+               strs = Lists.newArrayList(strs);
+               strs.add("");
+               strs.add(I18n.format("singleplayer.tpscounter.singleThreadMode"));
+            }
+            boolean first = true;
+            for (int j = 0, m = strs.size(); j < m; ++j) {
+               i += (int) (this.getFontRenderer().FONT_HEIGHT * (!first ? 0.5f : 1.0f));
+               first = false;
+            }
+         }
+      }
+      return i > 0 ? i + 2 : i;
+   }
+
+   private void drawStatsHUD(int x, int y) {
+      int i = 9;
+
+      String line = "Walk: " + TextFormatting.YELLOW + HString.format("%.2f", mc.player.getAIMoveSpeed())
+            + TextFormatting.WHITE + " Flight: "
+            + (mc.player.abilities.allowFlying
+                  ? ("" + TextFormatting.YELLOW + mc.player.abilities.getFlySpeed())
+                  : TextFormatting.RED + "No");
+      int lw = getFontRenderer().getStringWidth(line);
+      getFontRenderer().drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
+      i += 11;
+
+      line = "Food: " + TextFormatting.YELLOW + mc.player.getFoodStats().getFoodLevel()
+            + TextFormatting.WHITE + ", Sat: " + TextFormatting.YELLOW
+            + HString.format("%.1f", mc.player.getFoodStats().getSaturationLevel());
+      lw = getFontRenderer().getStringWidth(line);
+      getFontRenderer().drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
+      i += 11;
+
+      line = "Amr: " + TextFormatting.YELLOW + mc.player.getTotalArmorValue() + TextFormatting.WHITE
+            + ", Health: " + TextFormatting.RED + HString.format("%.1f", mc.player.getHealth());
+      lw = getFontRenderer().getStringWidth(line);
+      getFontRenderer().drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
+      i += 11;
+
+      int xpc = mc.player.xpBarCap();
+      line = "XP: " + TextFormatting.GREEN + MathHelper.floor(mc.player.experience * xpc)
+            + TextFormatting.WHITE + " / " + TextFormatting.GREEN + xpc;
+      lw = getFontRenderer().getStringWidth(line);
+      getFontRenderer().drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
+      i += 11;
+
+      for (EffectInstance e : mc.player.getActivePotionEffects()) {
+         i += 11;
+         int t = e.getDuration() / 20;
+         int m = t / 60;
+         int s = t % 60;
+         int j = e.getAmplifier();
+         if (j > 0) {
+            line = I18n.format(e.getEffectName())
+                  + (j > 0 ? (" " + TextFormatting.YELLOW + TextFormatting.BOLD
+                        + I18n.format("potion.potency." + j) + TextFormatting.RESET) : "")
+                  + " [" + TextFormatting.YELLOW + HString.format("%02d:%02d", m, s)
+                  + TextFormatting.RESET + "]";
+         } else {
+            line = I18n.format(e.getEffectName()) + " [" + TextFormatting.YELLOW
+                  + HString.format("%02d:%02d", m, s) + TextFormatting.RESET + "]";
+         }
+         lw = getFontRenderer().getStringWidth(line);
+         getFontRenderer().drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
+      }
+
+   }
+
+   public static final int ticksAtMidnight = 18000;
+   public static final int ticksPerDay = 24000;
+   public static final int ticksPerHour = 1000;
+   public static final double ticksPerMinute = 1000d / 60d;
+   public static final double ticksPerSecond = 1000d / 60d / 60d;
+   private static final SimpleDateFormat SDFTwentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
+   private static final SimpleDateFormat SDFTwelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
+
+   private void drawWorldHUD(int x, int y) {
+      long totalTicks = mc.world.getDayTime();
+      long ticks = totalTicks;
+      ticks = ticks - ticksAtMidnight + ticksPerDay;
+      final long days = ticks / ticksPerDay;
+      ticks -= days * ticksPerDay;
+      final long hours = ticks / ticksPerHour;
+      ticks -= hours * ticksPerHour;
+      final long minutes = (long) Math.floor(ticks / ticksPerMinute);
+      final double dticks = ticks - minutes * ticksPerMinute;
+      final long seconds = (long) Math.floor(dticks / ticksPerSecond);
+
+      final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.ENGLISH);
+
+      cal.setLenient(true);
+      cal.set(0, Calendar.JANUARY, 1, 0, 0, 0);
+      cal.add(Calendar.DAY_OF_YEAR, (int) days);
+      cal.add(Calendar.HOUR_OF_DAY, (int) hours);
+      cal.add(Calendar.MINUTE, (int) minutes);
+      cal.add(Calendar.SECOND, (int) seconds + 1);
+
+      SimpleDateFormat fmt = SDFTwelve;
+      fmt.setCalendar(cal);
+      String timeString = TextFormatting.WHITE + "Day " + ((totalTicks + 30000l) / 24000l) + " ("
+            + TextFormatting.YELLOW + fmt.format(cal.getTime()) + TextFormatting.WHITE + ")";
+
+      Entity e = mc.getRenderViewEntity();
+      BlockPos blockpos = new BlockPos(e.posX, MathHelper.clamp(e.getBoundingBox().minY, 0.0D, 254.0D), e.posZ);
+      Biome biome = mc.world.getBiome(blockpos);
+
+      int blockLight = mc.world.getLightFor(LightType.BLOCK, blockpos);
+      int skyLight = mc.world.getLightFor(LightType.SKY, blockpos) - mc.world.getSkylightSubtracted();
+      int totalLight = Math.max(blockLight, skyLight);
+      TextFormatting lightColor = blockLight < 8
+            ? ((skyLight < 8 || !mc.world.isDaytime()) ? TextFormatting.RED : TextFormatting.YELLOW)
+            : TextFormatting.GREEN;
+      String lightString = "Light: " + lightColor + totalLight + TextFormatting.WHITE;
+
+      float temp = biome.getTemperature(blockpos);
+
+      String tempString = "Temp: "
+            + ((blockLight > 11 || temp > 0.15f) ? TextFormatting.YELLOW : TextFormatting.AQUA)
+            + HString.format("%.2f", temp) + TextFormatting.WHITE;
+
+      getFontRenderer().drawStringWithShadow(timeString, x, y - 30, 0xFFFFFF);
+      getFontRenderer().drawStringWithShadow("Biome: " + TextFormatting.AQUA + biome.getDisplayName().getString(), x, y - 19, 0xFFFFFF);
+      getFontRenderer().drawStringWithShadow(lightString + " " + tempString, x, y - 8, 0xFFFFFF);
+   }
    private boolean func_212913_a(RayTraceResult p_212913_1_) {
       if (p_212913_1_ == null) {
          return false;
@@ -524,7 +720,7 @@ public class IngameGui extends AbstractGui {
             Effect effect = effectinstance.getPotion();
             if (effectinstance.isShowIcon()) {
                int k = this.scaledWidth;
-               int l = 1;
+               int l = 1 + this.getSingleplayerStatsHeight();
                if (this.mc.isDemo()) {
                   l += 15;
                }
@@ -561,7 +757,6 @@ public class IngameGui extends AbstractGui {
             }
          }
 
-
          this.mc.getTextureManager().bindTexture(AtlasTexture.LOCATION_EFFECTS_TEXTURE);
          GL11.glTexParameteri(3553, 10241, 9728);
          GL11.glTexParameteri(3553, 10240, 9728);
@@ -578,9 +773,33 @@ public class IngameGui extends AbstractGui {
          HandSide handside = playerentity.getPrimaryHand().opposite();
          int i = this.scaledWidth / 2;
          int j = this.blitOffset;
+         if (PointerInputAbstraction.isTouchMode()) {
+            int fw = this.mc.mainWindow.getFramebufferWidth();
+            int fh = this.mc.mainWindow.getFramebufferHeight();
+            int sw = this.scaledWidth;
+            int sh = this.scaledHeight;
+            int areaHAdd = 0;
+            if (playerentity.isSpectator()) {
+               areaHAdd = 40;
+            }
+            this.hotbarAreaX = (i - 91) * fw / sw;
+            this.hotbarAreaY = (sh - 22 - areaHAdd) * fh / sh;
+            this.hotbarAreaW = 203 * fw / sw;
+            this.hotbarAreaH = (22 + areaHAdd) * fh / sh;
+         } else {
+            this.hotbarAreaX = -1;
+            this.hotbarAreaY = -1;
+            this.hotbarAreaW = -1;
+            this.hotbarAreaH = -1;
+         }
          int k = 182;
          int l = 91;
          this.blitOffset = -90;
+         if (PointerInputAbstraction.isTouchMode()) {
+            GlStateManager.pushMatrix();
+            GlStateManager.translatef((float)this.scaledWidth / -4.0F, (float)this.scaledHeight / -2.0F, (float)this.blitOffset);
+            GlStateManager.scalef(1.5f, 1.5f, 1.5f);
+         }
          this.blit(i - 91, this.scaledHeight - 22, 0, 0, 182, 22);
          this.blit(i - 91 - 1 + playerentity.inventory.currentItem * 20, this.scaledHeight - 22 - 1, 0, 22, 24, 22);
          if (!itemstack.isEmpty()) {
@@ -612,6 +831,9 @@ public class IngameGui extends AbstractGui {
             }
          }
 
+         if (PointerInputAbstraction.isTouchMode()) {
+            GlStateManager.popMatrix();
+         }
          if (this.mc.gameSettings.attackIndicator == AttackIndicatorStatus.HOTBAR) {
             float f = this.mc.player.getCooledAttackStrength(0.0F);
             if (f < 1.0F) {
@@ -730,27 +952,13 @@ public class IngameGui extends AbstractGui {
 
    private void renderScoreboard(ScoreObjective objective) {
       Scoreboard scoreboard = objective.getScoreboard();
-      Collection<Score> collection = scoreboard.getSortedScores(objective);
-      List<Score> list = collection.stream().filter((p_212911_0_) -> {
-         return p_212911_0_.getPlayerName() != null && !p_212911_0_.getPlayerName().startsWith("#");
-      }).collect(Collectors.toList());
-      if (list.size() > 15) {
-         collection = Lists.newArrayList(Iterables.skip(list, collection.size() - 15));
-      } else {
-         collection = list;
-      }
+      this.updateSidebarCache(objective, scoreboard);
+      List<SidebarEntry> entries = this.sidebarEntries;
+      String s = this.cachedSidebarTitle;
+      int i = this.cachedSidebarTitleWidth;
+      int j = this.cachedSidebarWidth;
 
-      String s = objective.getDisplayName().getFormattedText();
-      int i = this.getFontRenderer().getStringWidth(s);
-      int j = i;
-
-      for(Score score : collection) {
-         ScorePlayerTeam scoreplayerteam = scoreboard.getPlayersTeam(score.getPlayerName());
-         String s1 = ScorePlayerTeam.formatMemberName(scoreplayerteam, new StringTextComponent(score.getPlayerName())).getFormattedText() + ": " + TextFormatting.RED + score.getScorePoints();
-         j = Math.max(j, this.getFontRenderer().getStringWidth(s1));
-      }
-
-      int l1 = collection.size() * 9;
+      int l1 = entries.size() * 9;
       int i2 = this.scaledHeight / 2 + l1 / 3;
       int j2 = 3;
       int k2 = this.scaledWidth - j - 3;
@@ -758,23 +966,70 @@ public class IngameGui extends AbstractGui {
       int l = 0x80000000;
       int i1 = 0x90000000; 
 
-      for(Score score1 : collection) {
-         ++k;
-         ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score1.getPlayerName());
-         String s2 = ScorePlayerTeam.formatMemberName(scoreplayerteam1, new StringTextComponent(score1.getPlayerName())).getFormattedText();
-         String s3 = TextFormatting.RED + "" + score1.getScorePoints();
-         int j1 = i2 - k * 9;
-         int k1 = this.scaledWidth - 3 + 2;
-         fill(k2 - 2, j1, k1, j1 + 9, l);
-         this.getFontRenderer().drawString(s2, (float)k2, (float)j1, 0xFFFFFFFF);
-         this.getFontRenderer().drawString(s3, (float)(k1 - this.getFontRenderer().getStringWidth(s3)), (float)j1, 0xFFFFFFFF);
-         if (k == collection.size()) {
-            fill(k2 - 2, j1 - 9 - 1, k1, j1 - 1, i1);
-            fill(k2 - 2, j1 - 1, k1, j1, l);
-            this.getFontRenderer().drawString(s, (float)(k2 + j / 2 - i / 2), (float)(j1 - 9), 0xFFFFFF00);
+      beginHudBatch();
+      this.getFontRenderer().beginBatch();
+      try {
+         for(SidebarEntry entry : entries) {
+            ++k;
+            String s2 = entry.name;
+            String s3 = entry.score;
+            int j1 = i2 - k * 9;
+            int k1 = this.scaledWidth - 3 + 2;
+            fill(k2 - 2, j1, k1, j1 + 9, l);
+            this.getFontRenderer().drawString(s2, (float)k2, (float)j1, 0xFFFFFFFF);
+            this.getFontRenderer().drawString(s3, (float)(k1 - this.getFontRenderer().getStringWidth(s3)), (float)j1, 0xFFFFFFFF);
+            if (k == entries.size()) {
+               fill(k2 - 2, j1 - 9 - 1, k1, j1 - 1, i1);
+               fill(k2 - 2, j1 - 1, k1, j1, l);
+               this.getFontRenderer().drawString(s, (float)(k2 + j / 2 - i / 2), (float)(j1 - 9), 0xFFFFFF00);
+            }
+         }
+      } finally {
+         endHudBatch();
+         this.getFontRenderer().endBatch();
+      }
+
+   }
+
+   private void updateSidebarCache(ScoreObjective objective, Scoreboard scoreboard) {
+      if (this.cachedSidebarObjective == objective && this.cachedSidebarTick == this.ticks) {
+         return;
+      }
+      this.cachedSidebarObjective = objective;
+      this.cachedSidebarTick = this.ticks;
+      this.sidebarScoreScratch.clear();
+      for (Score score : scoreboard.getSortedScores(objective)) {
+         String playerName = score.getPlayerName();
+         if (playerName != null && !playerName.startsWith("#")) {
+            this.sidebarScoreScratch.add(score);
          }
       }
 
+      this.sidebarEntries.clear();
+      this.cachedSidebarTitle = objective.getDisplayName().getFormattedText();
+      this.cachedSidebarTitleWidth = this.getFontRenderer().getStringWidth(this.cachedSidebarTitle);
+      this.cachedSidebarWidth = this.cachedSidebarTitleWidth;
+      int first = Math.max(0, this.sidebarScoreScratch.size() - 15);
+      for (int index = first; index < this.sidebarScoreScratch.size(); ++index) {
+         Score score = this.sidebarScoreScratch.get(index);
+         ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());
+         String name = ScorePlayerTeam.formatMemberName(team,
+               new StringTextComponent(score.getPlayerName())).getFormattedText();
+         String scoreText = TextFormatting.RED + "" + score.getScorePoints();
+         this.cachedSidebarWidth = Math.max(this.cachedSidebarWidth,
+               this.getFontRenderer().getStringWidth(name + ": " + scoreText));
+         this.sidebarEntries.add(new SidebarEntry(name, scoreText));
+      }
+   }
+
+   private static class SidebarEntry {
+      final String name;
+      final String score;
+
+      SidebarEntry(String name, String score) {
+         this.name = name;
+         this.score = score;
+      }
    }
 
    private PlayerEntity func_212304_m() {
@@ -1105,6 +1360,7 @@ public class IngameGui extends AbstractGui {
       GlStateManager.color4f(1.0F, 1.0F, 1.0F, timeInPortal);
       this.mc.getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
       TextureAtlasSprite textureatlassprite = this.mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.NETHER_PORTAL.getDefaultState());
+      textureatlassprite.markActive();
       float f = textureatlassprite.getMinU();
       float f1 = textureatlassprite.getMinV();
       float f2 = textureatlassprite.getMaxU();
@@ -1262,5 +1518,176 @@ public class IngameGui extends AbstractGui {
 
    public void func_212910_m() {
       this.overlayDebug.func_212921_a();
+   }
+
+   public boolean isTouchOverlapEagler(int uid, int pointX, int pointY) {
+      return touchEventUID == uid;
+   }
+
+   public void updateTouchEagler(boolean inGame) {
+      if (inGame) {
+         int pointCount = Touch.touchPointCount();
+         for (int i = 0; i < pointCount; ++i) {
+            int uid = Touch.touchPointUID(i);
+            if (TouchControls.touchControls.containsKey(uid)) {
+               continue;
+            }
+            if (touchEventUID == -1 || touchEventUID == uid) {
+               touchVPosX = applyTouchHotbarTransformX(Touch.touchPointX(i), false);
+               touchVPosY = applyTouchHotbarTransformY(this.mc.mainWindow.getFramebufferHeight() - Touch.touchPointY(i) - 1, false);
+               long millis = EagRuntime.steadyTimeMillis();
+               if (touchEventUID != -1 && hotbarSlotTouchStart != -1l) {
+                  if (currentHotbarSlotTouch != 69) {
+                     int slot = getHotbarSlotTouched(touchVPosX);
+                     if (slot != currentHotbarSlotTouch) {
+                        hotbarSlotTouchAlreadySelected = false;
+                        currentHotbarSlotTouch = slot;
+                        hotbarSlotTouchStart = millis;
+                        if (slot >= 0 && slot < 9) {
+                           if (this.mc.player.isSpectator()) {
+                              this.getSpectatorGui().onHotbarSelected(slot);
+                           } else {
+                              this.mc.player.inventory.currentItem = slot;
+                           }
+                        }
+                     } else {
+                        if (millis - hotbarSlotTouchStart > 1200l) {
+                           if (!this.mc.player.isSpectator()) {
+                              hotbarSlotTouchStart = millis;
+                              this.mc.player.dropItem(false);
+                           }
+                        }
+                     }
+                  }
+               }
+               return;
+            }
+         }
+      }
+      if (touchEventUID != -1) {
+         handleTouchEndEagler(touchEventUID, touchVPosX, touchVPosY);
+      }
+      touchVPosX = -1;
+      touchVPosY = -1;
+   }
+
+   public boolean handleTouchBeginEagler(int uid, int pointX, int pointY) {
+      if (this.mc.player == null) {
+         return false;
+      }
+      if (touchEventUID == -1) {
+         pointX = applyTouchHotbarTransformX(pointX, false);
+         pointY = applyTouchHotbarTransformY(pointY, false);
+         if (pointX >= hotbarAreaX && pointY >= hotbarAreaY && pointX < hotbarAreaX + hotbarAreaW
+               && pointY < hotbarAreaY + hotbarAreaH) {
+            touchEventUID = uid;
+            currentHotbarSlotTouch = getHotbarSlotTouched(pointX);
+            hotbarSlotTouchStart = EagRuntime.steadyTimeMillis();
+            if (currentHotbarSlotTouch >= 0 && currentHotbarSlotTouch < 9) {
+               if (this.mc.player.isSpectator()) {
+                  hotbarSlotTouchAlreadySelected = false;
+                  this.getSpectatorGui().onHotbarSelected(currentHotbarSlotTouch);
+               } else {
+                  hotbarSlotTouchAlreadySelected = (this.mc.player.inventory.currentItem == currentHotbarSlotTouch);
+                  this.mc.player.inventory.currentItem = currentHotbarSlotTouch;
+               }
+            } else if (currentHotbarSlotTouch == 9) {
+               hotbarSlotTouchAlreadySelected = false;
+               currentHotbarSlotTouch = 69;
+               if (this.mc.playerController.isSpectatorMode()) {
+               } else {
+                  this.mc.displayGuiScreen(new net.minecraft.client.gui.screen.inventory.InventoryScreen(this.mc.player));
+               }
+            }
+            return true;
+         }
+         if (pointX >= interactButtonX && pointY >= interactButtonY && pointX < interactButtonX + interactButtonW
+               && pointY < interactButtonY + interactButtonH) {
+            touchEventUID = uid;
+            this.mc.playerController.processRightClick(this.mc.player, this.mc.world, net.minecraft.util.Hand.MAIN_HAND);
+            return true;
+         }
+      }
+      return false;
+   }
+
+   public boolean handleTouchEndEagler(int uid, int pointX, int pointY) {
+      if (uid == touchEventUID) {
+         if (hotbarSlotTouchStart != -1l && currentHotbarSlotTouch != 69) {
+            if (EagRuntime.steadyTimeMillis() - hotbarSlotTouchStart < 350l) {
+               if (hotbarSlotTouchAlreadySelected) {
+                  if (this.mc.player != null) {
+                     this.mc.player.dropItem(false);
+                  }
+               }
+            }
+         }
+         touchVPosX = -1;
+         touchVPosY = -1;
+         touchEventUID = -1;
+         currentHotbarSlotTouch = -1;
+         hotbarSlotTouchStart = -1l;
+         hotbarSlotTouchAlreadySelected = false;
+         return true;
+      }
+      return false;
+   }
+
+   private int applyTouchHotbarTransformX(int posX, boolean scaled) {
+      if (scaled) {
+         return (posX + this.scaledWidth / 4) * 2 / 3;
+      } else {
+         return (posX + this.mc.mainWindow.getFramebufferWidth() / 4) * 2 / 3;
+      }
+   }
+
+   private int applyTouchHotbarTransformY(int posY, boolean scaled) {
+      if (scaled) {
+         return (posY + this.scaledHeight / 2) * 2 / 3;
+      } else {
+         return (posY + this.mc.mainWindow.getFramebufferHeight() / 2) * 2 / 3;
+      }
+   }
+
+   private int getHotbarSlotTouched(int pointX) {
+      int xx = pointX - hotbarAreaX - 2;
+      xx /= 20 * (int)this.mc.mainWindow.getGuiScaleFactor();
+      if (xx < 0) xx = 0;
+      if (xx > 9) xx = 9;
+      return xx;
+   }
+
+   private void drawEaglerInteractButton() {
+      if (PointerInputAbstraction.isTouchMode() && this.mc.objectMouseOver != null
+            && this.mc.objectMouseOver.getType() == net.minecraft.util.math.RayTraceResult.Type.ENTITY) {
+         MainWindow mainWindow = this.mc.mainWindow;
+         float f = MathHelper.clamp(this.mc.gameSettings.touchControlOpacity, 0.0F, 1.0F);
+         if (f > 0.0F) {
+            int scale = (int)mainWindow.getGuiScaleFactor();
+            int sw = mainWindow.getScaledWidth();
+            int sh = mainWindow.getScaledHeight();
+            interactButtonW = 118 * scale;
+            interactButtonH = 20 * scale;
+            int xx = (sw - 118) / 2;
+            int yy = sh - 70;
+            interactButtonX = xx * scale;
+            interactButtonY = yy * scale;
+            this.mc.getTextureManager().bindTexture(TouchOverlayRenderer.spriteSheet);
+            boolean hover = touchVPosX >= interactButtonX && touchVPosY >= interactButtonY
+                  && touchVPosX < interactButtonX + interactButtonW && touchVPosY < interactButtonY + interactButtonH;
+            if (f < 1.0F) GlStateManager.enableBlend();
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, f);
+            TouchOverlayRenderer.drawTexturedModalRect((float)xx, (float)yy, 0, hover ? 216 : 236, 118, 20, 2);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            this.mc.fontRenderer.drawString(I18n.format("touch.interact.entity"), (sw - this.mc.fontRenderer.getStringWidth(I18n.format("touch.interact.entity"))) / 2, yy + 6,
+                  (hover ? 16777120 : 14737632) | ((int)(f * 255.0F) << 24));
+            if (f < 1.0F) GlStateManager.disableBlend();
+         }
+      } else {
+         interactButtonX = -1;
+         interactButtonY = -1;
+         interactButtonW = -1;
+         interactButtonH = -1;
+      }
    }
 }

@@ -30,7 +30,6 @@ public class PandaRenderer extends MobRenderer<PandaEntity, PandaModel<PandaEnti
         this.addLayer(new PandaHeldItemLayer(this));
     }
 
-
     protected ResourceLocation getEntityTexture(PandaEntity entity) {
         return field_217777_a.getOrDefault(entity.func_213590_ei(), field_217777_a.get(PandaEntity.Type.NORMAL));
     }

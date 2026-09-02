@@ -44,7 +44,6 @@ public class RedstoneWallTorchBlock extends RedstoneTorchBlock {
         return Blocks.WALL_TORCH.updatePostPlacement(stateIn, facing, facingState, worldIn, currentPos, facingPos);
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = Blocks.WALL_TORCH.getStateForPlacement(context);
         return blockstate == null ? null : this.getDefaultState().with(FACING, blockstate.get(FACING));

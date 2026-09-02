@@ -13,11 +13,9 @@ public abstract class AbstractAttributeMap {
    protected final Map<String, IAttributeInstance> attributesByName = new LowerStringMap<>();
    protected final Multimap<IAttribute, IAttribute> descendantsByParent = HashMultimap.create();
 
-
    public IAttributeInstance getAttributeInstance(IAttribute attribute) {
       return this.attributes.get(attribute);
    }
-
 
    public IAttributeInstance getAttributeInstanceByName(String attributeName) {
       return this.attributesByName.get(attributeName);

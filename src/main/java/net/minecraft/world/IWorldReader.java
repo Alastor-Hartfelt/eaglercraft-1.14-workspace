@@ -52,7 +52,6 @@ public interface IWorldReader extends IEnviromentBlockReader {
 
     int getLightSubtracted(BlockPos pos, int amount);
 
-
     IChunk getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull);
 
     @Deprecated

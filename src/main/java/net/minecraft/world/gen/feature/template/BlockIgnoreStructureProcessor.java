@@ -27,7 +27,6 @@ public class BlockIgnoreStructureProcessor extends StructureProcessor {
       }));
    }
 
-
    public Template.BlockInfo process(IWorldReader p_215194_1_, BlockPos p_215194_2_, Template.BlockInfo p_215194_3_, Template.BlockInfo p_215194_4_, PlacementSettings p_215194_5_) {
       return this.blocks.contains(p_215194_4_.state.getBlock()) ? null : p_215194_4_;
    }

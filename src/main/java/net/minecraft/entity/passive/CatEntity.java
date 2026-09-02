@@ -199,7 +199,6 @@ public class CatEntity extends TameableEntity {
 
    }
 
-
    protected SoundEvent getAmbientSound() {
       if (this.isTamed()) {
          if (this.isInLove()) {
@@ -338,7 +337,6 @@ public class CatEntity extends TameableEntity {
          return catentity.isTamed() && super.canMateWith(otherAnimal);
       }
    }
-
 
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason,  ILivingEntityData spawnDataIn,  CompoundNBT dataTag) {
       spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);

@@ -83,7 +83,6 @@ public class EnchantingTableBlock extends ContainerBlock {
         }
     }
 
-
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
         TileEntity tileentity = worldIn.getTileEntity(pos);
         if (tileentity instanceof EnchantingTableTileEntity) {

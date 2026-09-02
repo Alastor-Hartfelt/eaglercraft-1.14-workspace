@@ -46,7 +46,6 @@ public class BlockPattern {
         return this.palmLength;
     }
 
-
     private BlockPattern.PatternHelper checkPatternAt(BlockPos pos, Direction finger, Direction thumb, LoadingCache<BlockPos, CachedBlockInfo> lcache) {
         for (int i = 0; i < this.palmLength; ++i) {
             for (int j = 0; j < this.thumbLength; ++j) {
@@ -60,7 +59,6 @@ public class BlockPattern {
 
         return new BlockPattern.PatternHelper(pos, finger, thumb, lcache, this.palmLength, this.thumbLength, this.fingerLength);
     }
-
 
     public BlockPattern.PatternHelper match(IWorldReader worldIn, BlockPos pos) {
         LoadingCache<BlockPos, CachedBlockInfo> loadingcache = createLoadingCache(worldIn, false);
@@ -110,7 +108,6 @@ public class BlockPattern {
             return new CachedBlockInfo(this.world, p_load_1_, this.forceLoad);
         }
     }
-
 
     public static class PatternHelper {
         private final BlockPos frontTopLeft;
@@ -199,7 +196,6 @@ public class BlockPattern {
             return new BlockPattern.PortalInfo(new Vec3d(d0, d1, d2), new Vec3d(d3, p_222504_5_.y, d4), i);
         }
 
-
         protected static BlockPos translateOffset(BlockPos pos, Direction finger, Direction thumb, int palmOffset, int thumbOffset, int fingerOffset) {
             if (finger != thumb && finger != thumb.getOpposite()) {
                 Vec3i vec3i = new Vec3i(finger.getXOffset(), finger.getYOffset(), finger.getZOffset());
@@ -210,7 +206,6 @@ public class BlockPattern {
                 throw new IllegalArgumentException("Invalid forwards & up combination");
             }
         }
-
 
     }
 

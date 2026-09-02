@@ -2,7 +2,6 @@ package net.minecraft.client.renderer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.GLX;
@@ -12,12 +11,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import net.lax1dude.eaglercraft.Random;
+import net.lax1dude.eaglercraft.opengl.EaglercraftGPU;
 import java.util.Set;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import me.jellysquid.mods.sodium.client.render.chunk.backends.multidraw.MultidrawChunkRenderBackend;
+import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
+import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.block.Block;
@@ -85,7 +85,6 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -106,7 +105,7 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL13;
 
 @OnlyIn(Dist.CLIENT)
-public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListener {
+public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListener, ChunkStatusListener {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final ResourceLocation MOON_PHASES_TEXTURES = new ResourceLocation("textures/environment/moon_phases.png");
    private static final ResourceLocation SUN_TEXTURES = new ResourceLocation("textures/environment/sun.png");
@@ -120,12 +119,14 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
    private final EntityRendererManager renderManager;
    private ClientWorld world;
    private Set<ChunkRender> chunksToUpdate = new java.util.LinkedHashSet<>(128);
+   private Set<ChunkRender> chunksToUpdateScratch = new java.util.LinkedHashSet<>(128);
    private final Set<ChunkRender> chunksToUpdateForced = new java.util.LinkedHashSet<>(32);
    private final List<WorldRenderer.LocalRenderInformationContainer> renderInfos = Lists.newArrayListWithCapacity(4096);
+   private final List<WorldRenderer.LocalRenderInformationContainer> renderInfoPool = Lists.newArrayListWithCapacity(4096);
+   private int renderInfoPoolUsed;
    private final List<Entity> renderEntitiesList = new java.util.ArrayList<>(256);
    private final List<Entity> renderEntitiesMultipassList = new java.util.ArrayList<>(64);
    private final Set<TileEntity> setTileEntities = Sets.newHashSet();
-   private final LongOpenHashSet visibleChunkSections = new LongOpenHashSet(512, 0.5F);
    private ViewFrustum viewFrustum;
    private int starGLCallList = -1;
    private int glSkyList = -1;
@@ -182,20 +183,25 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
    private final Vector3d debugTerrainFrustumPosition = new Vector3d(0.0D, 0.0D, 0.0D);
    private boolean vboEnabled;
    private IChunkRendererFactory renderChunkFactory;
-   private double prevRenderSortX;
-   private double prevRenderSortY;
-   private double prevRenderSortZ;
+   private final MultidrawChunkRenderBackend chunkRenderBackend;
    private boolean displayListEntitiesDirty = true;
+   private int terrainRenderListRevision;
    private boolean entityOutlinesRendered;
    private int lastVisibleFacingsChunkX = Integer.MIN_VALUE;
+   private int lastVisibleFacingsChunkY = Integer.MIN_VALUE;
    private int lastVisibleFacingsChunkZ = Integer.MIN_VALUE;
    private Set<Direction> cachedVisibleFacings = null;
+   private final VisGraph visibleFacingsGraph = new VisGraph();
    private int lastRebuildChunkX = Integer.MIN_VALUE;
    private int lastRebuildChunkZ = Integer.MIN_VALUE;
-   private int rebuildFrameCounter = 0;
+   private int completedChunkRebuildsPending;
    private final BlockPos.MutableBlockPos scratchBlockPos = new BlockPos.MutableBlockPos();
    private final BlockPos.MutableBlockPos scratchBlockPos2 = new BlockPos.MutableBlockPos();
    private final BlockPos.MutableBlockPos scratchVisibleFacingsPos = new BlockPos.MutableBlockPos();
+   private final BlockPos.MutableBlockPos shadowRenderPos = new BlockPos.MutableBlockPos();
+   private final BlockPos.MutableBlockPos shadowEntityPos = new BlockPos.MutableBlockPos();
+   private final BlockPos.MutableBlockPos paraboloidRenderPos = new BlockPos.MutableBlockPos();
+   private final BlockPos.MutableBlockPos paraboloidTileEntityPos = new BlockPos.MutableBlockPos();
 
    public WorldRenderer(Minecraft mcIn) {
       this.mc = mcIn;
@@ -203,10 +209,16 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
       this.renderManager = mcIn.getRenderManager();
       this.textureManager = mcIn.getTextureManager();
       this.vboEnabled = GLX.useVbo();
-      if (this.vboEnabled) {
+      if (MultidrawChunkRenderBackend.isSupported()) {
+         this.chunkRenderBackend = new MultidrawChunkRenderBackend();
+         this.renderContainer = new RegionRenderList(this.chunkRenderBackend);
+         this.renderChunkFactory = (world, renderer) -> new ChunkRenderContainer(world, renderer, this.chunkRenderBackend);
+      } else if (this.vboEnabled) {
+         this.chunkRenderBackend = null;
          this.renderContainer = new VboRenderList();
          this.renderChunkFactory = ChunkRender::new;
       } else {
+         this.chunkRenderBackend = null;
          this.renderContainer = new RenderList();
          this.renderChunkFactory = ListedChunkRender::new;
       }
@@ -219,6 +231,9 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
    }
 
    public void close() {
+      if (this.chunkRenderBackend != null) {
+         this.chunkRenderBackend.delete();
+      }
       if (this.entityOutlineShader != null) {
          this.entityOutlineShader.close();
       }
@@ -456,16 +471,25 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
       this.frustumUpdatePosChunkX = Integer.MIN_VALUE;
       this.frustumUpdatePosChunkY = Integer.MIN_VALUE;
       this.frustumUpdatePosChunkZ = Integer.MIN_VALUE;
+      this.renderInfos.clear();
+      this.renderInfoPool.clear();
+      this.renderInfoPoolUsed = 0;
       this.renderManager.setWorld(worldClientIn);
+      if (this.world != null) {
+         this.world.getChunkProvider().setListener(null);
+      }
       this.world = worldClientIn;
       if (worldClientIn != null) {
          this.loadRenderers();
+         worldClientIn.getChunkProvider().setListener(this);
       } else {
          this.chunksToUpdate.clear();
-         this.renderInfos.clear();
          if (this.viewFrustum != null) {
             this.viewFrustum.deleteGlResources();
             this.viewFrustum = null;
+         }
+         if (this.chunkRenderBackend != null) {
+            this.chunkRenderBackend.clear();
          }
 
          if (this.renderDispatcher != null) {
@@ -490,7 +514,10 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          this.renderDistanceChunks = this.mc.gameSettings.renderDistanceChunks;
          boolean flag = this.vboEnabled;
          this.vboEnabled = GLX.useVbo();
-         if (flag && !this.vboEnabled) {
+         if (this.chunkRenderBackend != null) {
+            this.renderContainer = new RegionRenderList(this.chunkRenderBackend);
+            this.renderChunkFactory = (world, renderer) -> new ChunkRenderContainer(world, renderer, this.chunkRenderBackend);
+         } else if (flag && !this.vboEnabled) {
             this.renderContainer = new RenderList();
             this.renderChunkFactory = ListedChunkRender::new;
          } else if (!flag && this.vboEnabled) {
@@ -506,6 +533,9 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
 
          if (this.viewFrustum != null) {
             this.viewFrustum.deleteGlResources();
+         }
+         if (this.chunkRenderBackend != null) {
+            this.chunkRenderBackend.clear();
          }
 
          this.stopChunkUpdates();
@@ -549,46 +579,48 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
       if (this.renderEntitiesStartupCounter > 0) {
          --this.renderEntitiesStartupCounter;
       } else {
-         double d0 = p_215326_1_.getProjectedView().x;
-         double d1 = p_215326_1_.getProjectedView().y;
-         double d2 = p_215326_1_.getProjectedView().z;
+         net.lax1dude.eaglercraft.voice.VoiceTagRenderer.clearTagsDrawnSet();
+         Vec3d projectedView = p_215326_1_.getProjectedView();
+         double d0 = projectedView.x;
+         double d1 = projectedView.y;
+         double d2 = projectedView.z;
+         Entity renderViewEntity = p_215326_1_.getRenderViewEntity();
          this.world.getProfiler().startSection("prepare");
          this.countEntitiesRendered = 0;
          this.countEntitiesHidden = 0;
-         double d3 = p_215326_1_.getProjectedView().x;
-         double d4 = p_215326_1_.getProjectedView().y;
-         double d5 = p_215326_1_.getProjectedView().z;
-         TileEntityRendererDispatcher.staticPlayerX = d3;
-         TileEntityRendererDispatcher.staticPlayerY = d4;
-         TileEntityRendererDispatcher.staticPlayerZ = d5;
-         this.renderManager.setRenderPosition(d3, d4, d5);
+         TileEntityRendererDispatcher.staticPlayerX = d0;
+         TileEntityRendererDispatcher.staticPlayerY = d1;
+         TileEntityRendererDispatcher.staticPlayerZ = d2;
+         this.renderManager.setRenderPosition(d0, d1, d2);
          this.mc.gameRenderer.enableLightmap();
          this.world.getProfiler().endStartSection("entities");
          this.renderEntitiesList.clear();
          this.renderEntitiesMultipassList.clear();
 
-         for(Int2ObjectMap.Entry<Entity> entry : this.world.entitiesById.int2ObjectEntrySet()) {
-            Entity entity = entry.getValue();
-            // Entity Culling: skip if chunk section not visible (O(1) check)
-            if (!this.visibleChunkSections.isEmpty() && !entity.isRidingOrBeingRiddenBy(this.mc.player)) {
-               long chunkSectionKey = ChunkPos.asLong(entity.chunkCoordX, entity.chunkCoordZ) | ((long)(entity.chunkCoordY & 0xFF) << 42);
-               if (!this.visibleChunkSections.contains(chunkSectionKey)) continue;
+         for(Entity entity : this.world.entitiesById.values()) {
+            if (entity == renderViewEntity && !p_215326_1_.isThirdPerson()
+                  && (!(entity instanceof LivingEntity) || !((LivingEntity)entity).isSleeping())) {
+               continue;
             }
-            if ((this.renderManager.shouldRender(entity, p_215326_2_, d0, d1, d2) || entity.isRidingOrBeingRiddenBy(this.mc.player)) && (entity != p_215326_1_.getRenderViewEntity() || p_215326_1_.isThirdPerson() || p_215326_1_.getRenderViewEntity() instanceof LivingEntity && ((LivingEntity)p_215326_1_.getRenderViewEntity()).isSleeping())) {
-               ++this.countEntitiesRendered;
-               this.renderManager.renderEntityStatic(entity, p_215326_3_, false);
-               if (entity.isGlowing() || entity instanceof PlayerEntity && this.mc.player.isSpectator() && this.mc.gameSettings.keyBindSpectatorOutlines.isKeyDown()) {
-                  this.renderEntitiesList.add(entity);
-               }
+            boolean connectedToPlayer = entity.isRidingOrBeingRiddenBy(this.mc.player);
+            if (!connectedToPlayer && !this.renderManager.shouldRender(entity, p_215326_2_, d0, d1, d2)) {
+               continue;
+            }
+            boolean glowing = entity.isGlowing();
+            ++this.countEntitiesRendered;
+            this.renderManager.renderEntityStatic(entity, p_215326_3_, false);
+            if (glowing || entity instanceof PlayerEntity && this.mc.player.isSpectator() && this.mc.gameSettings.keyBindSpectatorOutlines.isKeyDown()) {
+               this.renderEntitiesList.add(entity);
+            }
 
-               if (this.renderManager.isRenderMultipass(entity)) {
-                  this.renderEntitiesMultipassList.add(entity);
-               }
+            if (this.renderManager.isRenderMultipass(entity)) {
+               this.renderEntitiesMultipassList.add(entity);
             }
          }
 
-         for(Entity entity : this.world.globalEntities) {
-            if ((this.renderManager.shouldRender(entity, p_215326_2_, d0, d1, d2) || entity.isRidingOrBeingRiddenBy(this.mc.player)) && (entity != p_215326_1_.getRenderViewEntity() || p_215326_1_.isThirdPerson() || p_215326_1_.getRenderViewEntity() instanceof LivingEntity && ((LivingEntity)p_215326_1_.getRenderViewEntity()).isSleeping())) {
+         for(int i = 0, l = this.world.globalEntities.size(); i < l; ++i) {
+            Entity entity = this.world.globalEntities.get(i);
+            if ((this.renderManager.shouldRender(entity, p_215326_2_, d0, d1, d2) || entity.isRidingOrBeingRiddenBy(this.mc.player)) && (entity != renderViewEntity || p_215326_1_.isThirdPerson() || renderViewEntity instanceof LivingEntity && ((LivingEntity)renderViewEntity).isSleeping())) {
                ++this.countEntitiesRendered;
                this.renderManager.renderEntityStatic(entity, p_215326_3_, false);
                if (entity.isGlowing() || entity instanceof PlayerEntity && this.mc.player.isSpectator() && this.mc.gameSettings.keyBindSpectatorOutlines.isKeyDown()) {
@@ -602,8 +634,8 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          }
 
          if (!this.renderEntitiesMultipassList.isEmpty()) {
-            for(Entity entity1 : this.renderEntitiesMultipassList) {
-               this.renderManager.renderMultipass(entity1, p_215326_3_);
+            for(int i = 0, l = this.renderEntitiesMultipassList.size(); i < l; ++i) {
+               this.renderManager.renderMultipass(this.renderEntitiesMultipassList.get(i), p_215326_3_);
             }
          }
 
@@ -628,7 +660,9 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
                this.entityOutlineShader.render(p_215326_3_);
                GlStateManager.enableLighting();
                GlStateManager.depthMask(true);
-               GlStateManager.enableFog();
+               if (this.mc.gameSettings.fog) {
+                  GlStateManager.enableFog();
+               }
                GlStateManager.enableBlend();
                GlStateManager.enableColorMaterial();
                GlStateManager.depthFunc(515);
@@ -642,11 +676,12 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          this.world.getProfiler().endStartSection("blockentities");
          RenderHelper.enableStandardItemLighting();
 
-         for(WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : this.renderInfos) {
+         for(int i = 0, l = this.renderInfos.size(); i < l; ++i) {
+            WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer = this.renderInfos.get(i);
             List<TileEntity> list2 = worldrenderer$localrenderinformationcontainer.renderChunk.getCompiledChunk().getTileEntities();
             if (!list2.isEmpty()) {
-               for(TileEntity tileentity : list2) {
-                  TileEntityRendererDispatcher.instance.render(tileentity, p_215326_3_, -1);
+               for(int j = 0, m = list2.size(); j < m; ++j) {
+                  TileEntityRendererDispatcher.instance.render(list2.get(j), p_215326_3_, -1);
                }
             }
          }
@@ -690,7 +725,8 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
    protected int getRenderedChunks() {
       int i = 0;
 
-      for(WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : this.renderInfos) {
+      for(int j = 0, l = this.renderInfos.size(); j < l; ++j) {
+         WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer = this.renderInfos.get(j);
          CompiledChunk compiledchunk = worldrenderer$localrenderinformationcontainer.renderChunk.compiledChunk;
          if (compiledchunk != CompiledChunk.DUMMY && !compiledchunk.isEmpty()) {
             ++i;
@@ -739,47 +775,39 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
       BlockPos blockpos = this.scratchBlockPos.setPos(MathHelper.floor(p_215320_1_.getProjectedView().x / 16.0D) * 16, MathHelper.floor(p_215320_1_.getProjectedView().y / 16.0D) * 16, MathHelper.floor(p_215320_1_.getProjectedView().z / 16.0D) * 16);
       float f = p_215320_1_.getPitch();
       float f1 = p_215320_1_.getYaw();
-      boolean posChanged = p_215320_1_.getProjectedView().x != this.lastViewEntityX || p_215320_1_.getProjectedView().y != this.lastViewEntityY || p_215320_1_.getProjectedView().z != this.lastViewEntityZ;
       boolean rotChanged = (double)f != this.lastViewEntityPitch || (double)f1 != this.lastViewEntityYaw;
       this.lastViewEntityX = p_215320_1_.getProjectedView().x;
       this.lastViewEntityY = p_215320_1_.getProjectedView().y;
       this.lastViewEntityZ = p_215320_1_.getProjectedView().z;
       this.lastViewEntityPitch = (double)f;
       this.lastViewEntityYaw = (double)f1;
-      if (!this.displayListEntitiesDirty) {
-         int chunkX = blockpos1.getX() >> 4;
-         int chunkZ = blockpos1.getZ() >> 4;
-         boolean chunkChanged = chunkX != this.lastRebuildChunkX || chunkZ != this.lastRebuildChunkZ;
-         boolean timeForRebuild = ++this.rebuildFrameCounter >= 60;
-         this.displayListEntitiesDirty = chunkChanged || (rotChanged && timeForRebuild);
-         if (chunkChanged) {
-            this.lastRebuildChunkX = chunkX;
-            this.lastRebuildChunkZ = chunkZ;
-            this.rebuildFrameCounter = 0;
-         } else if (this.displayListEntitiesDirty && timeForRebuild) {
-            this.rebuildFrameCounter = 0;
-         }
-      }
+      int chunkX = blockpos1.getX() >> 4;
+      int chunkZ = blockpos1.getZ() >> 4;
+      this.displayListEntitiesDirty |= chunkX != this.lastRebuildChunkX || chunkZ != this.lastRebuildChunkZ || rotChanged;
+      this.lastRebuildChunkX = chunkX;
+      this.lastRebuildChunkZ = chunkZ;
       boolean flag = this.debugFixedClippingHelper != null;
       this.mc.getProfiler().endStartSection("update");
       if (!flag && this.displayListEntitiesDirty) {
          this.displayListEntitiesDirty = false;
+         ++this.terrainRenderListRevision;
          this.renderInfos.clear();
-         Queue<WorldRenderer.LocalRenderInformationContainer> queue = Queues.newArrayDeque();
+         this.renderInfoPoolUsed = 0;
          Entity.setRenderDistanceWeight(MathHelper.clamp((double)this.mc.gameSettings.renderDistanceChunks / 8.0D, 1.0D, 2.5D));
-         Entity.entityRenderMul = this.mc.gameSettings.fastEntityRender ? 32.0D : this.mc.gameSettings.entityRenderDistMul;
+         Entity.entityRenderMul = this.mc.gameSettings.fastEntityRender ? 32.0D : 64.0D;
          boolean flag1 = this.mc.renderChunksMany;
+         boolean traverseRenderInfos = false;
          if (chunkrender != null) {
             boolean flag2 = false;
-            WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer3 = new WorldRenderer.LocalRenderInformationContainer(chunkrender, (Direction)null, 0);
+            WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer3 = this.acquireRenderInfo(chunkrender, null, 0);
             Set<Direction> set1 = this.getVisibleFacings(blockpos1);
             if (set1.size() == 1) {
                Vec3d vec3d = p_215320_1_.getLookDirection();
                Direction direction = Direction.getFacingFromVector(vec3d.x, vec3d.y, vec3d.z).getOpposite();
-               set1.remove(direction);
+               flag2 = set1.contains(direction);
             }
 
-            if (set1.isEmpty()) {
+            if (!flag2 && set1.isEmpty()) {
                flag2 = true;
             }
 
@@ -791,7 +819,8 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
                }
 
                chunkrender.setFrameIndex(p_215320_3_);
-               queue.add(worldrenderer$localrenderinformationcontainer3);
+               this.renderInfos.add(worldrenderer$localrenderinformationcontainer3);
+               traverseRenderInfos = true;
             }
          } else {
             int i = blockpos1.getY() > 0 ? 248 : 8;
@@ -802,7 +831,8 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
                   ChunkRender chunkrender1 = this.viewFrustum.getRenderChunk(scratchNested.setPos((j << 4) + 8, i, (k << 4) + 8));
                   if (chunkrender1 != null && p_215320_2_.isBoundingBoxInFrustum(chunkrender1.boundingBox)) {
                      chunkrender1.setFrameIndex(p_215320_3_);
-                     queue.add(new WorldRenderer.LocalRenderInformationContainer(chunkrender1, (Direction)null, 0));
+                     this.renderInfos.add(this.acquireRenderInfo(chunkrender1, null, 0));
+                     traverseRenderInfos = true;
                   }
                }
             }
@@ -810,31 +840,26 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
 
          this.mc.getProfiler().startSection("iteration");
 
-         while(!queue.isEmpty()) {
-            WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer1 = queue.poll();
+         for (int queueIndex = 0; traverseRenderInfos && queueIndex < this.renderInfos.size(); ++queueIndex) {
+            WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer1 = this.renderInfos.get(queueIndex);
             ChunkRender chunkrender3 = worldrenderer$localrenderinformationcontainer1.renderChunk;
             Direction direction2 = worldrenderer$localrenderinformationcontainer1.facing;
-            this.renderInfos.add(worldrenderer$localrenderinformationcontainer1);
 
             for(Direction direction1 : FACINGS) {
                ChunkRender chunkrender2 = this.getRenderChunkOffset(blockpos, chunkrender3, direction1);
-               if ((!flag1 || !worldrenderer$localrenderinformationcontainer1.hasDirection(direction1.getOpposite())) && (!flag1 || direction2 == null || chunkrender3.getCompiledChunk().isVisible(direction2.getOpposite(), direction1)) && chunkrender2 != null && chunkrender2.shouldStayLoaded() && chunkrender2.setFrameIndex(p_215320_3_) && p_215320_2_.isBoundingBoxInFrustum(chunkrender2.boundingBox)) {
-                  WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer = new WorldRenderer.LocalRenderInformationContainer(chunkrender2, direction1, worldrenderer$localrenderinformationcontainer1.counter + 1);
+               CompiledChunk compiledchunk = chunkrender3.getCompiledChunk();
+               if ((!flag1 || !worldrenderer$localrenderinformationcontainer1.hasDirection(direction1.getOpposite())) && (!flag1 || direction2 == null || compiledchunk == CompiledChunk.DUMMY || compiledchunk.isVisible(direction2.getOpposite(), direction1)) && chunkrender2 != null && this.world.isBlockLoaded(chunkrender2.getPosition()) && chunkrender2.setFrameIndex(p_215320_3_) && p_215320_2_.isBoundingBoxInFrustum(chunkrender2.boundingBox)) {
+                  WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer = this.acquireRenderInfo(chunkrender2, direction1, worldrenderer$localrenderinformationcontainer1.counter + 1);
                   worldrenderer$localrenderinformationcontainer.setDirection(worldrenderer$localrenderinformationcontainer1.setFacing, direction1);
-                  queue.add(worldrenderer$localrenderinformationcontainer);
+                  this.renderInfos.add(worldrenderer$localrenderinformationcontainer);
                }
             }
          }
 
          this.mc.getProfiler().endSection();
 
-         // Entity Culling: populate visible chunk sections from renderInfos
-         this.visibleChunkSections.clear();
-         for (int idx = 0, len = this.renderInfos.size(); idx < len; ++idx) {
-            BlockPos pos = this.renderInfos.get(idx).renderChunk.getPosition();
-            this.visibleChunkSections.add(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4) | ((long)(pos.getY() >> 4 & 0xFF) << 42));
-         }
       }
+      this.renderContainer.setRenderListRevision(this.terrainRenderListRevision);
 
       this.mc.getProfiler().endStartSection("captureFrustum");
       if (this.debugFixTerrainFrustum) {
@@ -844,7 +869,9 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
 
       this.mc.getProfiler().endStartSection("rebuildNear");
       Set<ChunkRender> set = this.chunksToUpdate;
-      this.chunksToUpdate = new java.util.LinkedHashSet<>(256);
+      this.chunksToUpdate = this.chunksToUpdateScratch;
+      this.chunksToUpdateScratch = set;
+      this.chunksToUpdate.clear();
       this.chunksToUpdateForced.clear();
 
       boolean setHasUpdates = !set.isEmpty();
@@ -852,15 +879,16 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          ChunkRender chunkrender4 = this.renderInfos.get(idx).renderChunk;
          if (chunkrender4.needsUpdate() || (setHasUpdates && set.contains(chunkrender4))) {
             BlockPos blockpos2 = this.scratchBlockPos2.setPos(chunkrender4.getPosition()).move(8, 8, 8);
-            this.displayListEntitiesDirty = true;
             double maxDistanceSq = this.mc.gameSettings.chunkFix ? 363.0D : 768.0D;
 
             boolean isNear = blockpos2.distanceSq(blockpos1) < maxDistanceSq;
 
-            if (isNear && chunkrender4.needsImmediateUpdate()) {
+            if (isNear && chunkrender4.needsImmediateUpdate()
+                  && !net.lax1dude.eaglercraft.sp.SingleplayerServerController.isRunningSingleThreadMode()) {
                this.mc.getProfiler().startSection("build near");
                this.renderDispatcher.updateChunkNow(chunkrender4);
                chunkrender4.clearNeedsUpdate();
+               this.displayListEntitiesDirty = true;
                this.mc.getProfiler().endSection();
             } else if (isNear) {
                this.chunksToUpdateForced.add(chunkrender4);
@@ -870,17 +898,33 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          }
       }
       this.chunksToUpdate.addAll(set);
+      set.clear();
       this.mc.getProfiler().endSection();
+   }
+
+   private LocalRenderInformationContainer acquireRenderInfo(ChunkRender renderChunk, Direction facing, int counter) {
+      LocalRenderInformationContainer info;
+      if (this.renderInfoPoolUsed < this.renderInfoPool.size()) {
+         info = this.renderInfoPool.get(this.renderInfoPoolUsed);
+         info.reset(renderChunk, facing, counter);
+      } else {
+         info = new LocalRenderInformationContainer(renderChunk, facing, counter);
+         this.renderInfoPool.add(info);
+      }
+      ++this.renderInfoPoolUsed;
+      return info;
    }
 
    private Set<Direction> getVisibleFacings(BlockPos pos) {
       int chunkX = pos.getX() >> 4;
+      int chunkY = pos.getY() >> 4;
       int chunkZ = pos.getZ() >> 4;
-      if (chunkX == this.lastVisibleFacingsChunkX && chunkZ == this.lastVisibleFacingsChunkZ && this.cachedVisibleFacings != null) {
+      if (chunkX == this.lastVisibleFacingsChunkX && chunkY == this.lastVisibleFacingsChunkY && chunkZ == this.lastVisibleFacingsChunkZ && this.cachedVisibleFacings != null) {
          return this.cachedVisibleFacings;
       }
-      VisGraph visgraph = new VisGraph();
-      BlockPos blockpos = this.scratchVisibleFacingsPos.setPos(chunkX << 4, pos.getY() >> 4 << 4, chunkZ << 4);
+      VisGraph visgraph = this.visibleFacingsGraph;
+      visgraph.reset();
+      BlockPos blockpos = this.scratchVisibleFacingsPos.setPos(chunkX << 4, chunkY << 4, chunkZ << 4);
       BlockPos blockposEnd = this.scratchBlockPos2.setPos(blockpos).move(15, 15, 15);
       Chunk chunk = this.world.getChunkAt(blockpos);
 
@@ -891,23 +935,37 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
       }
 
       this.lastVisibleFacingsChunkX = chunkX;
+      this.lastVisibleFacingsChunkY = chunkY;
       this.lastVisibleFacingsChunkZ = chunkZ;
       this.cachedVisibleFacings = visgraph.getVisibleFacings(pos);
       return this.cachedVisibleFacings;
    }
 
-
    private ChunkRender getRenderChunkOffset(BlockPos playerPos, ChunkRender renderChunkBase, Direction facing) {
+      BlockPos blockpos = renderChunkBase.getBlockPosOffset16(facing);
       ChunkRender cached = renderChunkBase.getNeighborChunk(facing);
-      if (cached != null) {
+      if (cached != null && cached.getPosition().equals(blockpos)) {
          return cached;
       }
-      BlockPos blockpos = renderChunkBase.getBlockPosOffset16(facing);
       if (MathHelper.abs(playerPos.getX() - blockpos.getX()) > this.renderDistanceChunks * 16) {
+         renderChunkBase.setNeighborChunk(facing, null);
          return null;
       } else if (blockpos.getY() >= 0 && blockpos.getY() < 256) {
-         return MathHelper.abs(playerPos.getZ() - blockpos.getZ()) > this.renderDistanceChunks * 16 ? null : this.viewFrustum.getRenderChunk(blockpos);
+         if (MathHelper.abs(playerPos.getZ() - blockpos.getZ()) > this.renderDistanceChunks * 16) {
+            renderChunkBase.setNeighborChunk(facing, null);
+            return null;
+         }
+
+         ChunkRender chunkrender = this.viewFrustum.getRenderChunk(blockpos);
+         if (chunkrender != null && chunkrender.getPosition().equals(blockpos)) {
+            renderChunkBase.setNeighborChunk(facing, chunkrender);
+            return chunkrender;
+         }
+
+         renderChunkBase.setNeighborChunk(facing, null);
+         return null;
       } else {
+         renderChunkBase.setNeighborChunk(facing, null);
          return null;
       }
    }
@@ -916,45 +974,26 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
    }
 
    public int renderBlockLayer(BlockRenderLayer p_215323_1_, ActiveRenderInfo p_215323_2_) {
-      if (p_215323_1_ == BlockRenderLayer.TRANSLUCENT) {
-         this.mc.getProfiler().startSection("translucent_sort");
-         double d0 = p_215323_2_.getProjectedView().x - this.prevRenderSortX;
-         double d1 = p_215323_2_.getProjectedView().y - this.prevRenderSortY;
-         double d2 = p_215323_2_.getProjectedView().z - this.prevRenderSortZ;
-         if (d0 * d0 + d1 * d1 + d2 * d2 > 1.0D) {
-            this.prevRenderSortX = p_215323_2_.getProjectedView().x;
-            this.prevRenderSortY = p_215323_2_.getProjectedView().y;
-            this.prevRenderSortZ = p_215323_2_.getProjectedView().z;
-            int k = 0;
-
-            for(WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : this.renderInfos) {
-               if (worldrenderer$localrenderinformationcontainer.renderChunk.compiledChunk.isLayerStarted(p_215323_1_) && k++ < 15) {
-                  this.renderDispatcher.updateTransparencyLater(worldrenderer$localrenderinformationcontainer.renderChunk);
-               }
-            }
-         }
-
-         this.mc.getProfiler().endSection();
-      }
-
       this.mc.getProfiler().startSection("filterempty");
       int l = 0;
       boolean flag = p_215323_1_ == BlockRenderLayer.TRANSLUCENT;
       int i1 = flag ? this.renderInfos.size() - 1 : 0;
       int i = flag ? -1 : this.renderInfos.size();
       int j1 = flag ? -1 : 1;
+      boolean markAnimatedSprites = p_215323_1_ == BlockRenderLayer.SOLID;
 
       for(int j = i1; j != i; j += j1) {
          ChunkRender chunkrender = (this.renderInfos.get(j)).renderChunk;
+         if (markAnimatedSprites) {
+            chunkrender.compiledChunk.markAnimatedSpritesActive();
+         }
          if (!chunkrender.compiledChunk.isLayerEmpty(p_215323_1_)) {
             ++l;
             this.renderContainer.addRenderChunk(chunkrender, p_215323_1_);
          }
       }
 
-      this.mc.getProfiler().endStartSection(() -> {
-         return "render_" + p_215323_1_;
-      });
+      this.mc.getProfiler().endStartSection("render_layer");
       this.renderBlockLayer(p_215323_1_);
       this.mc.getProfiler().endSection();
       return l;
@@ -1073,7 +1112,9 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          Tessellator tessellator = Tessellator.getInstance();
          BufferBuilder bufferbuilder = tessellator.getBuffer();
          GlStateManager.depthMask(false);
-         GlStateManager.enableFog();
+         if (this.mc.gameSettings.fog) {
+            GlStateManager.enableFog();
+         }
          GlStateManager.color3f(f, f1, f2);
          if (false) {
             this.skyVBO.bindBuffer();
@@ -1167,7 +1208,9 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
          GlStateManager.disableBlend();
          GlStateManager.enableAlphaTest();
-         GlStateManager.enableFog();
+         if (this.mc.gameSettings.fog) {
+            GlStateManager.enableFog();
+         }
          GlStateManager.popMatrix();
          GlStateManager.disableTexture();
          GlStateManager.color3f(0.0F, 0.0F, 0.0F);
@@ -1423,7 +1466,7 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
    }
 
    public void updateChunks(long finishTimeNano) {
-      this.displayListEntitiesDirty |= this.renderDispatcher.runChunkUploads(finishTimeNano);
+      boolean rebuiltChunk = this.renderDispatcher.runChunkUploads(finishTimeNano);
       if (!this.chunksToUpdateForced.isEmpty()) {
          Iterator<ChunkRender> iterator = this.chunksToUpdateForced.iterator();
          while(iterator.hasNext()) {
@@ -1455,6 +1498,16 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
                break;
             }
          }
+      }
+
+      if (rebuiltChunk) {
+         ++this.completedChunkRebuildsPending;
+      }
+
+      if (this.completedChunkRebuildsPending > 0 && (this.completedChunkRebuildsPending >= 4
+            || this.renderDispatcher.hasNoChunkUpdates())) {
+         this.completedChunkRebuildsPending = 0;
+         this.displayListEntitiesDirty = true;
       }
 
    }
@@ -1788,6 +1841,44 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
 
    }
 
+   private void scheduleRebuildForChunks(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+      for(int chunkX = minX; chunkX <= maxX; ++chunkX) {
+         for(int chunkY = minY; chunkY <= maxY; ++chunkY) {
+            for(int chunkZ = minZ; chunkZ <= maxZ; ++chunkZ) {
+               this.markForRerender(chunkX, chunkY, chunkZ, false);
+            }
+         }
+      }
+   }
+
+   @Override
+   public void onChunkAdded(int x, int z) {
+      this.scheduleRebuildForChunks(x - 1, 0, z - 1, x + 1, 15, z + 1);
+      this.setDisplayListEntitiesDirty();
+   }
+
+   @Override
+   public void onChunkRemoved(int x, int z) {
+      this.scheduleRebuildForChunks(x - 1, 0, z - 1, x + 1, 15, z + 1);
+      this.setDisplayListEntitiesDirty();
+   }
+
+   public void scheduleChunkSectionsForRebuild(int x, int z, int sectionMask) {
+      int affectedSections = (sectionMask | sectionMask << 1 | sectionMask >>> 1) & 65535;
+
+      for(int chunkX = x - 1; chunkX <= x + 1; ++chunkX) {
+         for(int chunkZ = z - 1; chunkZ <= z + 1; ++chunkZ) {
+            for(int chunkY = 0; chunkY < 16; ++chunkY) {
+               if ((affectedSections & 1 << chunkY) != 0) {
+                  this.markForRerender(chunkX, chunkY, chunkZ, false);
+               }
+            }
+         }
+      }
+
+      this.setDisplayListEntitiesDirty();
+   }
+
    public void markForRerender(int sectionX, int sectionY, int sectionZ) {
       this.markForRerender(sectionX, sectionY, sectionZ, false);
    }
@@ -1849,11 +1940,9 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
       this.addParticle(particleData, particleData.getType().getAlwaysShow(), x, y, z, xSpeed, ySpeed, zSpeed);
    }
 
-
    private Particle addParticleUnchecked(IParticleData particleData, boolean alwaysRender, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
       return this.addParticleUnchecked(particleData, alwaysRender, false, x, y, z, xSpeed, ySpeed, zSpeed);
    }
-
 
    private Particle addParticleUnchecked(IParticleData particleData, boolean alwaysRender, boolean minimizeLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
       ActiveRenderInfo activerenderinfo = this.mc.gameRenderer.getActiveRenderInfo();
@@ -1861,7 +1950,7 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          ParticleStatus particlestatus = this.func_215327_a(minimizeLevel);
          if (alwaysRender) {
             return this.mc.particles.addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
-         } else if (activerenderinfo.isValid() && activerenderinfo.getProjectedView().squareDistanceTo(x, y, z) > (this.mc.gameSettings.reduceParticles ? 512.0D : 1024.0D)) {
+         } else if (activerenderinfo.isValid() && activerenderinfo.getProjectedView().squareDistanceTo(x, y, z) > 1024.0D) {
             return null;
          } else {
             return particlestatus == ParticleStatus.MINIMAL ? null : this.mc.particles.addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
@@ -2232,8 +2321,6 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
       return this.blockRendererDispatcher;
    }
 
-   // ===== EaglerCraft Deferred PBR shadow/paraboloid methods =====
-
    public static interface ChunkCullAdapter {
       boolean shouldCull(ChunkRender chunk);
    }
@@ -2248,7 +2335,7 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
 
    public int renderBlockLayerShadow(BlockRenderLayer blockLayerIn, AxisAlignedBB boundingBox, ChunkCullAdapter cullAdapter) {
       int count = 0;
-      BlockPos.MutableBlockPos tmp = new BlockPos.MutableBlockPos();
+      BlockPos.MutableBlockPos tmp = this.shadowRenderPos;
       int minXChunk = MathHelper.floor(boundingBox.minX / 16.0) * 16;
       int minYChunk = MathHelper.floor(boundingBox.minY / 16.0) * 16;
       int minZChunk = MathHelper.floor(boundingBox.minZ / 16.0) * 16;
@@ -2289,7 +2376,8 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          TileEntityRendererDispatcher.staticPlayerZ = d5;
          renderManager.setRenderPosition(d3, d4, d5);
 
-         for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : this.renderInfos) {
+         for (int renderInfoIndex = 0, renderInfoCount = this.renderInfos.size(); renderInfoIndex < renderInfoCount; ++renderInfoIndex) {
+            WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer = this.renderInfos.get(renderInfoIndex);
             ChunkRender currentRenderChunk = worldrenderer$localrenderinformationcontainer.renderChunk;
 
             if (!entityChunkCull.shouldCull(currentRenderChunk)) {
@@ -2304,7 +2392,7 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
                         Entity entity2 = iterator.next();
                         if (!entityObjectCull.shouldCull(currentRenderChunk, renderManager, entity2)
                               || entity2.getRidingEntity() == this.mc.player) {
-                           if (entity2.posY < 0.0D || entity2.posY >= 256.0D || this.world.isBlockLoaded(new BlockPos(entity2))) {
+                           if (entity2.posY < 0.0D || entity2.posY >= 256.0D || this.world.isBlockLoaded(this.shadowEntityPos.setPos(entity2))) {
                               this.renderManager.renderEntityStatic(entity2, partialTicks, false);
                            }
                         }
@@ -2347,7 +2435,7 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
       }
       int maxZ = (int)(entityIn.posZ + rad);
 
-      BlockPos.MutableBlockPos tmp = new BlockPos.MutableBlockPos();
+      BlockPos.MutableBlockPos tmp = this.paraboloidRenderPos;
       minX = MathHelper.floor(minX / 16.0) * 16;
       minY = MathHelper.floor(minY / 16.0) * 16;
       minZ = MathHelper.floor(minZ / 16.0) * 16;
@@ -2407,7 +2495,7 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
          }
          int maxZ = (int)(d5 + rad);
 
-         BlockPos.MutableBlockPos tmp = new BlockPos.MutableBlockPos();
+         BlockPos.MutableBlockPos tmp = this.paraboloidTileEntityPos;
          minX = MathHelper.floor(minX / 16.0) * 16;
          minY = MathHelper.floor(minY / 16.0) * 16;
          minZ = MathHelper.floor(minZ / 16.0) * 16;
@@ -2434,15 +2522,20 @@ public class WorldRenderer implements AutoCloseable, IResourceManagerReloadListe
 
    @OnlyIn(Dist.CLIENT)
    class LocalRenderInformationContainer {
-      private final ChunkRender renderChunk;
-      private final Direction facing;
+      private ChunkRender renderChunk;
+      private Direction facing;
       private byte setFacing;
-      private final int counter;
+      private int counter;
 
       private LocalRenderInformationContainer(ChunkRender renderChunkIn,  Direction facingIn, int counterIn) {
+         this.reset(renderChunkIn, facingIn, counterIn);
+      }
+
+      private void reset(ChunkRender renderChunkIn, Direction facingIn, int counterIn) {
          this.renderChunk = renderChunkIn;
          this.facing = facingIn;
          this.counter = counterIn;
+         this.setFacing = 0;
       }
 
       public void setDirection(byte dir, Direction facingIn) {

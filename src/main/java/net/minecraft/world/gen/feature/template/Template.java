@@ -689,7 +689,6 @@ public class Template {
             return i;
         }
 
-
         public BlockState stateFor(int id) {
             BlockState blockstate = this.ids.getByValue(id);
             return blockstate == null ? DEFAULT_BLOCK_STATE : blockstate;

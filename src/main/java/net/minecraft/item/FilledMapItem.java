@@ -44,11 +44,9 @@ public class FilledMapItem extends AbstractMapItem {
         return itemstack;
     }
 
-
     public static MapData func_219994_a(ItemStack p_219994_0_, World p_219994_1_) {
         return p_219994_1_.func_217406_a(func_219993_a(getMapId(p_219994_0_)));
     }
-
 
     public static MapData getMapData(ItemStack stack, World worldIn) {
         MapData mapdata = func_219994_a(stack, worldIn);
@@ -323,7 +321,6 @@ public class FilledMapItem extends AbstractMapItem {
         }
     }
 
-
     public IPacket<?> getUpdatePacket(ItemStack stack, World worldIn, PlayerEntity player) {
         return getMapData(stack, worldIn).getMapPacket(stack, worldIn, player);
     }
@@ -344,7 +341,6 @@ public class FilledMapItem extends AbstractMapItem {
         }
 
     }
-
 
     public static ItemStack func_219992_b(World p_219992_0_, ItemStack p_219992_1_) {
         MapData mapdata = getMapData(p_219992_1_, p_219992_0_);

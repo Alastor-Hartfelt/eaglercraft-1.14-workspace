@@ -25,5 +25,4 @@ public class ShaderLinkHelper {
         GLX.glDeleteProgram(manager.getProgram());
     }
 
-
 }

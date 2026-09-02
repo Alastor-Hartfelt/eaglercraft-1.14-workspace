@@ -73,7 +73,6 @@ public class BlockPart {
             }
         }
 
-
         private BlockPartRotation parseRotation(JsonObject object) {
             BlockPartRotation blockpartrotation = null;
             if (object.has("rotation")) {

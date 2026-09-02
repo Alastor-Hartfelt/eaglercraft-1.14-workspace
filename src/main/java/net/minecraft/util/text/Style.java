@@ -25,7 +25,6 @@ public class Style {
    private HoverEvent hoverEvent;
    private String insertion;
    private static final Style ROOT = new Style() {
-      
       public TextFormatting getColor() {
          return null;
       }
@@ -50,17 +49,14 @@ public class Style {
          return false;
       }
 
-      
       public ClickEvent getClickEvent() {
          return null;
       }
 
-      
       public HoverEvent getHoverEvent() {
          return null;
       }
 
-      
       public String getInsertion() {
          return null;
       }
@@ -118,7 +114,6 @@ public class Style {
       }
    };
 
-   
    public TextFormatting getColor() {
       return this.color == null ? this.getParent().getColor() : this.color;
    }
@@ -147,17 +142,14 @@ public class Style {
       return this.bold == null && this.italic == null && this.strikethrough == null && this.underlined == null && this.obfuscated == null && this.color == null && this.clickEvent == null && this.hoverEvent == null && this.insertion == null;
    }
 
-   
    public ClickEvent getClickEvent() {
       return this.clickEvent == null ? this.getParent().getClickEvent() : this.clickEvent;
    }
 
-   
    public HoverEvent getHoverEvent() {
       return this.hoverEvent == null ? this.getParent().getHoverEvent() : this.hoverEvent;
    }
 
-   
    public String getInsertion() {
       return this.insertion == null ? this.getParent().getInsertion() : this.insertion;
    }
@@ -333,7 +325,6 @@ public class Style {
    }
 
    public static class Serializer implements JsonDeserializer<Style>, JsonSerializer<Style> {
-      
       public Style deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
          if (p_deserialize_1_.isJsonObject()) {
             Style style = new Style();
@@ -396,7 +387,6 @@ public class Style {
          }
       }
 
-      
       public JsonElement serialize(Style p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
          if (p_serialize_1_.isEmpty()) {
             return null;

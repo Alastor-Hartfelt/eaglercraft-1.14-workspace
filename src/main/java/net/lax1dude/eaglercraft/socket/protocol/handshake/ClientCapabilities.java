@@ -18,6 +18,7 @@ package net.lax1dude.eaglercraft.socket.protocol.handshake;
 
 import com.carrotsearch.hppc.IntArrayList;
 import net.lax1dude.eaglercraft.EaglercraftUUID;
+import net.lax1dude.eaglercraft.voice.VoiceClientController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ public class ClientCapabilities {
         caps.addStandard(StandardCaps.NOTIFICATION, 0);
         caps.addStandard(StandardCaps.PAUSE_MENU, 0);
 
-        if (false) {
+        if (VoiceClientController.isClientSupported()) {
             caps.addStandard(StandardCaps.VOICE, 0);
         }
 

@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.List;
 import java.util.Map;
 import net.lax1dude.eaglercraft.Random;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import java.util.function.BooleanSupplier;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -76,6 +77,10 @@ public class ClientWorld extends World {
    private int ambienceTicks = this.rand.nextInt(12000);
    private Scoreboard scoreboard = new Scoreboard();
    private final Map<String, MapData> field_217432_z = Maps.newHashMap();
+   private final Random animateTickRandom = new XoRoShiRoRandom();
+   private final BlockPos.MutableBlockPos animateTickPos = new BlockPos.MutableBlockPos();
+   private final BlockPos.MutableBlockPos animateTickBelowPos = new BlockPos.MutableBlockPos();
+   private final BlockPos.MutableBlockPos animateTickBelowBelowPos = new BlockPos.MutableBlockPos();
 
    public ClientWorld(ClientPlayNetHandler p_i51056_1_, WorldSettings p_i51056_2_, DimensionType dimType, int p_i51056_4_, IProfiler p_i51056_5_, WorldRenderer p_i51056_6_) {
       super(new WorldInfo(p_i51056_2_, "MpServer"), dimType, (p_217422_1_, p_217422_2_) -> {
@@ -154,11 +159,7 @@ public class ClientWorld extends World {
          p_217418_1_.prevRotationPitch = p_217418_1_.rotationPitch;
          if (p_217418_1_.addedToChunk || p_217418_1_.isSpectator()) {
             ++p_217418_1_.ticksExisted;
-            this.getProfiler().startSection(() -> {
-               return Registry.ENTITY_TYPE.getKey(p_217418_1_.getType()).toString();
-            });
             p_217418_1_.tick();
-            this.getProfiler().endSection();
          }
 
          this.func_217423_b(p_217418_1_);
@@ -223,7 +224,7 @@ public class ClientWorld extends World {
    }
 
    public boolean chunkExists(int chunkX, int chunkZ) {
-      return true;
+      return this.chunkProvider.chunkExists(chunkX, chunkZ);
    }
 
    private void func_217426_j() {
@@ -299,7 +300,6 @@ public class ClientWorld extends World {
 
    }
 
-
    public Entity getEntityByID(int id) {
       return this.entitiesById.get(id);
    }
@@ -313,41 +313,58 @@ public class ClientWorld extends World {
    }
 
    public void animateTick(int posX, int posY, int posZ) {
-      int i = 32;
-      Random random = new Random();
       ItemStack itemstack = this.mc.player.getHeldItemMainhand();
       boolean flag = this.mc.playerController.getCurrentGameType() == GameType.CREATIVE && !itemstack.isEmpty() && itemstack.getItem() == Blocks.BARRIER.asItem();
-      BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
       for(int j = 0; j < 667; ++j) {
-         this.animateTick(posX, posY, posZ, 16, random, flag, blockpos$mutableblockpos);
-         this.animateTick(posX, posY, posZ, 32, random, flag, blockpos$mutableblockpos);
+         this.animateTick(posX, posY, posZ, 16, this.animateTickRandom, flag, this.animateTickPos);
+         this.animateTick(posX, posY, posZ, 32, this.animateTickRandom, flag, this.animateTickPos);
       }
 
    }
 
    public void animateTick(int x, int y, int z, int offset, Random random, boolean holdingBarrier, BlockPos.MutableBlockPos pos) {
-      int i = x + this.rand.nextInt(offset) - this.rand.nextInt(offset);
-      int j = y + this.rand.nextInt(offset) - this.rand.nextInt(offset);
-      int k = z + this.rand.nextInt(offset) - this.rand.nextInt(offset);
+      int i = x + random.nextInt(offset) - random.nextInt(offset);
+      int j = y + random.nextInt(offset) - random.nextInt(offset);
+      int k = z + random.nextInt(offset) - random.nextInt(offset);
       pos.setPos(i, j, k);
       BlockState blockstate = this.getBlockState(pos);
-      blockstate.getBlock().animateTick(blockstate, this, pos, random);
-      IFluidState ifluidstate = this.getFluidState(pos);
-      if (!ifluidstate.isEmpty()) {
-         ifluidstate.animateTick(this, pos, random);
-         IParticleData iparticledata = ifluidstate.getDripParticleData();
-         if (iparticledata != null && this.rand.nextInt(10) == 0) {
-            boolean flag = blockstate.func_224755_d(this, pos, Direction.DOWN);
-            BlockPos blockpos = pos.down();
-            this.spawnFluidParticle(blockpos, this.getBlockState(blockpos), iparticledata, flag);
-         }
+
+      if (!blockstate.isAir()) {
+         this.performBlockDisplayTick(blockstate, pos, random, holdingBarrier);
       }
+
+      IFluidState ifluidstate = blockstate.getFluidState();
+
+      if (!ifluidstate.isEmpty()) {
+         this.performFluidDisplayTick(blockstate, ifluidstate, pos, random);
+      }
+   }
+
+   private void performBlockDisplayTick(BlockState blockstate, BlockPos pos, Random random, boolean holdingBarrier) {
+      blockstate.getBlock().animateTick(blockstate, this, pos, random);
 
       if (holdingBarrier && blockstate.getBlock() == Blocks.BARRIER) {
-         this.addParticle(ParticleTypes.BARRIER, (double)((float)i + 0.5F), (double)((float)j + 0.5F), (double)((float)k + 0.5F), 0.0D, 0.0D, 0.0D);
+         this.performBarrierDisplayTick(pos);
       }
+   }
 
+   private void performBarrierDisplayTick(BlockPos pos) {
+      this.addParticle(ParticleTypes.BARRIER, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D,
+            (double)pos.getZ() + 0.5D, 0.0D, 0.0D, 0.0D);
+   }
+
+   private void performFluidDisplayTick(BlockState blockstate, IFluidState fluidstate, BlockPos pos, Random random) {
+      fluidstate.animateTick(this, pos, random);
+
+      IParticleData particledata = fluidstate.getDripParticleData();
+
+      if (particledata != null && random.nextInt(10) == 0) {
+         boolean solid = blockstate.func_224755_d(this, pos, Direction.DOWN);
+         BlockPos blockpos = this.animateTickBelowPos.setPos(pos).move(Direction.DOWN);
+
+         this.spawnFluidParticle(blockpos, this.getBlockState(blockpos), particledata, solid);
+      }
    }
 
    private void spawnFluidParticle(BlockPos blockPosIn, BlockState blockStateIn, IParticleData particleDataIn, boolean shapeDownSolid) {
@@ -363,7 +380,7 @@ public class ClientWorld extends World {
             if (d1 > 0.0D) {
                this.spawnParticle(blockPosIn, particleDataIn, voxelshape, (double)blockPosIn.getY() + d1 - 0.05D);
             } else {
-               BlockPos blockpos = blockPosIn.down();
+               BlockPos blockpos = this.animateTickBelowBelowPos.setPos(blockPosIn).move(Direction.DOWN);
                BlockState blockstate = this.getBlockState(blockpos);
                VoxelShape voxelshape1 = blockstate.getCollisionShape(this, blockpos);
                double d2 = voxelshape1.getEnd(Direction.Axis.Y);
@@ -477,7 +494,6 @@ public class ClientWorld extends World {
    public ClientChunkProvider getChunkProvider() {
       return (ClientChunkProvider)super.getChunkProvider();
    }
-
 
    public MapData func_217406_a(String p_217406_1_) {
       return this.field_217432_z.get(p_217406_1_);

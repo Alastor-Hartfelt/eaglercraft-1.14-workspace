@@ -2,7 +2,7 @@ package net.minecraft.client.renderer;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.lax1dude.eaglercraft.Random;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -43,6 +43,7 @@ public class ItemRenderer implements IResourceManagerReloadListener {
     private final ItemModelMesher itemModelMesher;
     private final TextureManager textureManager;
     private final ItemColors itemColors;
+    private final XoRoShiRoRandom modelRandom = new XoRoShiRoRandom();
 
     public ItemRenderer(TextureManager textureManagerIn, ModelManager modelManagerIn, ItemColors itemColorsIn) {
         this.textureManager = textureManagerIn;
@@ -73,16 +74,13 @@ public class ItemRenderer implements IResourceManagerReloadListener {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(7, DefaultVertexFormats.ITEM);
-        Random random = new Random();
-        long i = 42L;
+        XoRoShiRoRandom random = this.modelRandom;
 
         for (Direction direction : Direction._VALUES) {
-            random.setSeed(42L);
-            this.renderQuads(bufferbuilder, model.getQuads((BlockState) null, direction, random), color, stack);
+            this.renderQuads(bufferbuilder, model.getQuads((BlockState) null, direction, random.setSeedAndReturn(42L)), color, stack);
         }
 
-        random.setSeed(42L);
-        this.renderQuads(bufferbuilder, model.getQuads((BlockState) null, (Direction) null, random), color, stack);
+        this.renderQuads(bufferbuilder, model.getQuads((BlockState) null, (Direction) null, random.setSeedAndReturn(42L)), color, stack);
         tessellator.draw();
     }
 
@@ -122,14 +120,15 @@ public class ItemRenderer implements IResourceManagerReloadListener {
         GlStateManager.matrixMode(5890);
         GlStateManager.pushMatrix();
         GlStateManager.scalef((float) scale, (float) scale, (float) scale);
-        float f = (float) (Util.milliTime() % 3000L) / 3000.0F / (float) scale;
+        long animationTime = Util.milliTime();
+        float f = (float) (animationTime % 3000L) / 3000.0F / (float) scale;
         GlStateManager.translatef(f, 0.0F, 0.0F);
         GlStateManager.rotatef(-50.0F, 0.0F, 0.0F, 1.0F);
         renderModelFunction.run();
         GlStateManager.popMatrix();
         GlStateManager.pushMatrix();
         GlStateManager.scalef((float) scale, (float) scale, (float) scale);
-        float f1 = (float) (Util.milliTime() % 4873L) / 4873.0F / (float) scale;
+        float f1 = (float) (animationTime % 4873L) / 4873.0F / (float) scale;
         GlStateManager.translatef(-f1, 0.0F, 0.0F);
         GlStateManager.rotatef(10.0F, 0.0F, 0.0F, 1.0F);
         renderModelFunction.run();
@@ -148,6 +147,7 @@ public class ItemRenderer implements IResourceManagerReloadListener {
     }
 
     private void renderQuad(BufferBuilder renderer, BakedQuad quad, int color) {
+        quad.getSprite().markActive();
         renderer.addVertexData(quad.getVertexData());
         renderer.putColor4(color);
         this.putQuadNormal(renderer, quad);

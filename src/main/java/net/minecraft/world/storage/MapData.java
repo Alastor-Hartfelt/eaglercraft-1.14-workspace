@@ -259,7 +259,6 @@ public class MapData extends WorldSavedData {
         this.mapDecorations.put(decorationName, new MapDecoration(type, b0, b1, b2, p_191095_10_));
     }
 
-
     public IPacket<?> getMapPacket(ItemStack mapStack, IBlockReader worldIn, PlayerEntity player) {
         MapData.MapInfo mapdata$mapinfo = this.playersHashMap.get(player);
         return mapdata$mapinfo == null ? null : mapdata$mapinfo.getPacket(mapStack);
@@ -354,7 +353,6 @@ public class MapData extends WorldSavedData {
         public MapInfo(PlayerEntity player) {
             this.player = player;
         }
-
 
         public IPacket<?> getPacket(ItemStack stack) {
             if (this.isDirty) {

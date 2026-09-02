@@ -67,7 +67,6 @@ public class BarrelBlock extends ContainerBlock {
 
     }
 
-
     public TileEntity createNewTileEntity(IBlockReader worldIn) {
         return new BarrelTileEntity();
     }

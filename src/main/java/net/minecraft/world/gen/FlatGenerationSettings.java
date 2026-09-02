@@ -105,7 +105,6 @@ public class FlatGenerationSettings extends GenerationSettings {
     private boolean allAir;
     private int field_202246_E;
 
-
     public static Block getBlock(String p_212683_0_) {
         try {
             ResourceLocation resourcelocation = new ResourceLocation(p_212683_0_);
@@ -208,7 +207,6 @@ public class FlatGenerationSettings extends GenerationSettings {
 
         return stringbuilder.toString();
     }
-
 
     @OnlyIn(Dist.CLIENT)
     private static FlatLayerInfo deserializeLayer(String p_197526_0_, int p_197526_1_) {

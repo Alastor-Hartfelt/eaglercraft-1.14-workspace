@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 public class SetName extends LootFunction {
    private static final Logger LOGGER = LogManager.getLogger();
    private final ITextComponent name;
-   
    private final LootContext.EntityTarget field_215940_d;
 
    private SetName(ILootCondition[] p_i51218_1_,  ITextComponent p_i51218_2_,  LootContext.EntityTarget p_i51218_3_) {

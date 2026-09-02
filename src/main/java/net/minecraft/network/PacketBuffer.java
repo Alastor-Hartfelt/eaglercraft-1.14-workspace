@@ -242,7 +242,6 @@ public class PacketBuffer extends ByteBuf {
         return this;
     }
 
-
     public CompoundNBT readCompoundTag() {
         int i = this.readerIndex();
         byte b0 = this.readByte();
@@ -398,7 +397,6 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.maxCapacity();
     }
 
-
     public ByteOrder order() {
         return this.buf.order();
     }
@@ -414,7 +412,6 @@ public class PacketBuffer extends ByteBuf {
     public boolean isDirect() {
         return this.buf.isDirect();
     }
-
 
     public int readerIndex() {
         return this.buf.readerIndex();
@@ -516,36 +513,29 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.getShort(p_getShort_1_);
     }
 
-
     public int getUnsignedShort(int p_getUnsignedShort_1_) {
         return this.buf.getUnsignedShort(p_getUnsignedShort_1_);
     }
-
 
     public int getMedium(int p_getMedium_1_) {
         return this.buf.getMedium(p_getMedium_1_);
     }
 
-
     public int getUnsignedMedium(int p_getUnsignedMedium_1_) {
         return this.buf.getUnsignedMedium(p_getUnsignedMedium_1_);
     }
-
 
     public int getInt(int p_getInt_1_) {
         return this.buf.getInt(p_getInt_1_);
     }
 
-
     public long getUnsignedInt(int p_getUnsignedInt_1_) {
         return this.buf.getUnsignedInt(p_getUnsignedInt_1_);
     }
 
-
     public long getLong(int p_getLong_1_) {
         return this.buf.getLong(p_getLong_1_);
     }
-
 
     public char getChar(int p_getChar_1_) {
         return this.buf.getChar(p_getChar_1_);
@@ -599,21 +589,17 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.setShort(p_setShort_1_, p_setShort_2_);
     }
 
-
     public ByteBuf setMedium(int p_setMedium_1_, int p_setMedium_2_) {
         return this.buf.setMedium(p_setMedium_1_, p_setMedium_2_);
     }
-
 
     public ByteBuf setInt(int p_setInt_1_, int p_setInt_2_) {
         return this.buf.setInt(p_setInt_1_, p_setInt_2_);
     }
 
-
     public ByteBuf setLong(int p_setLong_1_, long p_setLong_2_) {
         return this.buf.setLong(p_setLong_1_, p_setLong_2_);
     }
-
 
     public ByteBuf setChar(int p_setChar_1_, int p_setChar_2_) {
         return this.buf.setChar(p_setChar_1_, p_setChar_2_);
@@ -655,11 +641,9 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.setBytes(p_setBytes_1_, p_setBytes_2_, p_setBytes_3_);
     }
 
-
     public ByteBuf setZero(int p_setZero_1_, int p_setZero_2_) {
         return this.buf.setZero(p_setZero_1_, p_setZero_2_);
     }
-
 
     public boolean readBoolean() {
         return this.buf.readBoolean();
@@ -677,26 +661,21 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.readShort();
     }
 
-
     public int readUnsignedShort() {
         return this.buf.readUnsignedShort();
     }
-
 
     public int readMedium() {
         return this.buf.readMedium();
     }
 
-
     public int readUnsignedMedium() {
         return this.buf.readUnsignedMedium();
     }
 
-
     public int readInt() {
         return this.buf.readInt();
     }
-
 
     public long readUnsignedInt() {
         return this.buf.readUnsignedInt();
@@ -705,7 +684,6 @@ public class PacketBuffer extends ByteBuf {
     public long readLong() {
         return this.buf.readLong();
     }
-
 
     public char readChar() {
         return this.buf.readChar();
@@ -726,7 +704,6 @@ public class PacketBuffer extends ByteBuf {
     public ByteBuf readSlice(int p_readSlice_1_) {
         return this.buf.readSlice(p_readSlice_1_);
     }
-
 
     public ByteBuf readBytes(ByteBuf p_readBytes_1_) {
         return this.buf.readBytes(p_readBytes_1_);
@@ -756,7 +733,6 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.readBytes(p_readBytes_1_, p_readBytes_2_);
     }
 
-
     public ByteBuf skipBytes(int p_skipBytes_1_) {
         return this.buf.skipBytes(p_skipBytes_1_);
     }
@@ -773,21 +749,17 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.writeShort(p_writeShort_1_);
     }
 
-
     public ByteBuf writeMedium(int p_writeMedium_1_) {
         return this.buf.writeMedium(p_writeMedium_1_);
     }
-
 
     public ByteBuf writeInt(int p_writeInt_1_) {
         return this.buf.writeInt(p_writeInt_1_);
     }
 
-
     public ByteBuf writeLong(long p_writeLong_1_) {
         return this.buf.writeLong(p_writeLong_1_);
     }
-
 
     public ByteBuf writeChar(int p_writeChar_1_) {
         return this.buf.writeChar(p_writeChar_1_);
@@ -849,7 +821,6 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.bytesBefore(p_bytesBefore_1_, p_bytesBefore_2_, p_bytesBefore_3_);
     }
 
-
     public ByteBuf copy() {
         return this.buf.copy();
     }
@@ -862,16 +833,13 @@ public class PacketBuffer extends ByteBuf {
         return this.buf.slice();
     }
 
-
     public ByteBuf slice(int p_slice_1_, int p_slice_2_) {
         return this.buf.slice(p_slice_1_, p_slice_2_);
     }
 
-
     public ByteBuf duplicate() {
         return this.buf.duplicate();
     }
-
 
     public int nioBufferCount() {
         return this.buf.nioBufferCount();
@@ -940,6 +908,5 @@ public class PacketBuffer extends ByteBuf {
     public String toString() {
         return this.buf.toString();
     }
-
 
 }

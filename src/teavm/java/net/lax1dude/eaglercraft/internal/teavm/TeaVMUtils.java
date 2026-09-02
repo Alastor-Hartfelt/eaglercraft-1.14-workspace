@@ -176,4 +176,19 @@ public class TeaVMUtils {
     @JSBody(params = {"obj"}, script = "return obj.stack||null;")
     public static native String getStackSafe(JSObject object);
 
+    public static final Comparator<OffsetTouch> touchSortingComparator2 = (t1, t2) -> {
+        return t1.eventUID - t2.eventUID;
+    };
+
+    public static List<OffsetTouch> toSortedTouchList(TouchList touchList, SortedTouchEvent.ITouchUIDMapper mapper,
+            int originX, int originY) {
+        int l = touchList.getLength();
+        List<OffsetTouch> ret = new ArrayList<>(l);
+        for (int i = 0; i < l; ++i) {
+            ret.add(OffsetTouch.create(touchList.item(i), mapper, originX, originY));
+        }
+        Collections.sort(ret, touchSortingComparator2);
+        return ret;
+    }
+
 }

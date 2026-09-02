@@ -104,7 +104,6 @@ public class SCommandListPacket implements IPacket<IClientPlayNetHandler> {
         return new SCommandListPacket.Entry(argumentbuilder, b0, i, aint);
     }
 
-
     private ArgumentBuilder<ISuggestionProvider, ?> readArgumentBuilder(PacketBuffer buf, byte flags) {
         int i = flags & 3;
         if (i == 2) {

@@ -52,7 +52,6 @@ public class Profiler implements IResultableProfiler {
          this.endSection();
          this.tickStarted = false;
 
-
       }
    }
 

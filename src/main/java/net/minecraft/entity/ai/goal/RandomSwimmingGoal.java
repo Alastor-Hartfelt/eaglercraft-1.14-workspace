@@ -11,7 +11,6 @@ public class RandomSwimmingGoal extends RandomWalkingGoal {
         super(p_i48937_1_, p_i48937_2_, p_i48937_4_);
     }
 
-
     protected Vec3d getPosition() {
         Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.creature, 10, 7);
 

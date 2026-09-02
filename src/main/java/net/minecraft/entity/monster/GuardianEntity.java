@@ -111,7 +111,6 @@ public class GuardianEntity extends MonsterEntity {
         return this.dataManager.get(TARGET_ENTITY) != 0;
     }
 
-
     public LivingEntity getTargetedEntity() {
         if (!this.hasTargetedEntity()) {
             return null;

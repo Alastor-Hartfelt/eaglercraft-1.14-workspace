@@ -122,7 +122,6 @@ public class RavagerEntity extends AbstractRaiderEntity {
       return !this.isAIDisabled() && this.getControllingPassenger() instanceof LivingEntity;
    }
 
-
    public Entity getControllingPassenger() {
       return this.getPassengers().isEmpty() ? null : this.getPassengers().get(0);
    }
@@ -274,7 +273,6 @@ public class RavagerEntity extends AbstractRaiderEntity {
       this.playSound(SoundEvents.ENTITY_RAVAGER_ATTACK, 1.0F, 1.0F);
       return super.attackEntityAsMob(entityIn);
    }
-
 
    protected SoundEvent getAmbientSound() {
       return SoundEvents.ENTITY_RAVAGER_AMBIENT;

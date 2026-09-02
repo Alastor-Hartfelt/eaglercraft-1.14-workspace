@@ -84,7 +84,6 @@ public class DamageSourcePredicate {
       }
    }
 
-
    private static Boolean optionalBoolean(JsonObject object, String memberName) {
       return object.has(memberName) ? JSONUtils.getBoolean(object, memberName) : null;
    }

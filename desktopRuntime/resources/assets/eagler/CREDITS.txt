@@ -9,7 +9,7 @@
   - Optimized 1.14
 
  cirsius:
-  - dozens of miscellaneous bug fixes
+  - dozens of miscellaneous bug fixes and improvements
 
  arlenh7:
   - small optimizations

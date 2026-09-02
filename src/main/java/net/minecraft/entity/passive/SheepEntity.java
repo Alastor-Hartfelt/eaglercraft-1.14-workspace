@@ -301,7 +301,6 @@ public class SheepEntity extends AnimalEntity {
 
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
         this.setFleeceColor(getRandomSheepColor(worldIn.getRandom()));

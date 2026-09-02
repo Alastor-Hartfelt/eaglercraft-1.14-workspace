@@ -64,11 +64,9 @@ public abstract class PropertyManager<T extends PropertyManager<T>> {
       };
    }
 
-
    private String func_218976_c(String key) {
       return (String)this.serverProperties.get(key);
    }
-
 
    protected <V> V func_218984_a(String key, Function<String, V> p_218984_2_) {
       String s = this.func_218976_c(key);
@@ -113,7 +111,6 @@ public abstract class PropertyManager<T extends PropertyManager<T>> {
       return this.func_218983_a(key, Function.identity(), Function.identity(), p_218973_2_);
    }
 
-
    protected String func_218980_a(String key) {
       return this.func_218984_a(key, Function.identity());
    }
@@ -141,7 +138,6 @@ public abstract class PropertyManager<T extends PropertyManager<T>> {
    protected PropertyManager<T>.Property<Boolean> func_218961_b(String key, boolean p_218961_2_) {
       return this.func_218965_b(key, Boolean::valueOf, p_218961_2_);
    }
-
 
    protected Boolean func_218978_b(String key) {
       return this.func_218984_a(key, Boolean::valueOf);

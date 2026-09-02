@@ -1,6 +1,5 @@
 package com.mojang.datafixers;
 
-
 import net.minecraft.nbt.CompoundNBT;
 
 public interface IDataFixer {

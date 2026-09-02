@@ -243,11 +243,8 @@ public class EntityType<T extends Entity> {
    private final boolean summonable;
    private final boolean immuneToFire;
    private final boolean field_225438_be;
-   
    private String translationKey;
-   
    private ITextComponent name;
-   
    private ResourceLocation lootTable;
    private final EntitySize size;
 
@@ -273,19 +270,16 @@ public class EntityType<T extends Entity> {
       this.size = p_i51559_7_;
    }
 
-   
    public Entity spawn(World worldIn,  ItemStack stack,  PlayerEntity playerIn, BlockPos pos, SpawnReason reason, boolean p_220331_6_, boolean p_220331_7_) {
       return this.spawn(worldIn, stack == null ? null : stack.getTag(), stack != null && stack.hasDisplayName() ? stack.getDisplayName() : null, playerIn, pos, reason, p_220331_6_, p_220331_7_);
    }
 
-   
    public T spawn(World worldIn,  CompoundNBT compound,  ITextComponent customName,  PlayerEntity playerIn, BlockPos pos, SpawnReason reason, boolean p_220342_7_, boolean p_220342_8_) {
       T t = this.create(worldIn, compound, customName, playerIn, pos, reason, p_220342_7_, p_220342_8_);
       worldIn.addEntity(t);
       return t;
    }
 
-   
    public T create(World worldIn,  CompoundNBT compound,  ITextComponent customName,  PlayerEntity playerIn, BlockPos pos, SpawnReason reason, boolean p_220349_7_, boolean p_220349_8_) {
       T t = this.create(worldIn);
       if (t == null) {
@@ -395,7 +389,6 @@ public class EntityType<T extends Entity> {
       return this.size.height;
    }
 
-   
    private static boolean baseEntityClassesInitialized = false;
 
    public T create(World worldIn) {
@@ -420,7 +413,6 @@ public class EntityType<T extends Entity> {
       return this.factory.create(this, worldIn);
    }
 
-   
    @OnlyIn(Dist.CLIENT)
    public static Entity create(int id, World worldIn) {
       return create(worldIn, Registry.ENTITY_TYPE.getByValue(id));
@@ -436,7 +428,6 @@ public class EntityType<T extends Entity> {
       });
    }
 
-   
    @OnlyIn(Dist.CLIENT)
    private static Entity create(World worldIn,  EntityType<?> type) {
       return type == null ? null : type.create(worldIn);
@@ -455,7 +446,6 @@ public class EntityType<T extends Entity> {
       return Registry.ENTITY_TYPE.getValue(new ResourceLocation(compound.getString("id")));
    }
 
-   
    public static Entity func_220335_a(CompoundNBT compound, World worldIn, Function<Entity, Entity> p_220335_2_) {
       return loadEntity(compound, worldIn).map(p_220335_2_).map((p_220346_3_) -> {
          if (compound.contains("Passengers", 9)) {

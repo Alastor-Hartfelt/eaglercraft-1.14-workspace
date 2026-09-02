@@ -410,7 +410,6 @@ public abstract class AbstractFurnaceTileEntity extends LockableTileEntity imple
 
     }
 
-
     public IRecipe<?> getRecipeUsed() {
         return null;
     }

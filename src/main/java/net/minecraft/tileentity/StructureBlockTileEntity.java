@@ -128,7 +128,6 @@ public class StructureBlockTileEntity extends TileEntity {
         }
     }
 
-
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, 7, this.getUpdateTag());
     }

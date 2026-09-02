@@ -6,7 +6,7 @@ import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.lax1dude.eaglercraft.EagRuntime;
 import net.lax1dude.eaglercraft.HString;
 import net.minecraft.block.BlockState;
@@ -79,8 +79,15 @@ public class DebugOverlayGui extends AbstractGui {
         Entity entity = this.mc.getRenderViewEntity();
         this.rayTraceBlock = entity.func_213324_a(20.0D, 0.0F, false);
         this.rayTraceFluid = entity.func_213324_a(20.0D, 0.0F, true);
-        this.renderDebugInfoLeft();
-        this.renderDebugInfoRight();
+        beginHudBatch();
+        this.fontRenderer.beginBatch();
+        try {
+            this.renderDebugInfoLeft();
+            this.renderDebugInfoRight();
+        } finally {
+            endHudBatch();
+            this.fontRenderer.endBatch();
+        }
         GlStateManager.popMatrix();
         if (this.mc.gameSettings.showLagometer) {
             int i = this.mc.mainWindow.getScaledWidth();
@@ -262,7 +269,6 @@ public class DebugOverlayGui extends AbstractGui {
         }
     }
 
-
     private String func_223101_g() {
         IntegratedServer integratedserver = this.mc.getIntegratedServer();
         if (integratedserver != null) {
@@ -278,7 +284,6 @@ public class DebugOverlayGui extends AbstractGui {
     private World func_212922_g() {
         return mc.world;
     }
-
 
     private Chunk func_212919_h() {
         if (this.field_212926_h == null) {

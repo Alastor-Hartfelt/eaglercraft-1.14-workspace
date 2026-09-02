@@ -922,7 +922,6 @@ public class LegacyResourcePackWrapper implements IResourcePack {
         return this.locationMap.getResourceNamespaces(type);
     }
 
-
     public <T> T getMetadata(IMetadataSectionSerializer<T> deserializer) throws IOException {
         return this.locationMap.getMetadata(deserializer);
     }

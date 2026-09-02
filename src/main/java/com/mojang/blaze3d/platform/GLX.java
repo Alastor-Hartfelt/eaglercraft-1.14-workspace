@@ -104,7 +104,7 @@ public class GLX {
     }
 
     public static String getLWJGLVersion() {
-        return "3.3.2"; //Ah hell naaaa
+        return "3.3.2"; 
     }
 
     public static LongSupplier initGlfw() {
@@ -116,6 +116,7 @@ public class GLX {
     }
 
     public static void pollEvents() {
+        net.lax1dude.eaglercraft.internal.PlatformInput.pollEvents();
     }
 
     public static String getOpenGLVersion() {
@@ -139,192 +140,6 @@ public class GLX {
     }
 
     public static void init() {
-//      GLCapabilities glcapabilities = GL.getCapabilities();
-//      useMultitextureArb = glcapabilities.GL_ARB_multitexture && !glcapabilities.OpenGL13;
-//      useTexEnvCombineArb = glcapabilities.GL_ARB_texture_env_combine && !glcapabilities.OpenGL13;
-//      if (useMultitextureArb) {
-//         capsString = capsString + "Using ARB_multitexture.\n";
-//         GL_TEXTURE0 = 33984;
-//         GL_TEXTURE1 = 33985;
-//         GL_TEXTURE2 = 33986;
-//      } else {
-//         capsString = capsString + "Using GL 1.3 multitexturing.\n";
-//         GL_TEXTURE0 = 33984;
-//         GL_TEXTURE1 = 33985;
-//         GL_TEXTURE2 = 33986;
-//      }
-//
-//      if (useTexEnvCombineArb) {
-//         capsString = capsString + "Using ARB_texture_env_combine.\n";
-//         GL_COMBINE = 34160;
-//         GL_INTERPOLATE = 34165;
-//         GL_PRIMARY_COLOR = 34167;
-//         GL_CONSTANT = 34166;
-//         GL_PREVIOUS = 34168;
-//         GL_COMBINE_RGB = 34161;
-//         GL_SOURCE0_RGB = 34176;
-//         GL_SOURCE1_RGB = 34177;
-//         GL_SOURCE2_RGB = 34178;
-//         GL_OPERAND0_RGB = 34192;
-//         GL_OPERAND1_RGB = 34193;
-//         GL_OPERAND2_RGB = 34194;
-//         GL_COMBINE_ALPHA = 34162;
-//         GL_SOURCE0_ALPHA = 34184;
-//         GL_SOURCE1_ALPHA = 34185;
-//         GL_SOURCE2_ALPHA = 34186;
-//         GL_OPERAND0_ALPHA = 34200;
-//         GL_OPERAND1_ALPHA = 34201;
-//         GL_OPERAND2_ALPHA = 34202;
-//      } else {
-//         capsString = capsString + "Using GL 1.3 texture combiners.\n";
-//         GL_COMBINE = 34160;
-//         GL_INTERPOLATE = 34165;
-//         GL_PRIMARY_COLOR = 34167;
-//         GL_CONSTANT = 34166;
-//         GL_PREVIOUS = 34168;
-//         GL_COMBINE_RGB = 34161;
-//         GL_SOURCE0_RGB = 34176;
-//         GL_SOURCE1_RGB = 34177;
-//         GL_SOURCE2_RGB = 34178;
-//         GL_OPERAND0_RGB = 34192;
-//         GL_OPERAND1_RGB = 34193;
-//         GL_OPERAND2_RGB = 34194;
-//         GL_COMBINE_ALPHA = 34162;
-//         GL_SOURCE0_ALPHA = 34184;
-//         GL_SOURCE1_ALPHA = 34185;
-//         GL_SOURCE2_ALPHA = 34186;
-//         GL_OPERAND0_ALPHA = 34200;
-//         GL_OPERAND1_ALPHA = 34201;
-//         GL_OPERAND2_ALPHA = 34202;
-//      }
-//
-//      useSeparateBlendExt = glcapabilities.GL_EXT_blend_func_separate && !glcapabilities.OpenGL14;
-//      separateBlend = glcapabilities.OpenGL14 || glcapabilities.GL_EXT_blend_func_separate;
-//      capsString = capsString + "Using framebuffer objects because ";
-//      if (glcapabilities.OpenGL30) {
-//         capsString = capsString + "OpenGL 3.0 is supported and separate blending is supported.\n";
-//         fboMode = GLX.FboMode.BASE;
-//         GL_FRAMEBUFFER = 36160;
-//         GL_RENDERBUFFER = 36161;
-//         GL_COLOR_ATTACHMENT0 = 36064;
-//         GL_DEPTH_ATTACHMENT = 36096;
-//         GL_FRAMEBUFFER_COMPLETE = 36053;
-//         GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054;
-//         GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055;
-//         GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER = 36059;
-//         GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER = 36060;
-//      } else if (glcapabilities.GL_ARB_framebuffer_object) {
-//         capsString = capsString + "ARB_framebuffer_object is supported and separate blending is supported.\n";
-//         fboMode = GLX.FboMode.ARB;
-//         GL_FRAMEBUFFER = 36160;
-//         GL_RENDERBUFFER = 36161;
-//         GL_COLOR_ATTACHMENT0 = 36064;
-//         GL_DEPTH_ATTACHMENT = 36096;
-//         GL_FRAMEBUFFER_COMPLETE = 36053;
-//         GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055;
-//         GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054;
-//         GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER = 36059;
-//         GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER = 36060;
-//      } else {
-//         if (!glcapabilities.GL_EXT_framebuffer_object) {
-//            throw new IllegalStateException("The driver does not appear to support framebuffer objects");
-//         }
-//
-//         capsString = capsString + "EXT_framebuffer_object is supported.\n";
-//         fboMode = GLX.FboMode.EXT;
-//         GL_FRAMEBUFFER = 36160;
-//         GL_RENDERBUFFER = 36161;
-//         GL_COLOR_ATTACHMENT0 = 36064;
-//         GL_DEPTH_ATTACHMENT = 36096;
-//         GL_FRAMEBUFFER_COMPLETE = 36053;
-//         GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055;
-//         GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054;
-//         GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER = 36059;
-//         GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER = 36060;
-//      }
-//
-//      isOpenGl21 = glcapabilities.OpenGL21;
-//      hasShaders = isOpenGl21 || glcapabilities.GL_ARB_vertex_shader && glcapabilities.GL_ARB_fragment_shader && glcapabilities.GL_ARB_shader_objects;
-//      capsString = capsString + "Shaders are " + (hasShaders ? "" : "not ") + "available because ";
-//      if (hasShaders) {
-//         if (glcapabilities.OpenGL21) {
-//            capsString = capsString + "OpenGL 2.1 is supported.\n";
-//            useShaderArb = false;
-//            GL_LINK_STATUS = 35714;
-//            GL_COMPILE_STATUS = 35713;
-//            GL_VERTEX_SHADER = 35633;
-//            GL_FRAGMENT_SHADER = 35632;
-//         } else {
-//            capsString = capsString + "ARB_shader_objects, ARB_vertex_shader, and ARB_fragment_shader are supported.\n";
-//            useShaderArb = true;
-//            GL_LINK_STATUS = 35714;
-//            GL_COMPILE_STATUS = 35713;
-//            GL_VERTEX_SHADER = 35633;
-//            GL_FRAGMENT_SHADER = 35632;
-//         }
-//      } else {
-//         capsString = capsString + "OpenGL 2.1 is " + (glcapabilities.OpenGL21 ? "" : "not ") + "supported, ";
-//         capsString = capsString + "ARB_shader_objects is " + (glcapabilities.GL_ARB_shader_objects ? "" : "not ") + "supported, ";
-//         capsString = capsString + "ARB_vertex_shader is " + (glcapabilities.GL_ARB_vertex_shader ? "" : "not ") + "supported, and ";
-//         capsString = capsString + "ARB_fragment_shader is " + (glcapabilities.GL_ARB_fragment_shader ? "" : "not ") + "supported.\n";
-//      }
-//
-//      usePostProcess = hasShaders;
-//      String s = GL11.glGetString(7936).toLowerCase(Locale.ROOT);
-//      isNvidia = s.contains("nvidia");
-//      useVboArb = !glcapabilities.OpenGL15 && glcapabilities.GL_ARB_vertex_buffer_object;
-//      capsString = capsString + "VBOs are available because ";
-//      if (useVboArb) {
-//         capsString = capsString + "ARB_vertex_buffer_object is supported.\n";
-//         GL_STATIC_DRAW = 35044;
-//         GL_ARRAY_BUFFER = 34962;
-//      } else {
-//         capsString = capsString + "OpenGL 1.5 is supported.\n";
-//         GL_STATIC_DRAW = 35044;
-//         GL_ARRAY_BUFFER = 34962;
-//      }
-//
-//      isAmd = s.contains("ati");
-//      if (isAmd) {
-//         needVbo = true;
-//      }
-//
-//      try {
-//         Processor[] aprocessor = (new SystemInfo()).getHardware().getProcessors();
-//         cpuInfo = String.format("%dx %s", aprocessor.length, aprocessor[0]).replaceAll("\\s+", " ");
-//      } catch (Throwable var3) {
-//         ;
-//      }
-//
-//   }
-//
-//   public static boolean isNextGen() {
-//      return usePostProcess;
-//   }
-//
-//   public static String getCapsString() {
-//      return capsString;
-//   }
-//
-//   public static int glGetProgrami(int p_glGetProgrami_0_, int p_glGetProgrami_1_) {
-//      return useShaderArb ? ARBShaderObjects.glGetObjectParameteriARB(p_glGetProgrami_0_, p_glGetProgrami_1_) : GL20.glGetProgrami(p_glGetProgrami_0_, p_glGetProgrami_1_);
-//   }
-//
-//   public static void glAttachShader(int p_glAttachShader_0_, int p_glAttachShader_1_) {
-//      if (useShaderArb) {
-//         ARBShaderObjects.glAttachObjectARB(p_glAttachShader_0_, p_glAttachShader_1_);
-//      } else {
-//         GL20.glAttachShader(p_glAttachShader_0_, p_glAttachShader_1_);
-//      }
-//
-//   }
-//
-//   public static void glDeleteShader(int p_glDeleteShader_0_) {
-//      if (useShaderArb) {
-//         ARBShaderObjects.glDeleteObjectARB(p_glDeleteShader_0_);
-//      } else {
-//         GL20.glDeleteShader(p_glDeleteShader_0_);
-        //}
 
     }
 
@@ -334,69 +149,53 @@ public class GLX {
 
     public static void glShaderSource(int p_glShaderSource_0_, CharSequence p_glShaderSource_1_) {
 
-
     }
 
     public static void glCompileShader(int p_glCompileShader_0_) {
 
-
     }
-
 
     public static void glUseProgram(int p_glUseProgram_0_) {
 
-
     }
 
-
     public static void glDeleteProgram(int p_glDeleteProgram_0_) {
-
 
     }
 
     public static void glLinkProgram(int p_glLinkProgram_0_) {
 
-
     }
 
-
     public static void glUniform1(int p_glUniform1_0_, IntBuffer p_glUniform1_1_) {
-
 
     }
 
     public static void glUniform1i(int p_glUniform1i_0_, int p_glUniform1i_1_) {
 
-
     }
 
     public static void glUniform1(int p_glUniform1_0_, FloatBuffer p_glUniform1_1_) {
-
 
     }
 
     public static void glUniform2(int p_glUniform2_0_, IntBuffer p_glUniform2_1_) {
 
-
     }
 
     public static void glUniform2(int p_glUniform2_0_, FloatBuffer p_glUniform2_1_) {
-
 
     }
 
     public static void glUniform3(int p_glUniform3_0_, IntBuffer p_glUniform3_1_) {
 
-
     }
 
     public static void glUniform3(int p_glUniform3_0_, FloatBuffer p_glUniform3_1_) {
 
-
     }
 
     public static void glUniform4(int p_glUniform4_0_, IntBuffer p_glUniform4_1_) {
-
 
     }
 
@@ -414,9 +213,7 @@ public class GLX {
 
     public static void glUniformMatrix4(int p_glUniformMatrix4_0_, boolean p_glUniformMatrix4_1_, FloatBuffer p_glUniformMatrix4_2_) {
 
-
     }
-
 
     public static void glBindBuffer(int p_glBindBuffer_0_, int p_glBindBuffer_1_) {
         net.lax1dude.eaglercraft.internal.PlatformOpenGL._wglBindBuffer(p_glBindBuffer_0_, p_glBindBuffer_1_ == 0 ? null : mapBuffersGL.get(p_glBindBuffer_1_));
@@ -510,7 +307,6 @@ public class GLX {
     public static void glActiveTexture(int p_glActiveTexture_0_) {
         net.lax1dude.eaglercraft.opengl.GlStateManager.setActiveTexture(p_glActiveTexture_0_);
     }
-
 
     public static void glBlendFuncSeparate(int p_glBlendFuncSeparate_0_, int p_glBlendFuncSeparate_1_, int p_glBlendFuncSeparate_2_, int p_glBlendFuncSeparate_3_) {
         org.lwjgl.opengl.GL11.glBlendFuncSeparate(p_glBlendFuncSeparate_0_, p_glBlendFuncSeparate_1_, p_glBlendFuncSeparate_2_, p_glBlendFuncSeparate_3_);

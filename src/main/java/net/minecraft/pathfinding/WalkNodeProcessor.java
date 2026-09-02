@@ -151,7 +151,6 @@ public class WalkNodeProcessor extends NodeProcessor {
         return (double) blockpos.getY() + (voxelshape.isEmpty() ? 0.0D : voxelshape.getEnd(Direction.Axis.Y));
     }
 
-
     private PathPoint getSafePoint(int x, int y, int z, int stepHeight, double groundYIn, Direction facing) {
         PathPoint pathpoint = null;
         BlockPos blockpos = new BlockPos(x, y, z);

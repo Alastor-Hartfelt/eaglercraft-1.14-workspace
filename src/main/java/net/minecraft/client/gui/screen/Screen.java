@@ -1,12 +1,13 @@
 package net.minecraft.client.gui.screen;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.lax1dude.eaglercraft.EagRuntime;
-import net.lax1dude.eaglercraft.KeyboardConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FocusableGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -57,6 +58,13 @@ public abstract class Screen extends FocusableGui implements IRenderable {
     private String clickedLink;
     private long showingCloseKey = 0L;
 
+    private int touchValue;
+    protected int touchModeCursorPosX = -1;
+    protected int touchModeCursorPosY = -1;
+    private long lastTouchEvent;
+
+    public final IntObjectMap<int[]> touchStarts = new IntObjectHashMap<>();
+
     protected Screen(ITextComponent titleIn) {
         this.title = titleIn;
     }
@@ -83,8 +91,7 @@ public abstract class Screen extends FocusableGui implements IRenderable {
                 alpha = (int) ((3000L - closeKeyTimeout) * 255L / (3000L - fadeTime));
             }
             String str;
-            int k = this.getCloseKey();
-            str = I18n.format("gui.exitKey", KeyboardConstants.getKeyName(KeyboardConstants.getEaglerKeyFromGLFW(k)));
+            str = I18n.format("gui.exitKey", this.mc.gameSettings.keyBindClose.getLocalizedName());
             int textWidth = this.font.getStringWidth(str);
             this.fill(this.width / 2 - textWidth / 2 - 2, 2, this.width / 2 + textWidth / 2 + 2, 14, (0xAA000000) | ((alpha & 0xFF) << 24));
             this.drawCenteredString(this.font, str, this.width / 2, 4, (0xFF5555) | ((alpha & 0xFF) << 24));
@@ -94,12 +101,12 @@ public abstract class Screen extends FocusableGui implements IRenderable {
 
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
         if (this.shouldCloseOnEsc()) {
-            if (p_keyPressed_1_ == this.mc.gameSettings.keyBindClose.getDefault().getKeyCode()) {
+            if (this.mc.gameSettings.keyBindClose.matchesKey(p_keyPressed_1_, p_keyPressed_2_)) {
                 this.onClose();
                 return true;
             }
             if (p_keyPressed_1_ == 256) {
-                if (this.mc.gameSettings.keyBindClose.getDefault().getKeyCode() <= 0) {
+                if (this.mc.gameSettings.keyBindClose.isInvalid()) {
                     this.onClose();
                 } else {
                     this.showingCloseKey = EagRuntime.steadyTimeMillis();
@@ -119,6 +126,10 @@ public abstract class Screen extends FocusableGui implements IRenderable {
         }
     }
 
+    public static boolean isCloseKey(int keyCode, int scanCode) {
+        return keyCode == 256 || Minecraft.getInstance().gameSettings.keyBindClose.matchesKey(keyCode, scanCode);
+    }
+
     public boolean shouldCloseOnEsc() {
         return true;
     }
@@ -128,10 +139,6 @@ public abstract class Screen extends FocusableGui implements IRenderable {
         if (this.mc.currentScreen == null) {
             this.mc.setIngameFocus();
         }
-    }
-
-    protected int getCloseKey() {
-        return this.mc.gameSettings.keyBindClose.getDefault().getKeyCode();
     }
 
     protected <T extends Widget> T addButton(T p_addButton_1_) {
@@ -355,6 +362,124 @@ public abstract class Screen extends FocusableGui implements IRenderable {
     public void removed() {
     }
 
+    public void handleTouchInput() {
+        net.lax1dude.eaglercraft.internal.EnumTouchEvent et = net.lax1dude.eaglercraft.Touch.getEventType();
+        if (et == net.lax1dude.eaglercraft.internal.EnumTouchEvent.TOUCHSTART) {
+            net.lax1dude.eaglercraft.PointerInputAbstraction.enterTouchModeHook();
+        }
+        float scaleFac = getEaglerScale();
+        int fw = this.mc.mainWindow.getFramebufferWidth();
+        int fh = this.mc.mainWindow.getFramebufferHeight();
+        for (int t = 0, c = net.lax1dude.eaglercraft.Touch.getEventTouchPointCount(); t < c; ++t) {
+            int u = net.lax1dude.eaglercraft.Touch.getEventTouchPointUID(t);
+            int i = net.lax1dude.eaglercraft.Touch.getEventTouchX(t);
+            int j = net.lax1dude.eaglercraft.Touch.getEventTouchY(t);
+            i = applyEaglerScale(scaleFac, i * this.width / fw, this.width);
+            j = applyEaglerScale(scaleFac, this.height - j * this.height / fh - 1, this.height);
+            float rad = net.lax1dude.eaglercraft.Touch.getEventTouchRadiusMixed(t);
+            float si = rad * this.width / fw / scaleFac;
+            if (si < 1.0f) si = 1.0f;
+            float sj = rad * this.height / fh / scaleFac;
+            if (sj < 1.0f) sj = 1.0f;
+            int[] ck = touchStarts.remove(u);
+            switch (et) {
+            case TOUCHSTART:
+                if (t == 0) {
+                    touchModeCursorPosX = i;
+                    touchModeCursorPosY = j;
+                }
+                lastTouchEvent = EagRuntime.steadyTimeMillis();
+                touchStarts.put(u, new int[] { i, j, 0 });
+                this.touchStarted(i, j, u);
+                if (t == 0 && shouldTouchGenerateMouseEvents()) {
+                    boolean handled = this.mouseClicked(i, j, 0);
+                    if (handled) {
+                        this.setDragging(true);
+                    }
+                }
+                break;
+            case TOUCHMOVE:
+                if (t == 0) {
+                    touchModeCursorPosX = i;
+                    touchModeCursorPosY = j;
+                }
+                if (ck != null && Math.abs(ck[0] - i) < si && Math.abs(ck[1] - j) < sj) {
+                    touchStarts.put(u, ck);
+                    break;
+                }
+                int newState = (ck != null && isTouchDraggingStateLocked(u)) ? ck[2] : 1;
+                touchStarts.put(u, new int[] { i, j, newState });
+                this.touchMoved(i, j, u);
+                if (t == 0 && shouldTouchGenerateMouseEvents()) {
+                    long timeSinceLast = EagRuntime.steadyTimeMillis() - lastTouchEvent;
+                    double dx = i - (ck != null ? ck[0] : i);
+                    double dy = j - (ck != null ? ck[1] : j);
+                    if (this.isDragging()) {
+                        this.mouseDragged(i, j, 0, dx, dy);
+                    }
+                }
+                break;
+            case TOUCHEND:
+                if (ck == null) break;
+                if (t == 0) {
+                    touchModeCursorPosX = -1;
+                    touchModeCursorPosY = -1;
+                }
+                if (ck[2] == 1) {
+                    this.touchEndMove(i, j, u);
+                } else {
+                    if (ck != null) {
+                        i = ck[0];
+                        j = ck[1];
+                    }
+                    this.touchTapped(i, j, u);
+                }
+                if (t == 0 && shouldTouchGenerateMouseEvents()) {
+                    this.mouseReleased(i, j, 0);
+                    this.setDragging(false);
+                }
+                break;
+            }
+        }
+    }
+
+    public void touchStarted(int x, int y, int evt) {
+    }
+
+    public void touchTapped(int x, int y, int evt) {
+    }
+
+    public void touchMoved(int x, int y, int evt) {
+    }
+
+    public void touchEndMove(int x, int y, int evt) {
+    }
+
+    public boolean isTouchPointDragging(int uid) {
+        int[] ret = touchStarts.get(uid);
+        return ret != null && ret[2] == 1;
+    }
+
+    public boolean isTouchDraggingStateLocked(int uid) {
+        return false;
+    }
+
+    public boolean shouldTouchGenerateMouseEvents() {
+        return true;
+    }
+
+    public float getEaglerScale() {
+        return 1.0f;
+    }
+
+    private int applyEaglerScale(float scaleFac, int val, int max) {
+        if (scaleFac == 0.0f) scaleFac = 1.0f;
+        int ret = (int) (val / scaleFac);
+        if (ret < 0) ret = 0;
+        else if (ret > max) ret = max;
+        return ret;
+    }
+
     public void renderBackground() {
         this.renderBackground(0);
     }
@@ -513,6 +638,14 @@ public abstract class Screen extends FocusableGui implements IRenderable {
     }
 
     public boolean isMouseOver(double p_isMouseOver_1_, double p_isMouseOver_3_) {
+        return true;
+    }
+
+    public boolean showCopyPasteButtons() {
+        return false;
+    }
+
+    public boolean canCloseGui() {
         return true;
     }
 }

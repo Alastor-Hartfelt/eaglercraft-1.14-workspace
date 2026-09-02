@@ -80,7 +80,6 @@ public class ServerSelectionList extends ExtendedList<ServerSelectionList.Entry>
         this.func_195094_h();
     }
 
-
     protected int getScrollbarPosition() {
         return super.getScrollbarPosition() + 30;
     }
@@ -96,7 +95,6 @@ public class ServerSelectionList extends ExtendedList<ServerSelectionList.Entry>
     @OnlyIn(Dist.CLIENT)
     public abstract static class Entry extends ExtendedList.AbstractListEntry<ServerSelectionList.Entry> {
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public static class LanScanEntry extends ServerSelectionList.Entry {

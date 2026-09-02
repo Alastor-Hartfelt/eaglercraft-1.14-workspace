@@ -1,6 +1,5 @@
 package net.minecraft.entity.ai.attributes;
 
-
 public interface IAttribute {
    String getName();
 
@@ -9,7 +8,6 @@ public interface IAttribute {
    double getDefaultValue();
 
    boolean getShouldWatch();
-
 
    IAttribute getParent();
 }

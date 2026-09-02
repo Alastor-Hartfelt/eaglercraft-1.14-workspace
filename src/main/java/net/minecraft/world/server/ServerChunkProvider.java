@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.lax1dude.eaglercraft.internal.vfs2.VFile2;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
@@ -66,7 +66,6 @@ public class ServerChunkProvider extends AbstractChunkProvider {
         this.mainThread = Thread.currentThread();
         VFile2 file1 = worldIn.getDimension().getType().getDirectory(worldDirectory);
         VFile2 file2 = new VFile2(file1, "data");
-        /* mkdirs removed (      file2 ) */
         this.savedData = new DimensionSavedDataManager(file2, dataFixer);
         this.chunkManager = new ChunkManager(worldIn, worldDirectory, dataFixer, p_i51537_4_, p_i51537_5_, this.executor, this, this.getChunkGenerator(), p_i51537_8_, p_i51537_9_, viewDistance);
         this.lightManager = this.chunkManager.getLightManager();
@@ -77,7 +76,6 @@ public class ServerChunkProvider extends AbstractChunkProvider {
     public ServerWorldLightManager getLightManager() {
         return this.lightManager;
     }
-
 
     private ChunkHolder func_217213_a(long chunkPosIn) {
         return this.chunkManager.func_219219_b(chunkPosIn);
@@ -98,7 +96,6 @@ public class ServerChunkProvider extends AbstractChunkProvider {
         this.recentStatuses[0] = p_225315_4_;
         this.recentChunks[0] = p_225315_3_;
     }
-
 
     public IChunk getChunk(int chunkX, int chunkZ, ChunkStatus requiredStatus, boolean load) {
         if (Thread.currentThread() != this.mainThread) {
@@ -132,7 +129,6 @@ public class ServerChunkProvider extends AbstractChunkProvider {
             return ichunk1;
         }
     }
-
 
     public Chunk func_225313_a(int p_225313_1_, int p_225313_2_) {
         if (Thread.currentThread() != this.mainThread) {

@@ -19,7 +19,6 @@ public class CatRenderer extends MobRenderer<CatEntity, CatModel<CatEntity>> {
         this.addLayer(new CatCollarLayer(this));
     }
 
-
     protected ResourceLocation getEntityTexture(CatEntity entity) {
         return entity.getCatTypeName();
     }

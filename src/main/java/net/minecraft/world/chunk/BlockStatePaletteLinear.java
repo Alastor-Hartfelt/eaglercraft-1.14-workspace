@@ -47,7 +47,6 @@ public class BlockStatePaletteLinear<T> implements IBlockStatePalette<T> {
         return ArrayUtils.contains(this.states, p_222626_1_);
     }
 
-
     public T get(int indexKey) {
         return (T) (indexKey >= 0 && indexKey < this.arraySize ? this.states[indexKey] : null);
     }

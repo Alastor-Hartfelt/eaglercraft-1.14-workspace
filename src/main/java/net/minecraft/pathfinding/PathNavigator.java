@@ -82,26 +82,21 @@ public abstract class PathNavigator {
 
     }
 
-
     public final Path func_225466_a(double p_225466_1_, double p_225466_3_, double p_225466_5_, int p_225466_7_) {
         return this.getPathToPos(new BlockPos(p_225466_1_, p_225466_3_, p_225466_5_), p_225466_7_);
     }
-
 
     public Path func_225463_a(Stream<BlockPos> p_225463_1_, int p_225463_2_) {
         return this.func_225464_a(p_225463_1_.collect(Collectors.toSet()), 8, false, p_225463_2_);
     }
 
-
     public Path getPathToPos(BlockPos pos, int p_179680_2_) {
         return this.func_225464_a(ImmutableSet.of(pos), 8, false, p_179680_2_);
     }
 
-
     public Path getPathToEntityLiving(Entity entityIn, int p_75494_2_) {
         return this.func_225464_a(ImmutableSet.of(new BlockPos(entityIn)), 16, true, p_75494_2_);
     }
-
 
     protected Path func_225464_a(Set<BlockPos> p_225464_1_, int p_225464_2_, boolean p_225464_3_, int p_225464_4_) {
         if (p_225464_1_.isEmpty()) {
@@ -159,7 +154,6 @@ public abstract class PathNavigator {
             }
         }
     }
-
 
     public Path getPath() {
         return this.currentPath;

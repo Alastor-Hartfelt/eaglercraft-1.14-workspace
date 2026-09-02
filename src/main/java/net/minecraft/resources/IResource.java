@@ -13,7 +13,6 @@ public interface IResource extends Closeable {
 
    InputStream getInputStream();
 
-
    @OnlyIn(Dist.CLIENT)
    <T> T getMetadata(IMetadataSectionSerializer<T> serializer);
 

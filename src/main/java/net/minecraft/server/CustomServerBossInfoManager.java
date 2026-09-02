@@ -17,7 +17,6 @@ public class CustomServerBossInfoManager {
         this.server = serverIn;
     }
 
-
     public CustomServerBossInfo get(ResourceLocation id) {
         return this.bars.get(id);
     }

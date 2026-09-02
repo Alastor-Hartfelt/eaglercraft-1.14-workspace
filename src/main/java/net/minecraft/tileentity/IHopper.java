@@ -15,7 +15,6 @@ public interface IHopper extends IInventory {
         return COLLECTION_AREA_SHAPE;
     }
 
-
     World getWorld();
 
     double getXPos();

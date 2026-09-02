@@ -280,6 +280,8 @@ public class GuiScreenEditCape extends Screen {
                 int w = font.getStringWidth(I18n.format("editProfile.importExport"));
                 if (mx > 1 && my > 1 && mx < (w * 3 / 4) + 7 && my < 12) {
                     safeProfile();
+                    this.mc.gameSettings.saveOptions();
+                    this.mc.displayGuiScreen(new GuiScreenImportExportProfile(this.parent));
                     return true;
                 }
             }

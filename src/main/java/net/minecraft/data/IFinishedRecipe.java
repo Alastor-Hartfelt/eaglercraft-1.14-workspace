@@ -19,9 +19,7 @@ public interface IFinishedRecipe {
 
     IRecipeSerializer<?> getSerializer();
 
-
     JsonObject getAdvancementJson();
-
 
     ResourceLocation getAdvancementID();
 }

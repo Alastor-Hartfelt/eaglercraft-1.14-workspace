@@ -67,7 +67,6 @@ public class LadderBlock extends Block implements IWaterLoggable {
         }
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         if (!context.replacingClickedOnBlock()) {
             BlockState blockstate = context.getWorld().getBlockState(context.getPos().offset(context.getFace().getOpposite()));

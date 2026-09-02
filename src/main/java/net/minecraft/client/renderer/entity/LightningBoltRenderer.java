@@ -12,6 +12,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class LightningBoltRenderer extends EntityRenderer<LightningBoltEntity> {
+    private final double[] offsetsX = new double[8];
+    private final double[] offsetsZ = new double[8];
+    private final Random pathRandom = new Random();
+    private final Random branchRandom = new Random();
+
     public LightningBoltRenderer(EntityRendererManager renderManagerIn) {
         super(renderManagerIn);
     }
@@ -23,11 +28,12 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBoltEntity> {
         GlStateManager.disableLighting();
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
-        double[] adouble = new double[8];
-        double[] adouble1 = new double[8];
+        double[] adouble = this.offsetsX;
+        double[] adouble1 = this.offsetsZ;
         double d0 = 0.0D;
         double d1 = 0.0D;
-        Random random = new Random(entity.boltVertex);
+        Random random = this.pathRandom;
+        random.setSeed(entity.boltVertex);
 
         for (int i = 7; i >= 0; --i) {
             adouble[i] = d0;
@@ -37,7 +43,8 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBoltEntity> {
         }
 
         for (int k1 = 0; k1 < 4; ++k1) {
-            Random random1 = new Random(entity.boltVertex);
+            Random random1 = this.branchRandom;
+            random1.setSeed(entity.boltVertex);
 
             for (int j = 0; j < 3; ++j) {
                 int k = 7;
@@ -113,7 +120,6 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBoltEntity> {
         GlStateManager.enableLighting();
         GlStateManager.enableTexture();
     }
-
 
     protected ResourceLocation getEntityTexture(LightningBoltEntity entity) {
         return null;

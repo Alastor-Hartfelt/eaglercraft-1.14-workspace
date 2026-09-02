@@ -228,7 +228,6 @@ public class Chunk implements IChunk {
       }
    }
 
-
    public BlockState setBlockState(BlockPos pos, BlockState state, boolean isMoving) {
       int i = pos.getX() & 15;
       int j = pos.getY();
@@ -295,7 +294,6 @@ public class Chunk implements IChunk {
       }
    }
 
-
    public WorldLightManager getWorldLightManager() {
       return this.world.getChunkProvider().getLightManager();
    }
@@ -353,18 +351,15 @@ public class Chunk implements IChunk {
       return this.heightMap.get(heightmapType).getHeight(x & 15, z & 15) - 1;
    }
 
-
    private TileEntity createNewTileEntity(BlockPos pos) {
       BlockState blockstate = this.getBlockState(pos);
       Block block = blockstate.getBlock();
       return !block.hasTileEntity() ? null : ((ITileEntityProvider)block).createNewTileEntity(this.world);
    }
 
-
    public TileEntity getTileEntity(BlockPos pos) {
       return this.getTileEntity(pos, Chunk.CreateEntityType.CHECK);
    }
-
 
    public TileEntity getTileEntity(BlockPos pos, Chunk.CreateEntityType creationMode) {
       TileEntity tileentity = this.tileEntities.get(pos);
@@ -415,7 +410,6 @@ public class Chunk implements IChunk {
    public void addTileEntity(CompoundNBT nbt) {
       this.deferredTileEntities.put(new BlockPos(nbt.getInt("x"), nbt.getInt("y"), nbt.getInt("z")), nbt);
    }
-
 
    public CompoundNBT func_223134_j(BlockPos p_223134_1_) {
       TileEntity tileentity = this.getTileEntity(p_223134_1_);
@@ -626,7 +620,6 @@ public class Chunk implements IChunk {
       this.lastSaveTime = saveTime;
    }
 
-
    public StructureStart getStructureStart(String stucture) {
       return this.structureStarts.get(stucture);
    }
@@ -698,7 +691,6 @@ public class Chunk implements IChunk {
       this.deferredTileEntities.clear();
       this.upgradeData.postProcessChunk(this);
    }
-
 
    private TileEntity setDeferredTileEntity(BlockPos pos, CompoundNBT compound) {
       TileEntity tileentity;

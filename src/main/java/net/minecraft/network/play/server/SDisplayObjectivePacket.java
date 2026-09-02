@@ -45,7 +45,6 @@ public class SDisplayObjectivePacket implements IPacket<IClientPlayNetHandler> {
       return this.position;
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public String getName() {
       return Objects.equals(this.scoreName, "") ? null : this.scoreName;

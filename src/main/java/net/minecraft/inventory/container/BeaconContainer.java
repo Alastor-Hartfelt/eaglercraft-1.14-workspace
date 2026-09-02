@@ -124,12 +124,10 @@ public class BeaconContainer extends Container {
         return this.field_216972_f.get(0);
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public Effect func_216967_f() {
         return Effect.get(this.field_216972_f.get(1));
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public Effect func_216968_g() {

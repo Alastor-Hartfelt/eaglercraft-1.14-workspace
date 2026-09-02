@@ -111,7 +111,6 @@ public class EnchantingTableTileEntity extends TileEntity implements INameable, 
         this.customname = name;
     }
 
-
     public ITextComponent getCustomName() {
         return this.customname;
     }

@@ -240,7 +240,6 @@ public class EndermanEntity extends MonsterEntity {
         this.dataManager.set(CARRIED_BLOCK, Optional.ofNullable(p_195406_1_));
     }
 
-
     public BlockState getHeldBlockState() {
         return this.dataManager.get(CARRIED_BLOCK).orElse((BlockState) null);
     }

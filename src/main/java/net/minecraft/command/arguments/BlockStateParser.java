@@ -5,7 +5,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.*;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.ISuggestionProvider;
@@ -67,16 +67,13 @@ public class BlockStateParser {
         return this.properties;
     }
 
-
     public BlockState getState() {
         return this.state;
     }
 
-
     public CompoundNBT getNbt() {
         return this.nbt;
     }
-
 
     public ResourceLocation getTag() {
         return this.tag;

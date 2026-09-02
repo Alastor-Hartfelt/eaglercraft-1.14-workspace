@@ -42,7 +42,8 @@ public class PlayerTabOverlayGui extends AbstractGui {
    }
 
    public ITextComponent getDisplayName(NetworkPlayerInfo p_200262_1_) {
-      return p_200262_1_.getDisplayName() != null ? p_200262_1_.getDisplayName() : ScorePlayerTeam.formatMemberName(p_200262_1_.getPlayerTeam(), new StringTextComponent(p_200262_1_.getGameProfile().getName()));
+      ITextComponent displayName = p_200262_1_.getDisplayNameProfanityFilter();
+      return displayName != null ? displayName : ScorePlayerTeam.formatMemberName(p_200262_1_.getPlayerTeam(), new StringTextComponent(p_200262_1_.getGameProfile().getName()));
    }
 
    public void setVisible(boolean visible) {
@@ -111,6 +112,7 @@ public class PlayerTabOverlayGui extends AbstractGui {
          }
       }
 
+      this.mc.fontRenderer.beginBatch();
       if (list1 != null) {
          fill(width / 2 - l1 / 2 - 1, k1 - 1, width / 2 + l1 / 2 + 1, k1 + list1.size() * 9, Integer.MIN_VALUE);
 
@@ -184,6 +186,7 @@ public class PlayerTabOverlayGui extends AbstractGui {
             k1 += 9;
          }
       }
+      this.mc.fontRenderer.endBatch();
 
    }
 

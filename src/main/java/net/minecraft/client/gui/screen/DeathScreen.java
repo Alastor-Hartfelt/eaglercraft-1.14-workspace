@@ -104,7 +104,6 @@ public class DeathScreen extends Screen {
         super.render(p_render_1_, p_render_2_, p_render_3_);
     }
 
-
     public ITextComponent getClickedComponentAt(int p_184870_1_) {
         if (this.causeOfDeath == null) {
             return null;

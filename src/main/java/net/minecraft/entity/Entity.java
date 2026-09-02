@@ -71,6 +71,7 @@ public abstract class Entity implements INameable, ICommandSource {
     private static final AtomicInteger NEXT_ENTITY_ID = new AtomicInteger();
     private static final List<ItemStack> EMPTY_EQUIPMENT = Collections.emptyList();
     private static final AxisAlignedBB ZERO_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
+    private static final BlockPos.MutableBlockPos CLIENT_BRIGHTNESS_POS = new BlockPos.MutableBlockPos();
     private static double renderDistanceWeight = 1.0D;
     public static double entityRenderMul = 64.0D;
     private final EntityType<?> type;
@@ -289,6 +290,10 @@ public abstract class Entity implements INameable, ICommandSource {
     }
 
     public void setPosition(double x, double y, double z) {
+        if (Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z) ||
+            Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(z)) {
+            return;
+        }
         this.posX = x;
         this.posY = y;
         this.posZ = z;
@@ -754,9 +759,16 @@ public abstract class Entity implements INameable, ICommandSource {
 
     public void resetPositionToBB() {
         AxisAlignedBB axisalignedbb = this.getBoundingBox();
-        this.posX = (axisalignedbb.minX + axisalignedbb.maxX) / 2.0D;
-        this.posY = axisalignedbb.minY;
-        this.posZ = (axisalignedbb.minZ + axisalignedbb.maxZ) / 2.0D;
+        double d0 = (axisalignedbb.minX + axisalignedbb.maxX) / 2.0D;
+        double d1 = axisalignedbb.minY;
+        double d2 = (axisalignedbb.minZ + axisalignedbb.maxZ) / 2.0D;
+        if (Double.isNaN(d0) || Double.isNaN(d1) || Double.isNaN(d2) ||
+            Double.isInfinite(d0) || Double.isInfinite(d1) || Double.isInfinite(d2)) {
+            return;
+        }
+        this.posX = d0;
+        this.posY = d1;
+        this.posZ = d2;
     }
 
     protected SoundEvent getSwimSound() {
@@ -865,7 +877,6 @@ public abstract class Entity implements INameable, ICommandSource {
         }
 
     }
-
 
     public AxisAlignedBB getCollisionBoundingBox() {
         return null;
@@ -1058,7 +1069,7 @@ public abstract class Entity implements INameable, ICommandSource {
 
     @OnlyIn(Dist.CLIENT)
     public int getBrightnessForRender() {
-        BlockPos blockpos = new BlockPos(this.posX, this.posY + (double) this.getEyeHeight(), this.posZ);
+        BlockPos blockpos = CLIENT_BRIGHTNESS_POS.setPos(this.posX, this.posY + (double) this.getEyeHeight(), this.posZ);
         return this.world.isBlockLoaded(blockpos) ? this.world.getCombinedLight(blockpos, 0) : 0;
     }
 
@@ -1106,6 +1117,12 @@ public abstract class Entity implements INameable, ICommandSource {
     }
 
     public void setLocationAndAngles(double x, double y, double z, float yaw, float pitch) {
+        if (Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z) ||
+            Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(z)) {
+            return;
+        }
+        if (Float.isNaN(yaw) || Float.isInfinite(yaw)) yaw = 0.0F;
+        if (Float.isNaN(pitch) || Float.isInfinite(pitch)) pitch = 0.0F;
         this.posX = x;
         this.posY = y;
         this.posZ = z;
@@ -1453,7 +1470,6 @@ public abstract class Entity implements INameable, ICommandSource {
         return true;
     }
 
-
     protected final String getEntityString() {
         EntityType<?> entitytype = this.getType();
         ResourceLocation resourcelocation = EntityType.getKey(entitytype);
@@ -1484,21 +1500,17 @@ public abstract class Entity implements INameable, ICommandSource {
         return listnbt;
     }
 
-
     public ItemEntity entityDropItem(IItemProvider p_199703_1_) {
         return this.entityDropItem(p_199703_1_, 0);
     }
-
 
     public ItemEntity entityDropItem(IItemProvider p_199702_1_, int offset) {
         return this.entityDropItem(new ItemStack(p_199702_1_), (float) offset);
     }
 
-
     public ItemEntity entityDropItem(ItemStack p_199701_1_) {
         return this.entityDropItem(p_199701_1_, 0.0F);
     }
-
 
     public ItemEntity entityDropItem(ItemStack stack, float offsetY) {
         if (stack.isEmpty()) {
@@ -1543,7 +1555,6 @@ public abstract class Entity implements INameable, ICommandSource {
     public boolean processInitialInteract(PlayerEntity player, Hand hand) {
         return false;
     }
-
 
     public AxisAlignedBB getCollisionBox(Entity entityIn) {
         return null;
@@ -1840,7 +1851,6 @@ public abstract class Entity implements INameable, ICommandSource {
         }
     }
 
-
     public Team getTeam() {
         return this.world.getScoreboard().getPlayersTeam(this.getScoreboardName());
     }
@@ -2026,7 +2036,6 @@ public abstract class Entity implements INameable, ICommandSource {
         this.teleportDirection = entityIn.teleportDirection;
     }
 
-
     public Entity changeDimension(DimensionType destination) {
         if (!this.world.isRemote && !this.removed) {
             this.world.getProfiler().startSection("changeDimension");
@@ -2188,7 +2197,6 @@ public abstract class Entity implements INameable, ICommandSource {
         this.dataManager.set(CUSTOM_NAME, Optional.ofNullable(name));
     }
 
-
     public ITextComponent getCustomName() {
         return this.dataManager.get(CUSTOM_NAME).orElse((ITextComponent) null);
     }
@@ -2331,7 +2339,6 @@ public abstract class Entity implements INameable, ICommandSource {
         return this.world;
     }
 
-
     public MinecraftServer getServer() {
         return this.world.getServer();
     }
@@ -2393,7 +2400,6 @@ public abstract class Entity implements INameable, ICommandSource {
         this.isPositionDirty = false;
         return flag;
     }
-
 
     public Entity getControllingPassenger() {
         return null;
@@ -2486,7 +2492,6 @@ public abstract class Entity implements INameable, ICommandSource {
             return !this.world.isRemote;
         }
     }
-
 
     public Entity getRidingEntity() {
         return this.ridingEntity;
@@ -2629,6 +2634,11 @@ public abstract class Entity implements INameable, ICommandSource {
     }
 
     public void setMotion(Vec3d p_213317_1_) {
+        if (p_213317_1_ == null || Double.isNaN(p_213317_1_.x) || Double.isNaN(p_213317_1_.y) || Double.isNaN(p_213317_1_.z) ||
+            Double.isInfinite(p_213317_1_.x) || Double.isInfinite(p_213317_1_.y) || Double.isInfinite(p_213317_1_.z)) {
+            this.motion = Vec3d.ZERO;
+            return;
+        }
         this.motion = p_213317_1_;
     }
 

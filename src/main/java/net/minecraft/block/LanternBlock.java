@@ -26,7 +26,6 @@ public class LanternBlock extends Block {
       this.setDefaultState(this.stateContainer.getBaseState().with(HANGING, Boolean.valueOf(false)));
    }
 
-
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       for(Direction direction : context.getNearestLookingDirections()) {
          if (direction.getAxis() == Direction.Axis.Y) {

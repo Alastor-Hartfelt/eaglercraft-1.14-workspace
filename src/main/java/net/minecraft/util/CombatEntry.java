@@ -32,11 +32,9 @@ public class CombatEntry {
         return this.damageSrc.getTrueSource() instanceof LivingEntity;
     }
 
-
     public String getFallSuffix() {
         return this.fallSuffix;
     }
-
 
     public ITextComponent getDamageSrcDisplayName() {
         return this.getDamageSrc().getTrueSource() == null ? null : this.getDamageSrc().getTrueSource().getDisplayName();

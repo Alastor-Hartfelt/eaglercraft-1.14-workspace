@@ -28,7 +28,6 @@ public abstract class AgeableEntity extends CreatureEntity {
         super(type, worldIn);
     }
 
-
     public abstract AgeableEntity createChild(AgeableEntity ageable);
 
     protected void onChildSpawnFromEgg(PlayerEntity playerIn, AgeableEntity child) {

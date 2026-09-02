@@ -522,7 +522,7 @@ public abstract class ContainerScreen<T extends Container> extends Screen implem
       if (super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
          return true;
       } else {
-         if (this.mc.gameSettings.keyBindInventory.matchesKey(p_keyPressed_1_, p_keyPressed_2_)) {
+         if (this.mc.gameSettings.keyBindInventory.matchesKey(p_keyPressed_1_, p_keyPressed_2_) || p_keyPressed_1_ == 96) {
             this.mc.player.closeScreen();
          } else if (p_keyPressed_1_ == 256 && !this.shouldCloseOnEsc()) {
             this.escWarningTimer = 60;
@@ -577,5 +577,48 @@ public abstract class ContainerScreen<T extends Container> extends Screen implem
 
    public T getContainer() {
       return this.container;
+   }
+
+   protected boolean primaryTouchPoint = false;
+   public int lastTouchX = -1;
+   public int lastTouchY = -1;
+
+   public void touchStarted(int x, int y, int evt) {
+      if (!primaryTouchPoint) {
+         primaryTouchPoint = true;
+         lastTouchX = x;
+         lastTouchY = y;
+         this.mouseClicked(x, y, 0);
+      }
+   }
+
+   public void touchMoved(int x, int y, int evt) {
+      if (primaryTouchPoint) {
+         this.mouseDragged(x, y, 0, x - lastTouchX, y - lastTouchY);
+         lastTouchX = x;
+         lastTouchY = y;
+      }
+   }
+
+   public void touchEndMove(int x, int y, int evt) {
+      if (primaryTouchPoint) {
+         primaryTouchPoint = false;
+         this.mouseReleased(x, y, 0);
+      }
+   }
+
+   public void touchTapped(int x, int y, int evt) {
+      if (primaryTouchPoint) {
+         primaryTouchPoint = false;
+         this.mouseReleased(x, y, 0);
+      }
+   }
+
+   public boolean shouldTouchGenerateMouseEvents() {
+      return false;
+   }
+
+   public float getTouchModeScale() {
+      return 1.25f;
    }
 }

@@ -97,7 +97,6 @@ public abstract class AbstractGroupFishEntity extends AbstractFishEntity {
       });
    }
 
-   
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason,  ILivingEntityData spawnDataIn,  CompoundNBT dataTag) {
       super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
       if (spawnDataIn == null) {

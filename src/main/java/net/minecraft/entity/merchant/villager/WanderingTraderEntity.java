@@ -57,7 +57,6 @@ public class WanderingTraderEntity extends AbstractVillagerEntity {
         this.goalSelector.addGoal(10, new LookAtGoal(this, MobEntity.class, 8.0F));
     }
 
-
     public AgeableEntity createChild(AgeableEntity ageable) {
         return null;
     }
@@ -193,7 +192,6 @@ public class WanderingTraderEntity extends AbstractVillagerEntity {
     public void func_213726_g(BlockPos p_213726_1_) {
         this.wanderTarget = p_213726_1_;
     }
-
 
     private BlockPos func_213727_eh() {
         return this.wanderTarget;

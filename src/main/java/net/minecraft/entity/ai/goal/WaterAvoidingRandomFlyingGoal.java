@@ -17,7 +17,6 @@ public class WaterAvoidingRandomFlyingGoal extends WaterAvoidingRandomWalkingGoa
         super(p_i47413_1_, p_i47413_2_);
     }
 
-
     protected Vec3d getPosition() {
         Vec3d vec3d = null;
         if (this.creature.isInWater()) {
@@ -30,7 +29,6 @@ public class WaterAvoidingRandomFlyingGoal extends WaterAvoidingRandomWalkingGoa
 
         return vec3d == null ? super.getPosition() : vec3d;
     }
-
 
     private Vec3d getTreePos() {
         BlockPos blockpos = new BlockPos(this.creature);

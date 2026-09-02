@@ -53,7 +53,6 @@ public class OverworldBiomeProvider extends BiomeProvider {
         return set;
     }
 
-
     public BlockPos findBiomePosition(int x, int z, int range, List<Biome> biomes, Random random) {
         int i = x - range >> 2;
         int j = z - range >> 2;

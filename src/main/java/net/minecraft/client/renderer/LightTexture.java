@@ -72,7 +72,6 @@ public class LightTexture implements AutoCloseable {
         GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
     }
 
-
     public void updateLightmap(float partialTicks) {
         if (this.needsUpdate) {
             this.client.getProfiler().startSection("lightTex");

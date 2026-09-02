@@ -68,7 +68,6 @@ public abstract class AbstractVillagerEntity extends AgeableEntity implements IN
         this.customer = player;
     }
 
-
     public PlayerEntity getCustomer() {
         return this.customer;
     }
@@ -164,7 +163,6 @@ public abstract class AbstractVillagerEntity extends AgeableEntity implements IN
         }
 
     }
-
 
     public Entity changeDimension(DimensionType destination) {
         this.func_213750_eg();

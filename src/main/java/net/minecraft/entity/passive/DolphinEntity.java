@@ -58,7 +58,6 @@ public class DolphinEntity extends WaterMobEntity {
         this.setCanPickUpLoot(true);
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         this.setAir(this.getMaxAir());
         this.rotationPitch = 0.0F;
@@ -287,11 +286,9 @@ public class DolphinEntity extends WaterMobEntity {
         return SoundEvents.ENTITY_DOLPHIN_HURT;
     }
 
-
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_DOLPHIN_DEATH;
     }
-
 
     protected SoundEvent getAmbientSound() {
         return this.isInWater() ? SoundEvents.ENTITY_DOLPHIN_AMBIENT_WATER : SoundEvents.ENTITY_DOLPHIN_AMBIENT;

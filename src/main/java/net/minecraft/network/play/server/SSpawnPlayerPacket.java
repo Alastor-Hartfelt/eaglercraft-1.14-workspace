@@ -62,7 +62,6 @@ public class SSpawnPlayerPacket implements IPacket<IClientPlayNetHandler> {
       handler.handleSpawnPlayer(this);
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public List<EntityDataManager.DataEntry<?>> getDataManagerEntries() {
       return this.dataManagerEntries;

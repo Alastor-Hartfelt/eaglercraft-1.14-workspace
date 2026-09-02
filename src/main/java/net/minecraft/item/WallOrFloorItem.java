@@ -17,7 +17,6 @@ public class WallOrFloorItem extends BlockItem {
         this.wallBlock = wallBlockIn;
     }
 
-
     protected BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = this.wallBlock.getStateForPlacement(context);
         BlockState blockstate1 = null;

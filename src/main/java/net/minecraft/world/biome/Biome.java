@@ -88,7 +88,6 @@ public abstract class Biome {
         }
     };
 
-
     public static Biome getMutationForBiome(Biome biome) {
         return MUTATION_TO_BASE_ID_MAP.getByValue(Registry.BIOME.getId(biome));
     }
@@ -159,7 +158,7 @@ public abstract class Biome {
         return 0.1F;
     }
 
-    protected float getTemperature(BlockPos pos) {
+    public float getTemperature(BlockPos pos) {
         if (pos.getY() > 64) {
             float f = (float) (TEMPERATURE_NOISE.getValue((double) ((float) pos.getX() / 8.0F), (double) ((float) pos.getZ() / 8.0F)) * 4.0D);
             return this.getDefaultTemperature() - (f + (float) pos.getY() - 64.0F) * 0.05F / 30.0F;
@@ -254,7 +253,6 @@ public abstract class Biome {
     public <C extends IFeatureConfig> boolean hasStructure(Structure<C> structureIn) {
         return this.structures.containsKey(structureIn);
     }
-
 
     public <C extends IFeatureConfig> C getStructureConfig(Structure<C> structureIn) {
         return (C) (this.structures.get(structureIn));
@@ -364,7 +362,6 @@ public abstract class Biome {
     public ISurfaceBuilderConfig getSurfaceBuilderConfig() {
         return this.surfaceBuilder.getConfig();
     }
-
 
     public String getParent() {
         return this.parent;

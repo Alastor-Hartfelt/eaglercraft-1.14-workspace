@@ -36,7 +36,6 @@ public class SeaPickleBlock extends BushBlock implements IGrowable, IWaterLoggab
         return this.isInBadEnvironment(state) ? 0 : super.getLightValue(state) + 3 * state.get(PICKLES);
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = context.getWorld().getBlockState(context.getPos());
         if (blockstate.getBlock() == this) {

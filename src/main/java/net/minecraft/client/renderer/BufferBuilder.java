@@ -1,10 +1,12 @@
 package net.minecraft.client.renderer;
 
 import com.google.common.primitives.Floats;
+import net.lax1dude.eaglercraft.EagRuntime;
 import net.lax1dude.eaglercraft.internal.buffer.ByteBuffer;
 import net.lax1dude.eaglercraft.internal.buffer.FloatBuffer;
 import net.lax1dude.eaglercraft.internal.buffer.IntBuffer;
 import net.lax1dude.eaglercraft.internal.buffer.ShortBuffer;
+import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexUtil;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraftforge.api.distmarker.Dist;
@@ -19,6 +21,10 @@ import java.util.BitSet;
 @OnlyIn(Dist.CLIENT)
 public class BufferBuilder {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final boolean LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
+    private static final int HFP_VERTEX_STRIDE = 20;
+    private static final float HFP_MODEL_ORIGIN = 8.0F;
+    private final boolean directChunkHfp;
     private ByteBuffer byteBuffer;
     private IntBuffer rawIntBuffer;
     private ShortBuffer rawShortBuffer;
@@ -35,6 +41,11 @@ public class BufferBuilder {
     private boolean isDrawing;
 
     public BufferBuilder(int bufferSizeIn) {
+        this(bufferSizeIn, false);
+    }
+
+    public BufferBuilder(int bufferSizeIn, boolean directChunkHfp) {
+        this.directChunkHfp = directChunkHfp;
         this.byteBuffer = GLAllocation.createDirectByteBuffer(bufferSizeIn * 4);
         this.rawIntBuffer = this.byteBuffer.asIntBuffer();
         this.rawShortBuffer = this.byteBuffer.asShortBuffer();
@@ -42,68 +53,63 @@ public class BufferBuilder {
     }
 
     private void growBuffer(int increaseAmount) {
-        if (this.vertexCount * this.vertexFormat.getSize() + increaseAmount > this.byteBuffer.capacity()) {
-            int i = this.byteBuffer.capacity();
-            int j = i + func_216566_c(increaseAmount);
-            LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", i, j);
+        if (this.getBufferSizeBytes() + increaseAmount > this.byteBuffer.capacity()) {
+            int capacity = this.byteBuffer.capacity();
+
+            int newCapacity = Math.max(capacity * 2, capacity + increaseAmount);
+            LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", capacity, newCapacity);
             int k = this.rawIntBuffer.position();
-            ByteBuffer bytebuffer = GLAllocation.createDirectByteBuffer(j);
-            this.byteBuffer.position(0);
-            bytebuffer.put(this.byteBuffer);
+            ByteBuffer oldBuffer = this.byteBuffer;
+            ByteBuffer bytebuffer = GLAllocation.createDirectByteBuffer(newCapacity);
+            oldBuffer.position(0);
+            bytebuffer.put(oldBuffer);
             bytebuffer.rewind();
             this.byteBuffer = bytebuffer;
             this.rawIntBuffer = this.byteBuffer.asIntBuffer();
             this.rawIntBuffer.position(k);
             this.rawShortBuffer = this.byteBuffer.asShortBuffer();
             this.rawShortBuffer.position(k << 1);
-        }
-    }
-
-    private static int func_216566_c(int p_216566_0_) {
-        int i = 131072;
-        if (p_216566_0_ == 0) {
-            return i;
-        } else {
-            if (p_216566_0_ < 0) {
-                i *= -1;
-            }
-
-            int j = p_216566_0_ % i;
-            return j == 0 ? p_216566_0_ : p_216566_0_ + i - j;
+            this.rawFloatBuffer = this.byteBuffer.asFloatBuffer();
+            this.rawFloatBuffer.position(k);
+            EagRuntime.freeByteBuffer(oldBuffer);
         }
     }
 
     public void sortVertexData(float cameraX, float cameraY, float cameraZ) {
-        int i = this.vertexCount / 4;
-        float[] afloat = new float[i];
+        int quadCount = this.vertexCount / 4;
+        float[] distanceArray = new float[quadCount];
+        int[] indicesArray = new int[quadCount];
 
-        for (int j = 0; j < i; ++j) {
-            afloat[j] = getDistanceSq(this.rawFloatBuffer, (float) ((double) cameraX + this.xOffset), (float) ((double) cameraY + this.yOffset), (float) ((double) cameraZ + this.zOffset), this.vertexFormat.getIntegerSize(), j * this.vertexFormat.getSize());
+        float centerX = (float) ((double) cameraX + this.xOffset);
+        float centerY = (float) ((double) cameraY + this.yOffset);
+        float centerZ = (float) ((double) cameraZ + this.zOffset);
+        for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
+            if (this.directChunkHfp) {
+                distanceArray[quadIdx] = getHfpDistanceSq(this.byteBuffer, centerX + HFP_MODEL_ORIGIN,
+                        centerY + HFP_MODEL_ORIGIN, centerZ + HFP_MODEL_ORIGIN,
+                        quadIdx * HFP_VERTEX_STRIDE * 4);
+            } else {
+                distanceArray[quadIdx] = getDistanceSq(this.rawFloatBuffer, centerX, centerY, centerZ,
+                        this.vertexFormat.getIntegerSize(), quadIdx * this.vertexFormat.getSize());
+            }
+            indicesArray[quadIdx] = quadIdx;
         }
 
-        Integer[] ainteger = new Integer[i];
-
-        for (int k = 0; k < ainteger.length; ++k) {
-            ainteger[k] = k;
-        }
-
-        Arrays.sort(ainteger, (p_210255_1_, p_210255_2_) -> {
-            return Floats.compare(afloat[p_210255_2_], afloat[p_210255_1_]);
-        });
+        mergeSort(indicesArray, distanceArray);
         BitSet bitset = new BitSet();
-        int l = this.vertexFormat.getSize();
+        int l = this.getStoredVertexStride();
         int[] aint = new int[l];
         int[] tempQuad = new int[l];
 
-        for (int i1 = bitset.nextClearBit(0); i1 < ainteger.length; i1 = bitset.nextClearBit(i1 + 1)) {
-            int j1 = ainteger[i1];
+        for (int i1 = bitset.nextClearBit(0); i1 < indicesArray.length; i1 = bitset.nextClearBit(i1 + 1)) {
+            int j1 = indicesArray[i1];
             if (j1 != i1) {
                 this.rawIntBuffer.limit(j1 * l + l);
                 this.rawIntBuffer.position(j1 * l);
                 this.rawIntBuffer.get(aint);
                 int k1 = j1;
 
-                for (int l1 = ainteger[j1]; k1 != i1; l1 = ainteger[l1]) {
+                for (int l1 = indicesArray[j1]; k1 != i1; l1 = indicesArray[l1]) {
                     this.rawIntBuffer.limit(l1 * l + l);
                     this.rawIntBuffer.position(l1 * l);
                     this.rawIntBuffer.get(tempQuad);
@@ -113,7 +119,6 @@ public class BufferBuilder {
                     bitset.set(k1);
                     k1 = l1;
                 }
-
 
                 this.rawIntBuffer.limit(i1 * l + l);
                 this.rawIntBuffer.position(i1 * l);
@@ -125,6 +130,53 @@ public class BufferBuilder {
 
     }
 
+    private static void mergeSort(int[] indicesArray, float[] distanceArray) {
+        mergeSort(indicesArray, 0, indicesArray.length, distanceArray,
+                Arrays.copyOf(indicesArray, indicesArray.length));
+    }
+
+    private static void mergeSort(final int[] a, final int from, final int to, float[] dist, final int[] supp) {
+        int len = to - from;
+
+        if (len < 16) {
+            insertionSort(a, from, to, dist);
+            return;
+        }
+        final int mid = (from + to) >>> 1;
+        mergeSort(supp, from, mid, dist, a);
+        mergeSort(supp, mid, to, dist, a);
+
+        if (Floats.compare(dist[supp[mid]], dist[supp[mid - 1]]) <= 0) {
+            System.arraycopy(supp, from, a, from, len);
+            return;
+        }
+
+        for (int i = from, p = from, q = mid; i < to; i++) {
+            if (q >= to || p < mid && Floats.compare(dist[supp[q]], dist[supp[p]]) <= 0) {
+                a[i] = supp[p++];
+            } else {
+                a[i] = supp[q++];
+            }
+        }
+    }
+
+    private static void insertionSort(final int[] a, final int from, final int to, final float[] dist) {
+        for (int i = from; ++i < to; ) {
+            int t = a[i];
+            int j = i;
+
+            for (int u = a[j - 1]; Floats.compare(dist[u], dist[t]) < 0; u = a[--j - 1]) {
+                a[j] = u;
+                if (from == j - 1) {
+                    --j;
+                    break;
+                }
+            }
+
+            a[j] = t;
+        }
+    }
+
     public BufferBuilder.State getVertexState() {
         this.rawIntBuffer.rewind();
         int i = this.getBufferSize();
@@ -133,33 +185,70 @@ public class BufferBuilder {
         this.rawIntBuffer.get(aint);
         this.rawIntBuffer.limit(this.rawIntBuffer.capacity());
         this.rawIntBuffer.position(i);
-        return new BufferBuilder.State(aint, new VertexFormat(this.vertexFormat));
+        return new BufferBuilder.State(aint, new VertexFormat(this.vertexFormat), this.getStoredVertexStride() >> 2,
+                this.directChunkHfp);
     }
 
     private int getBufferSize() {
-        return this.vertexCount * (this.vertexFormat.getSize() >> 2);
+        return this.getBufferSizeBytes() >> 2;
     }
 
-    private static float getDistanceSq(FloatBuffer floatBufferIn, float x, float y, float z, int integerSize, int offset) {
-        float f = floatBufferIn.get(offset + integerSize * 0 + 0);
-        float f1 = floatBufferIn.get(offset + integerSize * 0 + 1);
-        float f2 = floatBufferIn.get(offset + integerSize * 0 + 2);
-        float f3 = floatBufferIn.get(offset + integerSize * 1 + 0);
-        float f4 = floatBufferIn.get(offset + integerSize * 1 + 1);
-        float f5 = floatBufferIn.get(offset + integerSize * 1 + 2);
-        float f6 = floatBufferIn.get(offset + integerSize * 2 + 0);
-        float f7 = floatBufferIn.get(offset + integerSize * 2 + 1);
-        float f8 = floatBufferIn.get(offset + integerSize * 2 + 2);
-        float f9 = floatBufferIn.get(offset + integerSize * 3 + 0);
-        float f10 = floatBufferIn.get(offset + integerSize * 3 + 1);
-        float f11 = floatBufferIn.get(offset + integerSize * 3 + 2);
-        float f12 = (f + f3 + f6 + f9) * 0.25F - x;
-        float f13 = (f1 + f4 + f7 + f10) * 0.25F - y;
-        float f14 = (f2 + f5 + f8 + f11) * 0.25F - z;
-        return f12 * f12 + f13 * f13 + f14 * f14;
+    private int getBufferSizeBytes() {
+        return this.vertexCount * this.getStoredVertexStride();
+    }
+
+    private int getStoredVertexStride() {
+        return this.directChunkHfp ? HFP_VERTEX_STRIDE : this.vertexFormat.getSize();
+    }
+
+    private static float getDistanceSq(FloatBuffer buffer, float xCenter, float yCenter, float zCenter, int stride, int start) {
+        int vertexBase = start;
+        float x1 = buffer.get(vertexBase);
+        float y1 = buffer.get(vertexBase + 1);
+        float z1 = buffer.get(vertexBase + 2);
+
+        vertexBase += stride;
+        float x2 = buffer.get(vertexBase);
+        float y2 = buffer.get(vertexBase + 1);
+        float z2 = buffer.get(vertexBase + 2);
+
+        vertexBase += stride;
+        float x3 = buffer.get(vertexBase);
+        float y3 = buffer.get(vertexBase + 1);
+        float z3 = buffer.get(vertexBase + 2);
+
+        vertexBase += stride;
+        float x4 = buffer.get(vertexBase);
+        float y4 = buffer.get(vertexBase + 1);
+        float z4 = buffer.get(vertexBase + 2);
+
+        float xDist = ((x1 + x2 + x3 + x4) * 0.25F) - xCenter;
+        float yDist = ((y1 + y2 + y3 + y4) * 0.25F) - yCenter;
+        float zDist = ((z1 + z2 + z3 + z4) * 0.25F) - zCenter;
+
+        return (xDist * xDist) + (yDist * yDist) + (zDist * zDist);
+    }
+
+    private static float getHfpDistanceSq(ByteBuffer buffer, float xCenter, float yCenter, float zCenter, int start) {
+        float x = 0.0F;
+        float y = 0.0F;
+        float z = 0.0F;
+        for (int vertex = 0; vertex < 4; ++vertex) {
+            int offset = start + vertex * HFP_VERTEX_STRIDE;
+            x += (float) (buffer.getShort(offset) & 65535) * (1.0F / 256.0F);
+            y += (float) (buffer.getShort(offset + 2) & 65535) * (1.0F / 256.0F);
+            z += (float) (buffer.getShort(offset + 4) & 65535) * (1.0F / 256.0F);
+        }
+        float xDist = x * 0.25F - xCenter;
+        float yDist = y * 0.25F - yCenter;
+        float zDist = z * 0.25F - zCenter;
+        return xDist * xDist + yDist * yDist + zDist * zDist;
     }
 
     public void setVertexState(BufferBuilder.State state) {
+        if (state.isDirectChunkHfp() != this.directChunkHfp) {
+            throw new IllegalArgumentException("Mismatched chunk vertex storage format");
+        }
         this.rawIntBuffer.clear();
         this.growBuffer(state.getRawBuffer().length * 4);
         this.rawIntBuffer.put(state.getRawBuffer());
@@ -275,7 +364,7 @@ public class BufferBuilder {
         int j = -1;
         if (!this.noColor) {
             j = this.rawIntBuffer.get(i);
-            if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
+            if (LITTLE_ENDIAN) {
                 int k = (int) ((float) (j & 255) * red);
                 int l = (int) ((float) (j >> 8 & 255) * green);
                 int i1 = (int) ((float) (j >> 16 & 255) * blue);
@@ -318,7 +407,7 @@ public class BufferBuilder {
     }
 
     private void putColorRGBA(int index, int red, int green, int blue) {
-        if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
+        if (LITTLE_ENDIAN) {
             this.rawIntBuffer.put(index, -16777216 | blue << 16 | green << 8 | red);
         } else {
             this.rawIntBuffer.put(index, red << 24 | green << 16 | blue << 8 | 255);
@@ -362,7 +451,7 @@ public class BufferBuilder {
                     break;
                 case UBYTE:
                 case BYTE:
-                    if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
+                    if (LITTLE_ENDIAN) {
                         this.byteBuffer.put(i, (byte) red);
                         this.byteBuffer.put(i + 1, (byte) green);
                         this.byteBuffer.put(i + 2, (byte) blue);
@@ -389,12 +478,16 @@ public class BufferBuilder {
     }
 
     public void addQuadOptimized(int[] vertexData, float xOffset, float yOffset, float zOffset, int[] vertexBrightness, float[] colorMultR, float[] colorMultG, float[] colorMultB) {
+        if (this.directChunkHfp) {
+            this.addQuadHfp(vertexData, xOffset, yOffset, zOffset, vertexBrightness,
+                    colorMultR, colorMultG, colorMultB);
+            return;
+        }
+
         int vertexSizeInts = this.vertexFormat.getIntegerSize();
         int quadInts = vertexSizeInts * 4;
         this.growBuffer(quadInts * 4 + this.vertexFormat.getSize());
         int offset = this.getBufferSize();
-        boolean littleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
-
         float finalXOffset = xOffset + (float) this.xOffset;
         float finalYOffset = yOffset + (float) this.yOffset;
         float finalZOffset = zOffset + (float) this.zOffset;
@@ -412,7 +505,7 @@ public class BufferBuilder {
             float cg = colorMultG[i];
             float cb = colorMultB[i];
 
-            if (littleEndian) {
+            if (LITTLE_ENDIAN) {
                 int r = (int) ((float) (origColor & 255) * cr);
                 int g = (int) ((float) (origColor >> 8 & 255) * cg);
                 int b = (int) ((float) (origColor >> 16 & 255) * cb);
@@ -437,68 +530,137 @@ public class BufferBuilder {
         this.vertexCount += 4;
     }
 
+    private void addQuadHfp(int[] vertexData, float xOffset, float yOffset, float zOffset,
+                            int[] vertexBrightness, float[] colorMultR, float[] colorMultG, float[] colorMultB) {
+        int sourceStride = this.vertexFormat.getIntegerSize();
+        this.growBuffer(HFP_VERTEX_STRIDE * 4);
+        int offset = this.getBufferSizeBytes();
+        float finalXOffset = xOffset + (float) this.xOffset;
+        float finalYOffset = yOffset + (float) this.yOffset;
+        float finalZOffset = zOffset + (float) this.zOffset;
+
+        for (int i = 0; i < 4; ++i) {
+            int source = i * sourceStride;
+            int color = vertexData[source + 3];
+            if (LITTLE_ENDIAN) {
+                int red = (int) ((float) (color & 255) * colorMultR[i]);
+                int green = (int) ((float) (color >> 8 & 255) * colorMultG[i]);
+                int blue = (int) ((float) (color >> 16 & 255) * colorMultB[i]);
+                color = color & -16777216 | blue << 16 | green << 8 | red;
+            } else {
+                int red = (int) ((float) (color >> 24 & 255) * colorMultR[i]);
+                int green = (int) ((float) (color >> 16 & 255) * colorMultG[i]);
+                int blue = (int) ((float) (color >> 8 & 255) * colorMultB[i]);
+                color = color & 255 | red << 24 | green << 16 | blue << 8;
+            }
+
+            this.putHfpVertex(offset,
+                    Float.intBitsToFloat(vertexData[source]) + finalXOffset + HFP_MODEL_ORIGIN,
+                    Float.intBitsToFloat(vertexData[source + 1]) + finalYOffset + HFP_MODEL_ORIGIN,
+                    Float.intBitsToFloat(vertexData[source + 2]) + finalZOffset + HFP_MODEL_ORIGIN,
+                    color, Float.intBitsToFloat(vertexData[source + 4]),
+                    Float.intBitsToFloat(vertexData[source + 5]), vertexBrightness[i]);
+            offset += HFP_VERTEX_STRIDE;
+        }
+
+        this.vertexCount += 4;
+    }
+
     public void addFluidQuad(
             float x0, float y0, float z0, float u0, float v0,
             float x1, float y1, float z1, float u1, float v1,
             float x2, float y2, float z2, float u2, float v2,
             float x3, float y3, float z3, float u3, float v3,
             float r, float g, float b, int lightmap) {
-        int vertexSizeInts = this.vertexFormat.getIntegerSize();
-        this.growBuffer(vertexSizeInts * 16 + this.vertexFormat.getSize());
-        int k = this.vertexCount * vertexSizeInts;
+        int red = (int) (r * 255.0F) & 255;
+        int green = (int) (g * 255.0F) & 255;
+        int blue = (int) (b * 255.0F) & 255;
+        int color = LITTLE_ENDIAN
+                ? red | green << 8 | blue << 16 | 255 << 24
+                : 255 | red << 24 | green << 16 | blue << 8;
 
-        float cx = (float) this.xOffset;
-        float cy = (float) this.yOffset;
-        float cz = (float) this.zOffset;
-
-        int j1 = (int) (r * 255.0F);
-        int k1 = (int) (g * 255.0F);
-        int l1 = (int) (b * 255.0F);
-        boolean littleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
-        int colorInt;
-        if (littleEndian) {
-            colorInt = j1 | k1 << 8 | l1 << 16 | 255 << 24;
-        } else {
-            colorInt = 255 | j1 << 24 | k1 << 16 | l1 << 8;
+        if (this.directChunkHfp) {
+            this.growBuffer(HFP_VERTEX_STRIDE * 4);
+            int offset = this.getBufferSizeBytes();
+            this.putHfpVertex(offset, (float) ((double) x0 + this.xOffset) + HFP_MODEL_ORIGIN,
+                    (float) ((double) y0 + this.yOffset) + HFP_MODEL_ORIGIN,
+                    (float) ((double) z0 + this.zOffset) + HFP_MODEL_ORIGIN, color, u0, v0, lightmap);
+            offset += HFP_VERTEX_STRIDE;
+            this.putHfpVertex(offset, (float) ((double) x1 + this.xOffset) + HFP_MODEL_ORIGIN,
+                    (float) ((double) y1 + this.yOffset) + HFP_MODEL_ORIGIN,
+                    (float) ((double) z1 + this.zOffset) + HFP_MODEL_ORIGIN, color, u1, v1, lightmap);
+            offset += HFP_VERTEX_STRIDE;
+            this.putHfpVertex(offset, (float) ((double) x2 + this.xOffset) + HFP_MODEL_ORIGIN,
+                    (float) ((double) y2 + this.yOffset) + HFP_MODEL_ORIGIN,
+                    (float) ((double) z2 + this.zOffset) + HFP_MODEL_ORIGIN, color, u2, v2, lightmap);
+            offset += HFP_VERTEX_STRIDE;
+            this.putHfpVertex(offset, (float) ((double) x3 + this.xOffset) + HFP_MODEL_ORIGIN,
+                    (float) ((double) y3 + this.yOffset) + HFP_MODEL_ORIGIN,
+                    (float) ((double) z3 + this.zOffset) + HFP_MODEL_ORIGIN, color, u3, v3, lightmap);
+            this.vertexCount += 4;
+            return;
         }
 
-        // Vert 0
-        this.rawFloatBuffer.put(k, x0 + cx);
-        this.rawFloatBuffer.put(k + 1, y0 + cy);
-        this.rawFloatBuffer.put(k + 2, z0 + cz);
-        this.rawIntBuffer.put(k + 3, colorInt);
-        this.rawFloatBuffer.put(k + 4, u0);
-        this.rawFloatBuffer.put(k + 5, v0);
-        this.rawIntBuffer.put(k + 6, lightmap);
+        int vertexSizeInts = this.vertexFormat.getIntegerSize();
+        this.growBuffer(this.vertexFormat.getSize() * 4);
+        int offset = this.getBufferSize();
 
-        // Vert 1
-        this.rawFloatBuffer.put(k + 7, x1 + cx);
-        this.rawFloatBuffer.put(k + 8, y1 + cy);
-        this.rawFloatBuffer.put(k + 9, z1 + cz);
-        this.rawIntBuffer.put(k + 10, colorInt);
-        this.rawFloatBuffer.put(k + 11, u1);
-        this.rawFloatBuffer.put(k + 12, v1);
-        this.rawIntBuffer.put(k + 13, lightmap);
-
-        // Vert 2
-        this.rawFloatBuffer.put(k + 14, x2 + cx);
-        this.rawFloatBuffer.put(k + 15, y2 + cy);
-        this.rawFloatBuffer.put(k + 16, z2 + cz);
-        this.rawIntBuffer.put(k + 17, colorInt);
-        this.rawFloatBuffer.put(k + 18, u2);
-        this.rawFloatBuffer.put(k + 19, v2);
-        this.rawIntBuffer.put(k + 20, lightmap);
-
-        // Vert 3
-        this.rawFloatBuffer.put(k + 21, x3 + cx);
-        this.rawFloatBuffer.put(k + 22, y3 + cy);
-        this.rawFloatBuffer.put(k + 23, z3 + cz);
-        this.rawIntBuffer.put(k + 24, colorInt);
-        this.rawFloatBuffer.put(k + 25, u3);
-        this.rawFloatBuffer.put(k + 26, v3);
-        this.rawIntBuffer.put(k + 27, lightmap);
+        this.putBlockVertex(offset, (float) ((double) x0 + this.xOffset),
+                (float) ((double) y0 + this.yOffset), (float) ((double) z0 + this.zOffset), color, u0, v0, lightmap);
+        offset += vertexSizeInts;
+        this.putBlockVertex(offset, (float) ((double) x1 + this.xOffset),
+                (float) ((double) y1 + this.yOffset), (float) ((double) z1 + this.zOffset), color, u1, v1, lightmap);
+        offset += vertexSizeInts;
+        this.putBlockVertex(offset, (float) ((double) x2 + this.xOffset),
+                (float) ((double) y2 + this.yOffset), (float) ((double) z2 + this.zOffset), color, u2, v2, lightmap);
+        offset += vertexSizeInts;
+        this.putBlockVertex(offset, (float) ((double) x3 + this.xOffset),
+                (float) ((double) y3 + this.yOffset), (float) ((double) z3 + this.zOffset), color, u3, v3, lightmap);
 
         this.vertexCount += 4;
+    }
+
+    private void putHfpVertex(int offset, float x, float y, float z, int color, float u, float v, int light) {
+        this.byteBuffer.putShort(offset, ModelVertexUtil.denormalizeVertexPositionFloatAsShort(x));
+        this.byteBuffer.putShort(offset + 2, ModelVertexUtil.denormalizeVertexPositionFloatAsShort(y));
+        this.byteBuffer.putShort(offset + 4, ModelVertexUtil.denormalizeVertexPositionFloatAsShort(z));
+        this.byteBuffer.putInt(offset + 8, color);
+        this.byteBuffer.putShort(offset + 12, ModelVertexUtil.denormalizeVertexTextureFloatAsShort(u));
+        this.byteBuffer.putShort(offset + 14, ModelVertexUtil.denormalizeVertexTextureFloatAsShort(v));
+        this.byteBuffer.putInt(offset + 16, ModelVertexUtil.encodeLightMapTexCoord(light));
+    }
+
+    private void putBlockVertex(int offset, float x, float y, float z, int color, float u, float v, int light) {
+        this.rawFloatBuffer.put(offset, x);
+        this.rawFloatBuffer.put(offset + 1, y);
+        this.rawFloatBuffer.put(offset + 2, z);
+        this.rawIntBuffer.put(offset + 3, color);
+        this.rawFloatBuffer.put(offset + 4, u);
+        this.rawFloatBuffer.put(offset + 5, v);
+        this.rawIntBuffer.put(offset + 6, light);
+    }
+
+    public void addParticleVertex(float x, float y, float z, float u, float v,
+                                  float r, float g, float b, float a, int light) {
+        this.growBuffer(this.vertexFormat.getSize());
+        int offset = this.getBufferSize();
+
+        int red = (int) (r * 255.0F) & 255;
+        int green = (int) (g * 255.0F) & 255;
+        int blue = (int) (b * 255.0F) & 255;
+        int alpha = (int) (a * 255.0F) & 255;
+        int color = LITTLE_ENDIAN
+                ? red | green << 8 | blue << 16 | alpha << 24
+                : alpha | red << 24 | green << 16 | blue << 8;
+
+        this.rawFloatBuffer.put(offset, (float) ((double) x + this.xOffset));
+        this.rawFloatBuffer.put(offset + 1, (float) ((double) y + this.yOffset));
+        this.rawFloatBuffer.put(offset + 2, (float) ((double) z + this.zOffset));
+        this.rawFloatBuffer.put(offset + 3, u);
+        this.rawFloatBuffer.put(offset + 4, v);
+        this.rawIntBuffer.put(offset + 5, color);
+        this.rawIntBuffer.put(offset + 6, light);
+        ++this.vertexCount;
     }
 
     public void endVertex() {
@@ -551,13 +713,15 @@ public class BufferBuilder {
     }
 
     private void nextVertexFormatIndex() {
-        ++this.vertexFormatIndex;
-        this.vertexFormatIndex %= this.vertexFormat.getElementCount();
-        this.vertexFormatElement = this.vertexFormat.getElement(this.vertexFormatIndex);
-        if (this.vertexFormatElement.getUsage() == VertexFormatElement.Usage.PADDING) {
-            this.nextVertexFormatIndex();
-        }
+        int elementCount = this.vertexFormat.getElementCount();
 
+        do {
+            if (++this.vertexFormatIndex >= elementCount) {
+                this.vertexFormatIndex -= elementCount;
+            }
+
+            this.vertexFormatElement = this.vertexFormat.getElement(this.vertexFormatIndex);
+        } while (this.vertexFormatElement.getUsage() == VertexFormatElement.Usage.PADDING);
     }
 
     public BufferBuilder normal(float x, float y, float z) {
@@ -603,7 +767,7 @@ public class BufferBuilder {
         } else {
             this.isDrawing = false;
             this.byteBuffer.position(0);
-            this.byteBuffer.limit(this.getBufferSize() * 4);
+            this.byteBuffer.limit(this.getBufferSizeBytes());
         }
     }
 
@@ -621,6 +785,10 @@ public class BufferBuilder {
 
     public int getDrawMode() {
         return this.drawMode;
+    }
+
+    public boolean isDirectChunkHfp() {
+        return this.directChunkHfp;
     }
 
     public void putColor4(int argb) {
@@ -641,10 +809,14 @@ public class BufferBuilder {
     public class State {
         private final int[] stateRawBuffer;
         private final VertexFormat stateVertexFormat;
+        private final int stateVertexStrideInts;
+        private final boolean stateDirectChunkHfp;
 
-        public State(int[] buffer, VertexFormat format) {
+        public State(int[] buffer, VertexFormat format, int vertexStrideInts, boolean directChunkHfp) {
             this.stateRawBuffer = buffer;
             this.stateVertexFormat = format;
+            this.stateVertexStrideInts = vertexStrideInts;
+            this.stateDirectChunkHfp = directChunkHfp;
         }
 
         public int[] getRawBuffer() {
@@ -652,11 +824,15 @@ public class BufferBuilder {
         }
 
         public int getVertexCount() {
-            return this.stateRawBuffer.length / this.stateVertexFormat.getIntegerSize();
+            return this.stateRawBuffer.length / this.stateVertexStrideInts;
         }
 
         public VertexFormat getVertexFormat() {
             return this.stateVertexFormat;
+        }
+
+        public boolean isDirectChunkHfp() {
+            return this.stateDirectChunkHfp;
         }
     }
 }

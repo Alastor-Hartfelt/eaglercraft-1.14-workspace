@@ -37,10 +37,7 @@ public class NetworkSystem {
 
    }
 
-
-
    public void terminateEndpoints() {
-
 
    }
 

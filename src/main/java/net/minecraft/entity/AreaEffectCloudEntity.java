@@ -296,7 +296,6 @@ public class AreaEffectCloudEntity extends Entity {
         this.ownerUniqueId = ownerIn == null ? null : ownerIn.getUniqueID();
     }
 
-
     public LivingEntity getOwner() {
         if (this.owner == null && this.ownerUniqueId != null && this.world instanceof ServerWorld) {
             Entity entity = ((ServerWorld) this.world).getEntityByUuid(this.ownerUniqueId);

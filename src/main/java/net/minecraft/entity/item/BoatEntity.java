@@ -104,11 +104,9 @@ public class BoatEntity extends Entity {
       this.dataManager.register(ROCKING_TICKS, 0);
    }
 
-
    public AxisAlignedBB getCollisionBox(Entity entityIn) {
       return entityIn.canBePushed() ? entityIn.getBoundingBox() : null;
    }
-
 
    public AxisAlignedBB getCollisionBoundingBox() {
       return this.getBoundingBox();
@@ -339,7 +337,6 @@ public class BoatEntity extends Entity {
 
    }
 
-
    protected SoundEvent getPaddleSound() {
       switch(this.getBoatStatus()) {
       case IN_WATER:
@@ -468,7 +465,7 @@ public class BoatEntity extends Entity {
          }
       }
 
-      return f / (float)k1;
+      return k1 == 0 ? 0.0F : f / (float)k1;
    }
 
    private boolean checkInWater() {
@@ -500,7 +497,6 @@ public class BoatEntity extends Entity {
 
       return flag;
    }
-
 
    private BoatEntity.Status getUnderwaterStatus() {
       AxisAlignedBB axisalignedbb = this.getBoundingBox();
@@ -548,7 +544,8 @@ public class BoatEntity extends Entity {
          this.status = BoatEntity.Status.IN_WATER;
       } else {
          if (this.status == BoatEntity.Status.IN_WATER) {
-            d2 = (this.waterLevel - this.getBoundingBox().minY) / (double)this.getHeight();
+            float boatHeight = this.getHeight();
+            d2 = boatHeight == 0.0F ? 0.0D : (this.waterLevel - this.getBoundingBox().minY) / (double)boatHeight;
             this.momentum = 0.9F;
          } else if (this.status == BoatEntity.Status.UNDER_FLOWING_WATER) {
             d1 = -7.0E-4D;
@@ -758,7 +755,6 @@ public class BoatEntity extends Entity {
    protected boolean canFitPassenger(Entity passenger) {
       return this.getPassengers().size() < 2 && !this.areEyesInFluid(FluidTags.WATER);
    }
-
 
    public Entity getControllingPassenger() {
       List<Entity> list = this.getPassengers();

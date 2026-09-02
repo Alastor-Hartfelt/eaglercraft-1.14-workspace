@@ -11,7 +11,6 @@ public class DarkOakTree extends BigTree {
       return null;
    }
 
-
    protected AbstractTreeFeature<NoFeatureConfig> getBigTreeFeature(Random random) {
       return new DarkOakTreeFeature(NoFeatureConfig::deserialize, true);
    }

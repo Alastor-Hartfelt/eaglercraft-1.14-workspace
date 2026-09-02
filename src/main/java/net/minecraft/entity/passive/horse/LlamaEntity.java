@@ -190,7 +190,6 @@ public class LlamaEntity extends AbstractChestedHorseEntity implements IRangedAt
         return this.getHealth() <= 0.0F || this.isEatingHaystack();
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
         this.setRandomStrength();
@@ -276,12 +275,10 @@ public class LlamaEntity extends AbstractChestedHorseEntity implements IRangedAt
         this.dataManager.set(DATA_COLOR_ID, color == null ? -1 : color.getId());
     }
 
-
     private static DyeColor getCarpetColor(ItemStack p_195403_0_) {
         Block block = Block.getBlockFromItem(p_195403_0_.getItem());
         return block instanceof CarpetBlock ? ((CarpetBlock) block).getColor() : null;
     }
-
 
     public DyeColor getColor() {
         int i = this.dataManager.get(DATA_COLOR_ID);
@@ -371,7 +368,6 @@ public class LlamaEntity extends AbstractChestedHorseEntity implements IRangedAt
     public boolean inCaravan() {
         return this.caravanHead != null;
     }
-
 
     public LlamaEntity getCaravanHead() {
         return this.caravanHead;

@@ -25,6 +25,8 @@ import org.teavm.jso.JSObject;
 import org.teavm.jso.JSProperty;
 import org.teavm.jso.core.JSArrayReader;
 
+import net.lax1dude.eaglercraft.internal.EnumTouchEvent;
+
 
 public class SortedTouchEvent {
 
@@ -86,5 +88,61 @@ public class SortedTouchEvent {
 		return ret;
 	}
 
+	public static SortedTouchEvent createTouchEvent(EnumTouchEvent type, JSArrayReader<JSTouchPoint> changedTouches,
+			JSArrayReader<JSTouchPoint> targetTouches, ITouchUIDMapper uidMapper, int windowHeight, float windowDPI) {
+		List<TouchPoint> changedTouchesList = convertTouchList(changedTouches, uidMapper, windowHeight, windowDPI);
+		List<TouchPoint> targetTouchesList = convertTouchList(targetTouches, uidMapper, windowHeight, windowDPI);
+		List<TouchPoint> eventTouchesList;
+		switch(type) {
+		case TOUCHSTART:
+			eventTouchesList = changedTouchesList;
+			break;
+		case TOUCHMOVE:
+			eventTouchesList = targetTouchesList;
+			break;
+		case TOUCHEND:
+		default:
+			eventTouchesList = changedTouchesList;
+			break;
+		}
+		return new SortedTouchEvent(type, changedTouchesList, targetTouchesList, eventTouchesList);
+	}
+
+	public final EnumTouchEvent type;
+	private final List<TouchPoint> changedTouchesList;
+	private final List<TouchPoint> targetTouchesList;
+	private final List<TouchPoint> eventTouchesList;
+
+	public SortedTouchEvent(EnumTouchEvent type, List<TouchPoint> changedTouchesList,
+			List<TouchPoint> targetTouchesList, List<TouchPoint> eventTouchesList) {
+		this.type = type;
+		this.changedTouchesList = changedTouchesList;
+		this.targetTouchesList = targetTouchesList;
+		this.eventTouchesList = eventTouchesList;
+	}
+
+	public int getChangedTouchesSize() {
+		return changedTouchesList.size();
+	}
+
+	public List<TouchPoint> getChangedTouches() {
+		return changedTouchesList;
+	}
+
+	public int getTargetTouchesSize() {
+		return targetTouchesList.size();
+	}
+
+	public List<TouchPoint> getTargetTouches() {
+		return targetTouchesList;
+	}
+
+	public int getEventTouchesSize() {
+		return eventTouchesList.size();
+	}
+
+	public List<TouchPoint> getEventTouches() {
+		return eventTouchesList;
+	}
 
 }

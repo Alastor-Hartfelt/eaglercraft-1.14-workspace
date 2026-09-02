@@ -90,7 +90,6 @@ public class SSpawnMobPacket implements IPacket<IClientPlayNetHandler> {
       handler.handleSpawnMob(this);
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public List<EntityDataManager.DataEntry<?>> getDataManagerEntries() {
       return this.dataManagerEntries;

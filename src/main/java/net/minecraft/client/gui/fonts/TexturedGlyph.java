@@ -46,7 +46,6 @@ public class TexturedGlyph {
         buffer.pos((double) (f1 + f6), (double) f4, 0.0D).tex((double) this.u1, (double) this.v0).color(red, green, blue, alpha).endVertex();
     }
 
-
     public ResourceLocation getTextureLocation() {
         return this.textureLocation;
     }

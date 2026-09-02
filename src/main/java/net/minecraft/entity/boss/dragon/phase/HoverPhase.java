@@ -29,7 +29,6 @@ public class HoverPhase extends Phase {
       return 1.0F;
    }
 
-
    public Vec3d getTargetLocation() {
       return this.targetLocation;
    }

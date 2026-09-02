@@ -24,7 +24,6 @@ public interface ITaskQueue<T, F> {
          }).collect(Collectors.toList());
       }
 
-
       public Runnable poll() {
          for(Queue<Runnable> queue : this.queues) {
             Runnable runnable = queue.poll();
@@ -71,7 +70,6 @@ public interface ITaskQueue<T, F> {
       public Single(Queue<T> queueIn) {
          this.queue = queueIn;
       }
-
 
       public T poll() {
          return this.queue.poll();

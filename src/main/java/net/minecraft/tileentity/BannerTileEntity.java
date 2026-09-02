@@ -55,7 +55,6 @@ public class BannerTileEntity extends TileEntity implements INameable {
       return (ITextComponent)(this.name != null ? this.name : new TranslationTextComponent("block.minecraft.banner"));
    }
 
-
    public ITextComponent getCustomName() {
       return this.name;
    }
@@ -95,7 +94,6 @@ public class BannerTileEntity extends TileEntity implements INameable {
       this.patternResourceLocation = null;
       this.patternDataSet = true;
    }
-
 
    public SUpdateTileEntityPacket getUpdatePacket() {
       return new SUpdateTileEntityPacket(this.pos, 6, this.getUpdateTag());

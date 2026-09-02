@@ -1,5 +1,9 @@
 package net.minecraft.client.multiplayer;
 
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
+import me.jellysquid.mods.sodium.client.world.ChunkStatusListenerManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -24,12 +28,16 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.BooleanSupplier;
 
 @OnlyIn(Dist.CLIENT)
-public class ClientChunkProvider extends AbstractChunkProvider {
+public class ClientChunkProvider extends AbstractChunkProvider implements ChunkStatusListenerManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Chunk empty;
     private final WorldLightManager lightManager;
     private volatile ClientChunkProvider.ChunkArray array;
     private final ClientWorld world;
+    private final LongOpenHashSet loadedChunks = new LongOpenHashSet();
+    private boolean needsTrackingUpdate = false;
+
+    private ChunkStatusListener listener;
 
     public ClientChunkProvider(ClientWorld p_i51057_1_, int viewDistance) {
         this.world = p_i51057_1_;
@@ -57,11 +65,15 @@ public class ClientChunkProvider extends AbstractChunkProvider {
             Chunk chunk = this.array.get(i);
             if (isValid(chunk, x, z)) {
                 this.array.unload(i, chunk, (Chunk) null);
+
+                if (this.listener != null) {
+                    this.listener.onChunkRemoved(x, z);
+                    this.loadedChunks.remove(ChunkPos.asLong(x, z));
+                }
             }
 
         }
     }
-
 
     public Chunk getChunk(int chunkX, int chunkZ, ChunkStatus requiredStatus, boolean load) {
         if (this.array.inView(chunkX, chunkZ)) {
@@ -77,7 +89,6 @@ public class ClientChunkProvider extends AbstractChunkProvider {
     public IBlockReader getWorld() {
         return this.world;
     }
-
 
     public Chunk func_217250_a(World p_217250_1_, int p_217250_2_, int p_217250_3_, PacketBuffer p_217250_4_, CompoundNBT p_217250_5_, int p_217250_6_, boolean p_217250_7_) {
         if (!this.array.inView(p_217250_2_, p_217250_3_)) {
@@ -109,17 +120,46 @@ public class ClientChunkProvider extends AbstractChunkProvider {
 
             worldlightmanager.func_215571_a(new ChunkPos(p_217250_2_, p_217250_3_), true);
 
+            if (p_217250_7_ && this.listener != null) {
+                this.listener.onChunkAdded(p_217250_2_, p_217250_3_);
+                this.loadedChunks.add(ChunkPos.asLong(p_217250_2_, p_217250_3_));
+            }
+
             return chunk;
         }
     }
 
     public void tick(BooleanSupplier hasTimeLeft) {
         this.lightManager.tick(100, true, true);
+
+        if (!this.needsTrackingUpdate) {
+            return;
+        }
+
+        LongIterator it = this.loadedChunks.iterator();
+
+        while (it.hasNext()) {
+            long pos = it.nextLong();
+
+            int x = ChunkPos.getX(pos);
+            int z = ChunkPos.getZ(pos);
+
+            if (this.getChunk(x, z, ChunkStatus.FULL, false) == null) {
+                it.remove();
+
+                if (this.listener != null) {
+                    this.listener.onChunkRemoved(x, z);
+                }
+            }
+        }
+
+        this.needsTrackingUpdate = false;
     }
 
     public void setCenter(int p_217251_1_, int p_217251_2_) {
         this.array.centerX = p_217251_1_;
         this.array.centerZ = p_217251_2_;
+        this.needsTrackingUpdate = true;
     }
 
     public void setViewDistance(int p_217248_1_) {
@@ -141,6 +181,7 @@ public class ClientChunkProvider extends AbstractChunkProvider {
             }
 
             this.array = clientchunkprovider$chunkarray;
+            this.needsTrackingUpdate = true;
         }
 
     }
@@ -175,6 +216,11 @@ public class ClientChunkProvider extends AbstractChunkProvider {
 
     public boolean isChunkLoaded(Entity entityIn) {
         return this.chunkExists(MathHelper.floor(entityIn.posX) >> 4, MathHelper.floor(entityIn.posZ) >> 4);
+    }
+
+    @Override
+    public void setListener(ChunkStatusListener listener) {
+        this.listener = listener;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -225,7 +271,6 @@ public class ClientChunkProvider extends AbstractChunkProvider {
         private boolean inView(int p_217183_1_, int p_217183_2_) {
             return Math.abs(p_217183_1_ - this.centerX) <= this.viewDistance && Math.abs(p_217183_2_ - this.centerZ) <= this.viewDistance;
         }
-
 
         protected Chunk get(int p_217192_1_) {
             return this.chunks[p_217192_1_];

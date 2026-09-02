@@ -86,7 +86,6 @@ public class SnowBlock extends Block {
       }
    }
 
-
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       BlockState blockstate = context.getWorld().getBlockState(context.getPos());
       if (blockstate.getBlock() == this) {

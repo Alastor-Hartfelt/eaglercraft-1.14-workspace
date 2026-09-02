@@ -158,7 +158,6 @@ public abstract class MobEntity extends LivingEntity {
         return this.senses;
     }
 
-
     public LivingEntity getAttackTarget() {
         return this.attackTarget;
     }
@@ -281,7 +280,6 @@ public abstract class MobEntity extends LivingEntity {
         this.bodyController.updateRenderAngles();
         return p_110146_2_;
     }
-
 
     protected SoundEvent getAmbientSound() {
         return null;
@@ -789,7 +787,6 @@ public abstract class MobEntity extends LivingEntity {
         }
     }
 
-
     public static Item getArmorByChance(EquipmentSlotType slotIn, int chance) {
         switch (slotIn) {
             case HEAD:
@@ -861,7 +858,6 @@ public abstract class MobEntity extends LivingEntity {
         }
 
     }
-
 
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).applyModifier(new AttributeModifier("Random spawn bonus", this.rand.nextGaussian() * 0.05D, AttributeModifier.Operation.MULTIPLY_BASE));
@@ -1000,7 +996,6 @@ public abstract class MobEntity extends LivingEntity {
     public boolean getLeashed() {
         return this.leashHolder != null;
     }
-
 
     public Entity getLeashHolder() {
         if (this.leashHolder == null && this.leashHolderID != 0 && this.world.isRemote) {

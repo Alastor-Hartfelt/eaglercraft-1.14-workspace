@@ -308,12 +308,10 @@ public class HopperTileEntity extends LockableLootTileEntity implements IHopper,
       return stack;
    }
 
-
    private IInventory getInventoryForHopperTransfer() {
       Direction direction = this.getBlockState().get(HopperBlock.FACING);
       return getInventoryAtPosition(this.getWorld(), this.pos.offset(direction));
    }
-
 
    public static IInventory getSourceInventory(IHopper hopper) {
       return getInventoryAtPosition(hopper.getWorld(), hopper.getXPos(), hopper.getYPos() + 1.0D, hopper.getZPos());
@@ -325,11 +323,9 @@ public class HopperTileEntity extends LockableLootTileEntity implements IHopper,
       }).collect(Collectors.toList());
    }
 
-
    public static IInventory getInventoryAtPosition(World p_195484_0_, BlockPos p_195484_1_) {
       return getInventoryAtPosition(p_195484_0_, (double)p_195484_1_.getX() + 0.5D, (double)p_195484_1_.getY() + 0.5D, (double)p_195484_1_.getZ() + 0.5D);
    }
-
 
    public static IInventory getInventoryAtPosition(World worldIn, double x, double y, double z) {
       IInventory iinventory = null;

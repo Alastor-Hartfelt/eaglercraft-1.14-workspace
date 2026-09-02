@@ -75,6 +75,7 @@ public class ChunkRenderWorker implements Runnable {
       }
 
       this.freeRenderBuilder(builder);
+      generator.setStatus(ChunkRenderTask.Status.DONE);
       generator.finish();
    }
 

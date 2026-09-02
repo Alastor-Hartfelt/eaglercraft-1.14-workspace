@@ -105,7 +105,6 @@ public class EndGatewayTileEntity extends EndPortalTileEntity implements ITickab
         return 1.0F - MathHelper.clamp(((float) this.teleportCooldown - partialTicks) / 40.0F, 0.0F, 1.0F);
     }
 
-
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, 8, this.getUpdateTag());
     }
@@ -208,7 +207,6 @@ public class EndGatewayTileEntity extends EndPortalTileEntity implements ITickab
     private static Chunk getChunk(World worldIn, Vec3d vec3) {
         return worldIn.getChunk(MathHelper.floor(vec3.x / 16.0D), MathHelper.floor(vec3.z / 16.0D));
     }
-
 
     private static BlockPos findSpawnpointInChunk(Chunk chunkIn) {
         ChunkPos chunkpos = chunkIn.getPos();

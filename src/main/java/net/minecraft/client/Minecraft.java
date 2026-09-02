@@ -9,11 +9,13 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.datafixers.DataFixer;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.eymenwsmc.gui.NoticeScreen;import net.eymenwsmc.network.NetworkHandler;
 import net.lax1dude.eaglercraft.EagRuntime;
 import net.lax1dude.eaglercraft.EagUtils;
 import net.lax1dude.eaglercraft.EaglercraftUUID;
+import net.lax1dude.eaglercraft.PointerInputAbstraction;
+import net.lax1dude.eaglercraft.Touch;
 import net.lax1dude.eaglercraft.internal.vfs2.VFile2;
 import net.lax1dude.eaglercraft.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.opengl.RealOpenGLEnums;
@@ -22,11 +24,14 @@ import net.lax1dude.eaglercraft.opengl.ext.deferred.texture.MetalsLUT;
 import net.lax1dude.eaglercraft.opengl.ext.deferred.texture.PBRTextureMapUtils;
 import net.lax1dude.eaglercraft.opengl.ext.deferred.texture.TemperaturesLUT;
 import net.lax1dude.eaglercraft.profile.EaglerProfile;
+import net.lax1dude.eaglercraft.profanity_filter.GuiScreenContentWarning;
 import net.lax1dude.eaglercraft.profile.GuiScreenEditProfile;
 import net.lax1dude.eaglercraft.sp.IntegratedServerState;
 import net.lax1dude.eaglercraft.sp.SingleplayerServerController;
 import net.lax1dude.eaglercraft.sp.SkullCommand;
 import net.lax1dude.eaglercraft.sp.gui.GuiScreenIntegratedServerBusy;
+import net.lax1dude.eaglercraft.touch_gui.TouchControls;
+import net.lax1dude.eaglercraft.touch_gui.TouchOverlayRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -112,8 +117,6 @@ import org.apache.logging.log4j.Logger;
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
@@ -163,6 +166,10 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     private float renderPartialTicksPaused;
     public FontRenderer fontRenderer;
 
+    public net.lax1dude.eaglercraft.notifications.ServerNotificationRenderer notifRenderer;
+
+    public net.lax1dude.eaglercraft.voice.GuiVoiceOverlay voiceOverlay;
+
     public Screen currentScreen;
 
     public LoadingGui loadingGui;
@@ -189,12 +196,16 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     private Runnable pendingWorldUnload;
     private static int debugFPS;
     private int rightClickDelayTimer;
+    private long placeTouchStartTime = -1L;
+    private long mineTouchStartTime = -1L;
+    private boolean wasMiningTouch = false;
     private String serverName;
     private int serverPort;
     public final FrameTimer frameTimer = new FrameTimer();
     private long startNanoTime = Util.nanoTime();
     private final boolean isDemo;
     public SkullCommand skullCommand;
+    public TouchOverlayRenderer touchOverlayRenderer;
 
     private NetworkManager networkManager;
     private boolean integratedServerIsRunning;
@@ -394,6 +405,12 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
             this.fontRenderer.setBidiFlag(this.languageManager.isCurrentLanguageBidirectional());
         }
 
+        this.notifRenderer = new net.lax1dude.eaglercraft.notifications.ServerNotificationRenderer();
+        this.notifRenderer.init();
+        this.notifRenderer.setResolution(this, this.mainWindow.getScaledWidth(), this.mainWindow.getScaledHeight(), (int) this.mainWindow.getGuiScaleFactor());
+        this.voiceOverlay = new net.lax1dude.eaglercraft.voice.GuiVoiceOverlay(this);
+        this.voiceOverlay.setResolution(this.mainWindow.getScaledWidth(), this.mainWindow.getScaledHeight());
+
         this.resourceManager.addReloadListener(new GrassColorReloadListener());
         this.resourceManager.addReloadListener(new FoliageColorReloadListener());
         this.mainWindow.setRenderPhase("Startup");
@@ -429,7 +446,7 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         this.worldRenderer = new WorldRenderer(this);
         this.resourceManager.addReloadListener(this.worldRenderer);
         this.populateSearchTreeManager();
-        this.currentScreen = new GuiScreenEditProfile(new NoticeScreen("This is the first version of the port. If you think that chunks are loading slow. Please check Performance Settings and increase Chunk Updates (not recommended). Stairs are buggy due a vanilla 1.14 bug. And because I ported sodium, lightning is a bit weird,It's not a bug! Please keep your game updated for better experience!",new MainMenuScreen()));
+        this.currentScreen = new GuiScreenEditProfile(new NoticeScreen("This port was NOT made by LAX1DUDE. Please keep your game updated for a better experience!",new MainMenuScreen()));
         this.resourceManager.addReloadListener(this.searchTreeManager);
         GlStateManager.viewport(0, 0, this.mainWindow.getFramebufferWidth(), this.mainWindow.getFramebufferHeight());
         this.particles = new ParticleManager(this.world, this.textureManager);
@@ -451,6 +468,8 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         }
 
         this.skullCommand = new SkullCommand(this);
+        PointerInputAbstraction.init(this);
+        this.touchOverlayRenderer = new TouchOverlayRenderer(this);
         this.mainWindow.setVsync(this.gameSettings.vsync);
         this.mainWindow.func_224798_d(this.gameSettings.field_225307_E);
         this.mainWindow.setLogOnGlError();
@@ -458,7 +477,15 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         if (this.serverName != null) {
             this.displayGuiScreen(new ConnectingScreen(new MainMenuScreen(), this, this.serverName, this.serverPort));
         } else {
-            this.displayGuiScreen( this.gameSettings.hasReadIt ? new GuiScreenEditProfile(new MainMenuScreen()) : new GuiScreenEditProfile(new NoticeScreen("This is the first version of the port. If you think that chunks are loading slow. Please check Performance Settings and increase Chunk Updates (not recommended). Stairs are buggy due a vanilla 1.14 bug. And because I ported sodium, lightning is a bit weird,It's not a bug! Please keep your game updated for better experience!",new MainMenuScreen())));
+            Screen mainMenuScreen = this.gameSettings.hasReadIt ? new GuiScreenEditProfile(new MainMenuScreen()) : new GuiScreenEditProfile(new NoticeScreen("This port was NOT made by LAX1DUDE. Please keep your game updated for a better experience!",new MainMenuScreen()));
+            if (!EagRuntime.getConfiguration().isForceProfanityFilter() && !this.gameSettings.hasShownProfanityFilter) {
+                mainMenuScreen = new GuiScreenContentWarning(mainMenuScreen);
+            }
+            int vidIssues = this.gameSettings.checkBadVideoSettings();
+            if (vidIssues != 0) {
+                mainMenuScreen = new GuiScreenVideoSettingsWarning(mainMenuScreen, vidIssues);
+            }
+            this.displayGuiScreen(mainMenuScreen);
         }
 
         ResourceLoadProgressGui.loadLogoTexture(this);
@@ -467,6 +494,8 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
                 this.checkMissingData();
             }
         }, false));
+
+        while (Touch.next());
 
     }
 
@@ -511,12 +540,6 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         this.searchTreeManager.add(SearchTreeManager.RECIPES, searchtree1);
     }
 
-    private void disableVSyncAfterGlError(int error, long description) {
-        this.gameSettings.vsync = false;
-        this.gameSettings.saveOptions();
-    }
-
-
     public Framebuffer getFramebuffer() {
         return this.framebuffer;
     }
@@ -552,19 +575,9 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     }
 
     public void displayCrashReport(CrashReport crashReportIn) {
-        VFile2 file1 = new VFile2(getInstance().gameDir, "crash-reports");
-        VFile2 file2 = new VFile2(file1, "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-client.txt");
-        Bootstrap.printToSYSOUT(crashReportIn.getCompleteReport());
-        if (crashReportIn.getFile() != null) {
-            Bootstrap.printToSYSOUT("#@!@# Game crashed! Crash report saved to: #@!@# " + crashReportIn.getFile());
-            throw new RuntimeException("Game crashed");
-        } else if (crashReportIn.saveToFile(file2)) {
-            Bootstrap.printToSYSOUT("#@!@# Game crashed! Crash report saved to: #@!@# " + file2.getPath());
-            throw new RuntimeException("Game crashed");
-        } else {
-            Bootstrap.printToSYSOUT("#@?@# Game crashed! Crash report could not be saved. #@?@#");
-            throw new RuntimeException("Game crashed");
-        }
+        String report = crashReportIn.getCompleteReport();
+        Bootstrap.printToSYSOUT(report);
+        net.lax1dude.eaglercraft.internal.PlatformRuntime.writeCrashReport(report);
 
     }
 
@@ -698,7 +711,6 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
                 ;
             }
 
-
             if (SingleplayerServerController.isWorldRunning()) {
                 SingleplayerServerController.shutdownEaglercraftServer();
                 while (SingleplayerServerController.getStatusState() == IntegratedServerState.WORLD_UNLOADING) {
@@ -724,6 +736,11 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
 
             if (this.currentScreen != null) {
                 this.currentScreen.removed();
+            }
+
+            if (this.notifRenderer != null) {
+                this.notifRenderer.destroy();
+                this.notifRenderer = null;
             }
 
             this.close();
@@ -776,6 +793,9 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
             runnable.run();
         }
 
+        PointerInputAbstraction.runGameLoop();
+        this.gameSettings.touchscreen = PointerInputAbstraction.isTouchMode();
+
         if (renderWorldIn) {
             this.timer.updateTimer(Util.milliTime());
             this.profiler.startSection("scheduledExecutables");
@@ -792,6 +812,10 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         if (renderWorldIn) {
             for (int k = 0; k < Math.min(10, this.timer.elapsedTicks); ++k) {
                 this.runTick();
+            }
+
+            if (SingleplayerServerController.isRunningSingleThreadMode()) {
+                SingleplayerServerController.runTick();
             }
         }
 
@@ -832,6 +856,9 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         GlStateManager.pushMatrix();
         this.framebuffer.framebufferRender(this.mainWindow.getFramebufferWidth(), this.mainWindow.getFramebufferHeight());
         GlStateManager.popMatrix();
+        if (this.touchOverlayRenderer != null) {
+            this.touchOverlayRenderer.render(this.mainWindow.getFramebufferWidth(), this.mainWindow.getFramebufferHeight(), this.mainWindow);
+        }
         this.profiler.startTick();
         this.updateDisplay(true);
         this.mainWindow.setRenderPhase("Post render");
@@ -849,6 +876,7 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
 
         net.lax1dude.eaglercraft.sp.SingleplayerServerController.setPaused(this.isGamePaused);
         net.lax1dude.eaglercraft.sp.SingleplayerServerController.runTick();
+        net.lax1dude.eaglercraft.voice.VoiceClientController.tickVoiceClient();
 
         long l = Util.nanoTime();
         this.frameTimer.addFrame(l - this.startNanoTime);
@@ -884,6 +912,12 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     public void updateWindowSize() {
         int i = this.mainWindow.calcGuiScale(this.gameSettings.guiScale, this.getForceUnicodeFont());
         this.mainWindow.setGuiScale((double) i);
+        if (this.notifRenderer != null) {
+            this.notifRenderer.setResolution(this, this.mainWindow.getScaledWidth(), this.mainWindow.getScaledHeight(), (int) this.mainWindow.getGuiScaleFactor());
+        }
+        if (this.voiceOverlay != null) {
+            this.voiceOverlay.setResolution(this.mainWindow.getScaledWidth(), this.mainWindow.getScaledHeight());
+        }
         if (this.currentScreen != null) {
             this.currentScreen.resize(this, this.mainWindow.getScaledWidth(), this.mainWindow.getScaledHeight());
         }
@@ -1062,7 +1096,7 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     public void shutdownIntegratedServer(Screen cont) {
         if (SingleplayerServerController.shutdownEaglercraftServer()
                 || SingleplayerServerController.getStatusState() == IntegratedServerState.WORLD_UNLOADING) {
-            displayGuiScreen(new GuiScreenIntegratedServerBusy(cont, "singleplayer.busy.stoppingIntegratedServer",
+            displayGuiScreen(new GuiScreenIntegratedServerBusy(cont, "menu.savingLevel",
                     "singleplayer.failed.stoppingIntegratedServer", SingleplayerServerController::isReady));
         } else {
             displayGuiScreen(cont);
@@ -1074,12 +1108,15 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     }
 
     public void setIngameFocus() {
+        boolean touch = PointerInputAbstraction.isTouchMode();
         if (!this.inGameHasFocus) {
-            if (!IS_RUNNING_ON_MAC) {
-                KeyBinding.updateKeyBindState();
-            }
             this.inGameHasFocus = true;
-            this.mouseHelper.grabMouse();
+            if (!touch) {
+                if (!IS_RUNNING_ON_MAC) {
+                    KeyBinding.updateKeyBindState();
+                }
+                this.mouseHelper.grabMouse();
+            }
             this.leftClickCounter = 10000;
         }
     }
@@ -1088,7 +1125,9 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         if (this.inGameHasFocus) {
             KeyBinding.unPressAllKeys();
             this.inGameHasFocus = false;
-            this.mouseHelper.ungrabMouse();
+            if (!PointerInputAbstraction.isTouchMode()) {
+                this.mouseHelper.ungrabMouse();
+            }
         }
     }
 
@@ -1109,6 +1148,8 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         if (!leftClick) {
             this.leftClickCounter = 0;
         }
+
+        if (this.player == null) return;
 
         if (this.leftClickCounter <= 0 && !this.player.isHandActive()) {
             if (leftClick && this.objectMouseOver != null && this.objectMouseOver.getType() == RayTraceResult.Type.BLOCK) {
@@ -1267,9 +1308,44 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
             this.ingameGUI.func_212910_m();
         }
 
-        if (this.loadingGui == null && (this.currentScreen == null || this.currentScreen.passEvents)) {
+        if (this.loadingGui == null) {
             this.profiler.endStartSection("GLFW events");
             GLX.pollEvents();
+            this.profiler.endStartSection("touch events");
+            while (Touch.next()) {
+                PointerInputAbstraction.enterTouchModeHook();
+                int tc = Touch.getEventTouchPointCount();
+                if (tc > 0) {
+                    for (int i = 0; i < tc; ++i) {
+                        final int uid = Touch.getEventTouchPointUID(i);
+                        int x = Touch.getEventTouchX(i);
+                        int y = Touch.getEventTouchY(i);
+                        switch (Touch.getEventType()) {
+                        case TOUCHSTART:
+                            if (TouchControls.handleTouchBegin(uid, x, y)) {
+                                break;
+                            }
+                            handlePlaceTouchStart();
+                            break;
+                        case TOUCHEND:
+                            if (TouchControls.handleTouchEnd(uid, x, y)) {
+                                break;
+                            }
+                            handlePlaceTouchEnd();
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    TouchControls.handleInput();
+                }
+                if (this.currentScreen != null) {
+                    this.currentScreen.handleTouchInput();
+                }
+            }
+
+            processTouchMine();
+
             this.processKeyBinds();
             if (this.leftClickCounter > 0) {
                 --this.leftClickCounter;
@@ -1422,8 +1498,11 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
             }
         }
 
-        if (this.player.isHandActive()) {
-            if (!this.gameSettings.keyBindUseItem.isKeyDown()) {
+        boolean touchMode = PointerInputAbstraction.isTouchMode();
+        boolean miningTouch = touchMode && this.player != null && isMiningTouch();
+        boolean useTouch = touchMode && this.player != null && this.player.getItemShouldUseOnTouchEagler();
+        if (this.player != null && this.player.isHandActive()) {
+            if (!this.gameSettings.keyBindUseItem.isKeyDown() && !miningTouch) {
                 this.playerController.onStoppedUsingItem(this.player);
             }
 
@@ -1443,6 +1522,15 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
                 this.clickMouse();
             }
 
+            if (miningTouch && !wasMiningTouch) {
+                if ((this.objectMouseOver != null && this.objectMouseOver.getType() == net.minecraft.util.math.RayTraceResult.Type.ENTITY) || useTouch) {
+                    this.rightClickMouse();
+                } else {
+                    this.clickMouse();
+                }
+                wasMiningTouch = true;
+            }
+
             while (this.gameSettings.keyBindUseItem.isPressed()) {
                 this.rightClickMouse();
             }
@@ -1451,12 +1539,19 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
                 this.middleClickMouse();
             }
         }
+        wasMiningTouch = miningTouch;
 
-        if (this.gameSettings.keyBindUseItem.isKeyDown() && this.rightClickDelayTimer == 0 && !this.player.isHandActive()) {
-            this.rightClickMouse();
+        if (this.player != null) {
+            if (this.gameSettings.keyBindUseItem.isKeyDown() && this.rightClickDelayTimer == 0 && !this.player.isHandActive()) {
+                this.rightClickMouse();
+            }
+
+            if (miningTouch && useTouch && this.rightClickDelayTimer == 0 && !this.player.isHandActive()) {
+                this.rightClickMouse();
+            }
         }
 
-        this.sendClickBlockToController(this.currentScreen == null && this.gameSettings.keyBindAttack.isKeyDown() && this.mouseHelper.isMouseGrabbed());
+        this.sendClickBlockToController(this.currentScreen == null && (this.gameSettings.keyBindAttack.isKeyDown() || miningTouch) && this.inGameHasFocus && !useTouch);
     }
 
     public void launchIntegratedServer(String folderName, String worldName, WorldSettings worldSettingsIn) {
@@ -1495,7 +1590,11 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     }
 
     public void func_213254_o() {
-        this.func_213231_b(new WorkingScreen());
+        if (this.world != null && SingleplayerServerController.isWorldRunning()) {
+            this.func_213231_b(new DirtMessageScreen(new TranslationTextComponent("menu.savingLevel")));
+        } else {
+            this.func_213231_b(new WorkingScreen());
+        }
     }
 
     public void scheduleWorldUnload(Screen savingScreen, Screen nextScreen) {
@@ -1572,7 +1671,6 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     public final boolean isDemo() {
         return this.isDemo;
     }
-
 
     public ClientPlayNetHandler getConnection() {
         return this.player == null ? null : this.player.connection;
@@ -1764,6 +1862,56 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         return theCrash;
     }
 
+    private void processTouchMine() {
+        if ((currentScreen == null || currentScreen.passEvents)
+                && PointerInputAbstraction.isTouchingScreenNotButton()) {
+            if (PointerInputAbstraction.isDraggingNotTouching()) {
+                if (mineTouchStartTime != -1l) {
+                    long l = EagRuntime.steadyTimeMillis();
+                    if ((placeTouchStartTime == -1l || (l - placeTouchStartTime) < 350l)
+                            || (l - mineTouchStartTime) < 350l) {
+                        mineTouchStartTime = -1l;
+                    }
+                }
+            } else {
+                if (mineTouchStartTime == -1l) {
+                    mineTouchStartTime = EagRuntime.steadyTimeMillis();
+                }
+            }
+        } else {
+            mineTouchStartTime = -1l;
+        }
+    }
+
+    private boolean isMiningTouch() {
+        if (mineTouchStartTime == -1l)
+            return false;
+        long l = EagRuntime.steadyTimeMillis();
+        return (placeTouchStartTime == -1l || (l - placeTouchStartTime) >= 350l) && (l - mineTouchStartTime) >= 350l;
+    }
+
+    private void handlePlaceTouchStart() {
+        if (placeTouchStartTime == -1l) {
+            placeTouchStartTime = EagRuntime.steadyTimeMillis();
+        }
+    }
+
+    private void handlePlaceTouchEnd() {
+        if (placeTouchStartTime != -1l) {
+            int len = (int) (EagRuntime.steadyTimeMillis() - placeTouchStartTime);
+            if (len < 350l && !PointerInputAbstraction.isDraggingNotTouching()) {
+                if (this.player != null && this.world != null) {
+                    if (objectMouseOver != null && objectMouseOver.getType() == RayTraceResult.Type.ENTITY) {
+                        clickMouse();
+                    } else {
+                        rightClickMouse();
+                    }
+                }
+            }
+            placeTouchStartTime = -1l;
+        }
+    }
+
     public static Minecraft getInstance() {
         return instance;
     }
@@ -1821,14 +1969,11 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         this.currentServerData = serverDataIn;
     }
 
-
     public ServerData getCurrentServerData() {
         return this.currentServerData;
     }
 
     public boolean isIntegratedServerRunning() {
-        // EaglercraftX singleplayer uses SingleplayerServerController, not vanilla's IntegratedServer object,
-        // so integratedServerIsRunning is never set. Detect SP via the actual worker state.
         return SingleplayerServerController.isWorldRunning();
     }
 
@@ -1839,6 +1984,9 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         return SingleplayerServerController.isWorldRunning();
     }
 
+    public boolean isEnableProfanityFilter() {
+        return EagRuntime.getConfiguration().isForceProfanityFilter() || this.gameSettings.enableProfanityFilter;
+    }
 
     public IntegratedServer getIntegratedServer() {
         return this.integratedServer;
@@ -1860,7 +2008,6 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
 
         return this.profileProperties;
     }
-
 
     public TextureManager getTextureManager() {
         return this.textureManager;
@@ -1889,7 +2036,6 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     public AtlasTexture getTextureMap() {
         return this.textureMap;
     }
-
 
     public boolean isGamePaused() {
         return this.isGamePaused;
@@ -1925,7 +2071,6 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     public SkinManager getSkinManager() {
         return this.skinManager;
     }
-
 
     public Entity getRenderViewEntity() {
         return this.renderViewEntity;
@@ -1982,10 +2127,6 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
 
     public boolean isConnectedToRealms() {
         return this.connectedToRealms;
-    }
-
-    public void setConnectedToRealms(boolean isConnected) {
-        this.connectedToRealms = isConnected;
     }
 
     public DataFixer getDataFixer() {
@@ -2059,11 +2200,6 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     public MinecraftGame getMinecraftGame() {
         return this.game;
     }
-
-    public Splashes getSplashes() {
-        return this.splashes;
-    }
-
 
     public LoadingGui getLoadingGui() {
         return this.loadingGui;

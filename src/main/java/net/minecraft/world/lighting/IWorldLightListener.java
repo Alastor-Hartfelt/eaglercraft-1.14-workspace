@@ -13,7 +13,6 @@ public interface IWorldLightListener extends ILightListener {
     public static enum Dummy implements IWorldLightListener {
         INSTANCE;
 
-
         public NibbleArray getData(SectionPos p_215612_1_) {
             return null;
         }

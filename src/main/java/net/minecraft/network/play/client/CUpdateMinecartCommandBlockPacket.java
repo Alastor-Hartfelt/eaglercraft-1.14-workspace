@@ -42,7 +42,6 @@ public class CUpdateMinecartCommandBlockPacket implements IPacket<IServerPlayNet
       handler.processUpdateCommandMinecart(this);
    }
 
-
    public CommandBlockLogic getCommandBlock(World worldIn) {
       Entity entity = worldIn.getEntityByID(this.entityId);
       return entity instanceof MinecartCommandBlockEntity ? ((MinecartCommandBlockEntity)entity).getCommandBlockLogic() : null;

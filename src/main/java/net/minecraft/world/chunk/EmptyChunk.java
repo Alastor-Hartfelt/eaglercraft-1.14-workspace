@@ -32,7 +32,6 @@ public class EmptyChunk extends Chunk {
       return Blocks.VOID_AIR.getDefaultState();
    }
 
-
    public BlockState setBlockState(BlockPos pos, BlockState state, boolean isMoving) {
       return null;
    }
@@ -40,7 +39,6 @@ public class EmptyChunk extends Chunk {
    public IFluidState getFluidState(BlockPos pos) {
       return Fluids.EMPTY.getDefaultState();
    }
-
 
    public WorldLightManager getWorldLightManager() {
       return null;
@@ -58,7 +56,6 @@ public class EmptyChunk extends Chunk {
 
    public void removeEntityAtIndex(Entity entityIn, int index) {
    }
-
 
    public TileEntity getTileEntity(BlockPos pos, Chunk.CreateEntityType creationMode) {
       return null;

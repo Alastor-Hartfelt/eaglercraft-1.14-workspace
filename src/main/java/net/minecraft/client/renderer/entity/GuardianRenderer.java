@@ -10,9 +10,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.GuardianEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -36,9 +34,11 @@ public class GuardianRenderer extends MobRenderer<GuardianEntity, GuardianModel>
          if (livingEntity.hasTargetedEntity()) {
             LivingEntity livingentity = livingEntity.getTargetedEntity();
             if (livingentity != null) {
-               Vec3d vec3d = this.getPosition(livingentity, (double)livingentity.getHeight() * 0.5D, 1.0F);
-               Vec3d vec3d1 = this.getPosition(livingEntity, (double)livingEntity.getEyeHeight(), 1.0F);
-               if (camera.isBoundingBoxInFrustum(new AxisAlignedBB(vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y, vec3d.z))) {
+               double targetY = livingentity.posY + (double)livingentity.getHeight() * 0.5D;
+               double guardianY = livingEntity.posY + (double)livingEntity.getEyeHeight();
+               if (camera.isBoxInFrustum(Math.min(livingEntity.posX, livingentity.posX), Math.min(guardianY, targetY),
+                     Math.min(livingEntity.posZ, livingentity.posZ), Math.max(livingEntity.posX, livingentity.posX),
+                     Math.max(guardianY, targetY), Math.max(livingEntity.posZ, livingentity.posZ))) {
                   return true;
                }
             }
@@ -46,13 +46,6 @@ public class GuardianRenderer extends MobRenderer<GuardianEntity, GuardianModel>
 
          return false;
       }
-   }
-
-   private Vec3d getPosition(LivingEntity entityLivingBaseIn, double p_177110_2_, float p_177110_4_) {
-      double d0 = MathHelper.lerp((double)p_177110_4_, entityLivingBaseIn.lastTickPosX, entityLivingBaseIn.posX);
-      double d1 = MathHelper.lerp((double)p_177110_4_, entityLivingBaseIn.lastTickPosY, entityLivingBaseIn.posY) + p_177110_2_;
-      double d2 = MathHelper.lerp((double)p_177110_4_, entityLivingBaseIn.lastTickPosZ, entityLivingBaseIn.posZ);
-      return new Vec3d(d0, d1, d2);
    }
 
    public void doRender(GuardianEntity entity, double x, double y, double z, float entityYaw, float partialTicks) {
@@ -77,13 +70,20 @@ public class GuardianRenderer extends MobRenderer<GuardianEntity, GuardianModel>
          float f4 = entity.getEyeHeight();
          GlStateManager.pushMatrix();
          GlStateManager.translatef((float)x, (float)y + f4, (float)z);
-         Vec3d vec3d = this.getPosition(livingentity, (double)livingentity.getHeight() * 0.5D, partialTicks);
-         Vec3d vec3d1 = this.getPosition(entity, (double)f4, partialTicks);
-         Vec3d vec3d2 = vec3d.subtract(vec3d1);
-         double d0 = vec3d2.length() + 1.0D;
-         vec3d2 = vec3d2.normalize();
-         float f5 = (float)Math.acos(vec3d2.y);
-         float f6 = (float)Math.atan2(vec3d2.z, vec3d2.x);
+         double targetX = MathHelper.lerp((double)partialTicks, livingentity.lastTickPosX, livingentity.posX);
+         double targetY = MathHelper.lerp((double)partialTicks, livingentity.lastTickPosY, livingentity.posY)
+               + (double)livingentity.getHeight() * 0.5D;
+         double targetZ = MathHelper.lerp((double)partialTicks, livingentity.lastTickPosZ, livingentity.posZ);
+         double guardianX = MathHelper.lerp((double)partialTicks, entity.lastTickPosX, entity.posX);
+         double guardianY = MathHelper.lerp((double)partialTicks, entity.lastTickPosY, entity.posY) + (double)f4;
+         double guardianZ = MathHelper.lerp((double)partialTicks, entity.lastTickPosZ, entity.posZ);
+         double beamX = targetX - guardianX;
+         double beamY = targetY - guardianY;
+         double beamZ = targetZ - guardianZ;
+         double beamLength = (double)MathHelper.sqrt(beamX * beamX + beamY * beamY + beamZ * beamZ);
+         double d0 = beamLength + 1.0D;
+         float f5 = (float)Math.acos(beamLength < 1.0E-4D ? 0.0D : beamY / beamLength);
+         float f6 = (float)Math.atan2(beamZ, beamX);
          GlStateManager.rotatef((((float)Math.PI / 2F) - f6) * (180F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
          GlStateManager.rotatef(f5 * (180F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
          int i = 1;

@@ -66,7 +66,6 @@ public class UserList<K, V extends UserListEntry<K>> {
 
    }
 
-
    public V getEntry(K obj) {
       this.removeExpired();
       return (V)(this.values.get(this.getObjectKey(obj)));
@@ -140,25 +139,6 @@ public class UserList<K, V extends UserListEntry<K>> {
    }
 
    public void readSavedFile() throws FileNotFoundException {
-//      if (this.saveFile.exists()) {
-//         BufferedReader bufferedreader = null;
-//
-//         try {
-//            Collection<UserListEntry<K>> collection = JSONUtils.fromJson(this.gson, bufferedreader, USER_LIST_ENTRY_TYPE);
-//            if (collection != null) {
-//               this.values.clear();
-//
-//               for(UserListEntry<K> userlistentry : collection) {
-//                  if (userlistentry.getValue() != null) {
-//                     this.values.put(this.getObjectKey(userlistentry.getValue()), (V)userlistentry);
-//                  }
-//               }
-//            }
-//         } finally {
-//            IOUtils.closeQuietly((Reader)bufferedreader);
-//         }
-//
-//      }
    }
 
    class Serializer implements JsonDeserializer<UserListEntry<K>>, JsonSerializer<UserListEntry<K>> {

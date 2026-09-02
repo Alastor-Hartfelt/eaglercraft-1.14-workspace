@@ -34,7 +34,6 @@ public class FontTexture extends Texture implements Closeable {
         this.deleteGlTexture();
     }
 
-
     public TexturedGlyph createTexturedGlyph(IGlyphInfo glyphInfoIn) {
         if (glyphInfoIn.isColored() != this.colored) {
             return null;
@@ -73,7 +72,6 @@ public class FontTexture extends Texture implements Closeable {
             this.field_211227_c = p_i49711_3_;
             this.field_211228_d = p_i49711_4_;
         }
-
 
         FontTexture.Entry func_211224_a(IGlyphInfo p_211224_1_) {
             if (this.field_211229_e != null && this.field_211230_f != null) {

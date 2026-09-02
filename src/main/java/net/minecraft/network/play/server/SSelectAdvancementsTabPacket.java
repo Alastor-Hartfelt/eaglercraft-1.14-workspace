@@ -39,7 +39,6 @@ public class SSelectAdvancementsTabPacket implements IPacket<IClientPlayNetHandl
 
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public ResourceLocation getTab() {
         return this.tab;

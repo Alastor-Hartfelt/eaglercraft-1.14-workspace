@@ -56,6 +56,10 @@ public class CClientSettingsPacket implements IPacket<IServerPlayNetHandler> {
       return this.lang;
    }
 
+   public int getViewDistance() {
+      return this.view;
+   }
+
    public ChatVisibility getChatVisibility() {
       return this.chatVisibility;
    }

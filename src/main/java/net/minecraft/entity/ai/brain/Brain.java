@@ -51,7 +51,6 @@ public class Brain<E extends LivingEntity> implements IDynamicSerializable {
 
         });
 
-
     }
 
     public boolean hasMemory(MemoryModuleType<?> p_218191_1_) {
@@ -174,9 +173,15 @@ public class Brain<E extends LivingEntity> implements IDynamicSerializable {
 
     public void stopAllTasks(ServerWorld worldIn, E owner) {
         long i = owner.world.getGameTime();
-        this.getRunningTasks().forEach((p_218206_4_) -> {
-            p_218206_4_.stop(worldIn, owner, i);
-        });
+        for (Map<Activity, Set<Task<? super E>>> activityMap : this.field_218232_c.values()) {
+            for (Set<Task<? super E>> tasks : activityMap.values()) {
+                for (Task<? super E> task : tasks) {
+                    if (task.getStatus() == Task.Status.RUNNING) {
+                        task.stop(worldIn, owner, i);
+                    }
+                }
+            }
+        }
     }
 
     public <T> T serialize(DynamicOps<T> p_218175_1_) {
@@ -189,37 +194,47 @@ public class Brain<E extends LivingEntity> implements IDynamicSerializable {
     }
 
     private void updateSensors(ServerWorld worldIn, E entityIn) {
-        this.sensors.values().forEach((p_218201_2_) -> {
-            p_218201_2_.tick(worldIn, entityIn);
-        });
+        for (Sensor<? super E> sensor : this.sensors.values()) {
+            sensor.tick(worldIn, entityIn);
+        }
     }
 
     private void startTasks(ServerWorld worldIn, E entityIn) {
         long i = worldIn.getGameTime();
-        this.field_218232_c.values().stream().flatMap((p_218219_0_) -> {
-            return p_218219_0_.entrySet().stream();
-        }).filter((p_218215_1_) -> {
-            return this.activities.contains(p_218215_1_.getKey());
-        }).map(Entry::getValue).flatMap(Collection::stream).filter((p_218194_0_) -> {
-            return p_218194_0_.getStatus() == Task.Status.STOPPED;
-        }).forEach((p_218192_4_) -> {
-            p_218192_4_.start(worldIn, entityIn, i);
-        });
+        for (Map<Activity, Set<Task<? super E>>> activityMap : this.field_218232_c.values()) {
+            for (Entry<Activity, Set<Task<? super E>>> entry : activityMap.entrySet()) {
+                if (!this.activities.contains(entry.getKey())) {
+                    continue;
+                }
+                for (Task<? super E> task : entry.getValue()) {
+                    if (task.getStatus() == Task.Status.STOPPED) {
+                        task.start(worldIn, entityIn, i);
+                    }
+                }
+            }
+        }
     }
 
     private void tickTasks(ServerWorld worldIn, E entityIn) {
         long i = worldIn.getGameTime();
-        this.getRunningTasks().forEach((p_218220_4_) -> {
-            p_218220_4_.tick(worldIn, entityIn, i);
-        });
+        for (Map<Activity, Set<Task<? super E>>> activityMap : this.field_218232_c.values()) {
+            for (Set<Task<? super E>> tasks : activityMap.values()) {
+                for (Task<? super E> task : tasks) {
+                    if (task.getStatus() == Task.Status.RUNNING) {
+                        task.tick(worldIn, entityIn, i);
+                    }
+                }
+            }
+        }
     }
 
     private boolean hasRequiredMemories(Activity activityIn) {
-        return this.requiredMemoryStates.get(activityIn).stream().allMatch((p_218190_1_) -> {
-            MemoryModuleType<?> memorymoduletype = p_218190_1_.getFirst();
-            MemoryModuleStatus memorymodulestatus = p_218190_1_.getSecond();
-            return this.hasMemory(memorymoduletype, memorymodulestatus);
-        });
+        for (Pair<MemoryModuleType<?>, MemoryModuleStatus> requirement : this.requiredMemoryStates.get(activityIn)) {
+            if (!this.hasMemory(requirement.getFirst(), requirement.getSecond())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isEmptyCollection(Object p_218213_1_) {

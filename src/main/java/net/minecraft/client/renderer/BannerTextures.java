@@ -35,7 +35,6 @@ public class BannerTextures {
          this.cacheResourceBase = resourcePath;
       }
 
-
       public ResourceLocation getResourceLocation(String id, List<BannerPattern> patternList, List<DyeColor> colorList) {
          if (id.isEmpty()) {
             return null;

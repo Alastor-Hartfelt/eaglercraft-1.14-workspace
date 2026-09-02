@@ -25,7 +25,6 @@ public interface IPhase {
 
     PhaseType<? extends IPhase> getType();
 
-
     Vec3d getTargetLocation();
 
     float func_221113_a(DamageSource p_221113_1_, float p_221113_2_);

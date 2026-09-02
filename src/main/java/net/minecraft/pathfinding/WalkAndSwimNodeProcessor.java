@@ -119,7 +119,6 @@ public class WalkAndSwimNodeProcessor extends WalkNodeProcessor {
       }
    }
 
-
    private PathPoint func_203245_a(int p_203245_1_, int p_203245_2_, int p_203245_3_, int p_203245_4_, double p_203245_5_) {
       PathPoint pathpoint = null;
       BlockPos blockpos = new BlockPos(p_203245_1_, p_203245_2_, p_203245_3_);

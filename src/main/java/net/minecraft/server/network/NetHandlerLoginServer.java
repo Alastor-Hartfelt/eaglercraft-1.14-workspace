@@ -33,9 +33,6 @@ public class NetHandlerLoginServer implements IServerLoginNetHandler {
     public final IntegratedServerPlayerNetworkManager networkManager;
     private NetHandlerLoginServer.LoginState currentLoginState = NetHandlerLoginServer.LoginState.HELLO;
 
-    /**
-     * How long has player been trying to login into the server.
-     */
     private int connectionTimer;
     private GameProfile loginGameProfile;
     private byte[] loginSkinPacket;

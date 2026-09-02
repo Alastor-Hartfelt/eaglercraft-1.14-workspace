@@ -104,7 +104,9 @@ public class ActiveRenderInfo {
       float f5 = MathHelper.sin((-this.pitch + 90.0F) * ((float)Math.PI / 180F));
       this.look = new Vec3d((double)(f * f2), (double)f3, (double)(f1 * f2));
       this.up = new Vec3d((double)(f * f4), (double)f5, (double)(f1 * f4));
-      this.field_216796_h = this.look.crossProduct(this.up).scale(-1.0D);
+      this.field_216796_h = new Vec3d(this.look.z * this.up.y - this.look.y * this.up.z,
+            this.look.x * this.up.z - this.look.z * this.up.x,
+            this.look.y * this.up.x - this.look.x * this.up.y);
    }
 
    protected void setDirection(float pitchIn, float yawIn) {

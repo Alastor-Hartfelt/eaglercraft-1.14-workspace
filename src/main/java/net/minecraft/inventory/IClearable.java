@@ -1,6 +1,5 @@
 package net.minecraft.inventory;
 
-
 public interface IClearable {
    void clear();
 

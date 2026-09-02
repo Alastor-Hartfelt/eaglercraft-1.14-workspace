@@ -9,7 +9,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.longs.LongIterator;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.lax1dude.eaglercraft.EagUtils;
 import net.lax1dude.eaglercraft.IOUtils;
 import net.lax1dude.eaglercraft.Random;
@@ -771,7 +771,6 @@ public abstract class MinecraftServer extends RecursiveEventLoop<TickDelayedTask
         this.tickables.add(tickable);
     }
 
-
     protected void setServerId(String serverIdIn) {
         this.serverId = serverIdIn;
     }
@@ -1120,7 +1119,6 @@ public abstract class MinecraftServer extends RecursiveEventLoop<TickDelayedTask
         }
 
     }
-
 
     public NetworkSystem getNetworkSystem() {
         return this.networkSystem;

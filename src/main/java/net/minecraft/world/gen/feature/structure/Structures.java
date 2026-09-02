@@ -40,7 +40,6 @@ public class Structures {
    public static void init() {
    }
 
-
    public static StructureStart func_215142_a(ChunkGenerator<?> p_215142_0_, TemplateManager p_215142_1_, BiomeProvider p_215142_2_, CompoundNBT p_215142_3_) {
       String s = p_215142_3_.getString("id");
       if ("INVALID".equals(s)) {

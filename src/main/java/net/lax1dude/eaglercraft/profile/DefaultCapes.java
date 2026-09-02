@@ -15,7 +15,7 @@ public enum DefaultCapes {
     MINECON13(8, "Minecon 2013", new ResourceLocation("eagler:capes/minecon2013.png")),
     JAVA(9, "Java Edition Free", new ResourceLocation("eagler:capes/javaeditionfree.png")),
     GOLEM(10, "Iron Golem", new ResourceLocation("eagler:capes/irongolem.png")),
-    ANNIVERSARY15(11, "15th Anniversary", new ResourceLocation("eagler:capes/15th.png")),
+    ANNIVERSARY15(11, "15th Anniversary", new ResourceLocation("eagler:capes/15thanivessary.png")),
     GRASS(12, "Common Grass", new ResourceLocation("eagler:capes/commongrass.png"));
 
 

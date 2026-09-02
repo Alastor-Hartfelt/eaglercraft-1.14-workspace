@@ -32,7 +32,6 @@ public class KelpTopBlock extends Block implements ILiquidContainer {
         return SHAPE;
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         IFluidState ifluidstate = context.getWorld().getFluidState(context.getPos());
         return ifluidstate.isTagged(FluidTags.WATER) && ifluidstate.getLevel() == 8 ? this.randomAge(context.getWorld()) : null;

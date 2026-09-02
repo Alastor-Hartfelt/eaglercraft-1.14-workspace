@@ -56,7 +56,6 @@ public abstract class ResourcePack implements IResourcePack {
       LOGGER.warn("ResourcePack: ignored non-lowercase namespace: {} in {}", namespace, this.file);
    }
 
-
    public <T> T getMetadata(IMetadataSectionSerializer<T> deserializer) throws IOException {
       Object object;
       try (InputStream inputstream = this.getInputStream("pack.mcmeta")) {
@@ -65,7 +64,6 @@ public abstract class ResourcePack implements IResourcePack {
 
       return (T)object;
    }
-
 
    public static <T> T getResourceMetadata(IMetadataSectionSerializer<T> deserializer, InputStream inputStream) {
       JsonObject jsonobject;

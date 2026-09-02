@@ -35,7 +35,6 @@ public interface IChunk extends IStructureReader {
 
     void addEntity(Entity entityIn);
 
-
     default ChunkSection getLastExtendedBlockStorage() {
         ChunkSection[] achunksection = this.getSections();
 
@@ -57,7 +56,6 @@ public interface IChunk extends IStructureReader {
     Set<BlockPos> getTileEntitiesPos();
 
     ChunkSection[] getSections();
-
 
     WorldLightManager getWorldLightManager();
 
@@ -138,9 +136,7 @@ public interface IChunk extends IStructureReader {
         LogManager.getLogger().warn("Trying to set a BlockEntity, but this operation is not supported.");
     }
 
-
     CompoundNBT getDeferredTileEntity(BlockPos pos);
-
 
     CompoundNBT func_223134_j(BlockPos p_223134_1_);
 

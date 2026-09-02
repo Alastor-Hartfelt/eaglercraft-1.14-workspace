@@ -31,7 +31,6 @@ public class DynamicTexture extends Texture implements AutoCloseable {
         this.setBlurMipmap(false, false);
     }
 
-
     public NativeImage getTextureData() {
         return this.dynamicTextureData;
     }

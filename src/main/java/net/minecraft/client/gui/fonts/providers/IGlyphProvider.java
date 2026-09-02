@@ -11,7 +11,6 @@ public interface IGlyphProvider extends Closeable {
     default void close() {
     }
 
-
     default IGlyphInfo func_212248_a(char p_212248_1_) {
         return null;
     }

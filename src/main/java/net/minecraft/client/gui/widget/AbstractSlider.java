@@ -13,6 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class AbstractSlider extends Widget {
    protected final GameSettings options;
    protected double value;
+   protected boolean dragging;
 
    protected AbstractSlider(int xIn, int yIn, int widthIn, int heightIn, double valueIn) {
       this(Minecraft.getInstance().gameSettings, xIn, yIn, widthIn, heightIn, valueIn);
@@ -33,6 +34,14 @@ public abstract class AbstractSlider extends Widget {
    }
 
    protected void renderBg(Minecraft p_renderBg_1_, int p_renderBg_2_, int p_renderBg_3_) {
+      if (this.dragging) {
+         if (p_renderBg_1_.currentScreen != null && p_renderBg_1_.currentScreen.isDragging()) {
+            this.setValueFromMouse(p_renderBg_2_);
+         } else {
+            this.dragging = false;
+         }
+      }
+
       p_renderBg_1_.getTextureManager().bindTexture(WIDGETS_LOCATION);
       GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
       int i = (this.isHovered() ? 2 : 1) * 20;
@@ -41,6 +50,7 @@ public abstract class AbstractSlider extends Widget {
    }
 
    public void onClick(double p_onClick_1_, double p_onClick_3_) {
+      this.dragging = true;
       this.setValueFromMouse(p_onClick_1_);
    }
 
@@ -77,7 +87,13 @@ public abstract class AbstractSlider extends Widget {
    }
 
    public void onRelease(double p_onRelease_1_, double p_onRelease_3_) {
+      this.dragging = false;
       super.playDownSound(Minecraft.getInstance().getSoundHandler());
+   }
+
+   public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_) {
+      this.dragging = false;
+      return super.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
    }
 
    protected abstract void updateMessage();

@@ -140,7 +140,7 @@ public class WorldSelectionList extends ExtendedList<WorldSelectionList.Entry> {
 
         public void render(int p_render_1_, int p_render_2_, int p_render_3_, int p_render_4_, int p_render_5_, int p_render_6_, int p_render_7_, boolean p_render_8_, float p_render_9_) {
             String s = this.field_214451_d.getDisplayName();
-            String s1 = this.field_214451_d.getFileName() + " (" + WorldSelectionList.field_214377_b.format(new Date(this.field_214451_d.getLastTimePlayed())) + ")";
+            String s1 = this.field_214451_d.getFileName() + " (" + WorldSelectionList.field_214377_b.format(new Date(this.field_214451_d.getLastTimePlayed())).replace('\u202F', ' ').replace('\u00A0', ' ') + ")";
             if (StringUtils.isEmpty(s)) {
                 s = I18n.format("selectWorld.world") + " " + (p_render_1_ + 1);
             }
@@ -328,7 +328,6 @@ public class WorldSelectionList extends ExtendedList<WorldSelectionList.Entry> {
             }
 
         }
-
 
         private DynamicTexture func_214446_f() {
             byte[] iconRaw = net.peyton.eagler.fs.WorldsDB.newVFile(this.field_214451_d.getFileName(), "icon.raw").getAllBytes();

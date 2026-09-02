@@ -19,7 +19,6 @@ public class DefaultRenderer extends EntityRenderer<Entity> {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-
    protected ResourceLocation getEntityTexture(Entity entity) {
       return null;
    }

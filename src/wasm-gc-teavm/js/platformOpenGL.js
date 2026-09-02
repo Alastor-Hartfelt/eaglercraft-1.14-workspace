@@ -33,6 +33,7 @@ const CAP_A_BIT_ANISOTROPIC = 128;
 
 const CAP_B_BIT_HDR_LINEAR16F = 1;
 const CAP_B_BIT_HDR_LINEAR32F = 2;
+const CAP_B_BIT_WEBGL_MULTI_DRAW = 4;
 
 const platfOpenGLName = "platformOpenGL";
 
@@ -45,6 +46,7 @@ const platfOpenGLName = "platformOpenGL";
 function setCurrentGLContext(ctx, glesVersIn, allowExts, glImports) {
 	const wglExtVAO = (allowExts && glesVersIn === 200) ? ctx.getExtension("OES_vertex_array_object") : null;
 	const wglExtInstancing = (allowExts && glesVersIn === 200) ? ctx.getExtension("ANGLE_instanced_arrays") : null;
+	const wglExtMultiDraw = (allowExts && glesVersIn >= 300) ? ctx.getExtension("WEBGL_multi_draw") : null;
 	const hasANGLEInstancedArrays = allowExts && glesVersIn === 200 && wglExtInstancing !== null;
 	const hasEXTColorBufferFloat = allowExts && (glesVersIn === 310 || glesVersIn === 300) && ctx.getExtension("EXT_color_buffer_float") !== null;
 	const hasEXTColorBufferHalfFloat = allowExts && !hasEXTColorBufferFloat && (glesVersIn === 310 || glesVersIn === 300 || glesVersIn === 200)
@@ -74,6 +76,7 @@ function setCurrentGLContext(ctx, glesVersIn, allowExts, glImports) {
 	if(hasEXTTextureFilterAnisotropic) capBits[3] |= CAP_A_BIT_ANISOTROPIC;
 	if(hasLinearHDR16FSupport) capBits[4] |= CAP_B_BIT_HDR_LINEAR16F;
 	if(hasLinearHDR32FSupport) capBits[4] |= CAP_B_BIT_HDR_LINEAR32F;
+	if(wglExtMultiDraw !== null) capBits[4] |= CAP_B_BIT_WEBGL_MULTI_DRAW;
 	
 	/**
 	 * @param {number} idx
@@ -119,6 +122,7 @@ function setCurrentGLContext(ctx, glesVersIn, allowExts, glImports) {
 	glImports["glBindBuffer"] = ctx.bindBuffer.bind(ctx);
 	glImports["glBufferData"] = ctx.bufferData.bind(ctx);
 	glImports["glBufferSubData"] = ctx.bufferSubData.bind(ctx);
+	glImports["glCopyBufferSubData"] = glesVersIn >= 300 ? ctx.copyBufferSubData.bind(ctx) : unsupportedFunc(platfOpenGLName, "glCopyBufferSubData");
 	glImports["glEnableVertexAttribArray"] = ctx.enableVertexAttribArray.bind(ctx);
 	glImports["glDisableVertexAttribArray"] = ctx.disableVertexAttribArray.bind(ctx);
 		glImports["glScissor"] = ctx.scissor.bind(ctx);
@@ -145,6 +149,8 @@ function setCurrentGLContext(ctx, glesVersIn, allowExts, glImports) {
 	glImports["glGetProgrami"] = ctx.getProgramParameter.bind(ctx);
 	glImports["glGetProgramInfoLog"] = ctx.getProgramInfoLog.bind(ctx);
 	glImports["glDrawArrays"] = ctx.drawArrays.bind(ctx);
+	glImports["glMultiDrawArrays"] = wglExtMultiDraw !== null ? wglExtMultiDraw["multiDrawArraysWEBGL"].bind(wglExtMultiDraw) : unsupportedFunc(platfOpenGLName, "glMultiDrawArrays");
+	glImports["glMultiDrawElements"] = wglExtMultiDraw !== null ? wglExtMultiDraw["multiDrawElementsWEBGL"].bind(wglExtMultiDraw) : unsupportedFunc(platfOpenGLName, "glMultiDrawElements");
 	glImports["glDrawElements"] = ctx.drawElements.bind(ctx);
 	glImports["glDrawRangeElements"] = glesVersIn >= 300 ? ctx.drawRangeElements.bind(ctx) : unsupportedFunc(platfOpenGLName, "glDrawRangeElements");
 	glImports["glBindAttribLocation"] = ctx.bindAttribLocation.bind(ctx);
@@ -192,6 +198,7 @@ function setCurrentGLContext(ctx, glesVersIn, allowExts, glImports) {
 	if(hasOESTextureHalfFloatLinear) exts.push("OES_texture_half_float_linear");
 	if(hasEXTTextureFilterAnisotropic) exts.push("EXT_texture_filter_anisotropic");
 	if(hasWEBGLDebugRendererInfo) exts.push("WEBGL_debug_renderer_info");
+	if(wglExtMultiDraw !== null) exts.push("WEBGL_multi_draw");
 	
 	/**
 	 * @return {Array}
@@ -320,6 +327,7 @@ function setNoGLContext(glImports) {
 	setUnsupportedFunc(glImports, platfOpenGLName, "glBindBuffer");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glBufferData");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glBufferSubData");
+	setUnsupportedFunc(glImports, platfOpenGLName, "glCopyBufferSubData");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glEnableVertexAttribArray");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glDisableVertexAttribArray");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glVertexAttribPointer");
@@ -346,6 +354,8 @@ function setNoGLContext(glImports) {
 	setUnsupportedFunc(glImports, platfOpenGLName, "glGetProgrami");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glGetProgramInfoLog");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glDrawArrays");
+	setUnsupportedFunc(glImports, platfOpenGLName, "glMultiDrawArrays");
+	setUnsupportedFunc(glImports, platfOpenGLName, "glMultiDrawElements");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glDrawElements");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glDrawRangeElements");
 	setUnsupportedFunc(glImports, platfOpenGLName, "glBindAttribLocation");

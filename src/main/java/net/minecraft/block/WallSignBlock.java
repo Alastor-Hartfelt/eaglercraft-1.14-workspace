@@ -40,7 +40,6 @@ public class WallSignBlock extends AbstractSignBlock {
         return worldIn.getBlockState(pos.offset(state.get(FACING).getOpposite())).getMaterial().isSolid();
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = this.getDefaultState();
         IFluidState ifluidstate = context.getWorld().getFluidState(context.getPos());

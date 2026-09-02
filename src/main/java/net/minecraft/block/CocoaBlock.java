@@ -58,7 +58,6 @@ public class CocoaBlock extends HorizontalBlock implements IGrowable {
         }
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = this.getDefaultState();
         IWorldReader iworldreader = context.getWorld();

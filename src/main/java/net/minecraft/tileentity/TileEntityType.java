@@ -50,7 +50,6 @@ public class TileEntityType<T extends TileEntity> {
     private final Supplier<? extends T> factory;
     private final Set<Block> validBlocks;
 
-
     public static ResourceLocation getId(TileEntityType<?> tileEntityTypeIn) {
         return Registry.BLOCK_ENTITY_TYPE.getKey(tileEntityTypeIn);
     }
@@ -78,7 +77,6 @@ public class TileEntityType<T extends TileEntity> {
         this.factory = factoryIn;
         this.validBlocks = validBlocksIn;
     }
-
 
     public T create() {
         return (T) (this.factory.get());

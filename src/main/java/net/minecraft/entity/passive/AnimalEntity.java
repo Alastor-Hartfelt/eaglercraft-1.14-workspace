@@ -150,7 +150,6 @@ public abstract class AnimalEntity extends AgeableEntity {
         this.inLove = ticks;
     }
 
-
     public ServerPlayerEntity getLoveCause() {
         if (this.playerInLove == null) {
             return null;

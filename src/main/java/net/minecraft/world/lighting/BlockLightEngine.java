@@ -48,7 +48,6 @@ public final class BlockLightEngine extends LightEngine<BlockLightStorage.Storag
                     return 15;
                 } else {
                     BlockState blockstate1 = this.getBlockAndOpacity(startPos);
-                    // Fast path: if both blocks are opaque full cubes, light cannot pass through
                     if (blockstate.isSolid() && blockstate.func_215691_g() && blockstate1.isSolid() && blockstate1.func_215691_g()) {
                         return 15;
                     }

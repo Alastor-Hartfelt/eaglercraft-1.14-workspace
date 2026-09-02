@@ -45,7 +45,6 @@ public class ZombieHorseEntity extends AbstractHorseEntity {
         return SoundEvents.ENTITY_ZOMBIE_HORSE_HURT;
     }
 
-
     public AgeableEntity createChild(AgeableEntity ageable) {
         return EntityType.ZOMBIE_HORSE.create(this.world);
     }

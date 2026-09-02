@@ -12,7 +12,7 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -300,7 +300,6 @@ public abstract class AbstractCommandBlockScreen extends Screen {
     protected void setCommand(String p_209102_1_) {
         this.commandTextField.setText(p_209102_1_);
     }
-
 
     private static String func_212339_b(String p_212339_0_, String p_212339_1_) {
         return p_212339_1_.startsWith(p_212339_0_) ? p_212339_1_.substring(p_212339_0_.length()) : null;

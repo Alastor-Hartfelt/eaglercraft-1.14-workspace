@@ -18,11 +18,9 @@ public class MinMaxBoundsWrapped {
         this.max = p_i49328_2_;
     }
 
-
     public Float getMin() {
         return this.min;
     }
-
 
     public Float getMax() {
         return this.max;
@@ -61,7 +59,6 @@ public class MinMaxBoundsWrapped {
         }
     }
 
-
     private static Float func_207924_b(StringReader p_207924_0_, boolean p_207924_1_) throws CommandSyntaxException {
         int i = p_207924_0_.getCursor();
 
@@ -97,7 +94,6 @@ public class MinMaxBoundsWrapped {
             return true;
         }
     }
-
 
     private static Float map(Float p_207922_0_, Function<Float, Float> p_207922_1_) {
         return p_207922_0_ == null ? null : p_207922_1_.apply(p_207922_0_);

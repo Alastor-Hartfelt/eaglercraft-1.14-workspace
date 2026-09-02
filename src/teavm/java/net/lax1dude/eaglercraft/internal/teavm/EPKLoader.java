@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import net.peyton.eagler.minecraft.AudioUtils;
 import org.teavm.jso.typedarrays.ArrayBuffer;
 import org.teavm.jso.typedarrays.Uint8Array;
 
@@ -147,11 +146,6 @@ public class EPKLoader {
 				
 				if(zis.read() != ':') {
 					throw new IOException("File '" + name + "' is incomplete");
-				}
-
-				String s = path + name;
-				if(s.contains(".ogg")) {
-					AudioUtils.addFile(s);
 				}
 
 				loadedFiles.put(path + name, load);

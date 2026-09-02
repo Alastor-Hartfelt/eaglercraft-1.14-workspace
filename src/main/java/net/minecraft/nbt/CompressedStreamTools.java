@@ -58,7 +58,6 @@ public class CompressedStreamTools {
 
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public static CompoundNBT read(VFile2 fileIn) throws IOException {
         if (!fileIn.exists()) {

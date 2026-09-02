@@ -91,7 +91,6 @@ public abstract class Structure<C extends IFeatureConfig> extends Feature<C> {
         return this.getStart(worldIn, pos, true).isValid();
     }
 
-
     public BlockPos findNearest(World worldIn, ChunkGenerator<? extends GenerationSettings> chunkGenerator, BlockPos pos, int radius, boolean p_211405_5_) {
         if (!chunkGenerator.getBiomeProvider().hasStructure(this)) {
             return null;

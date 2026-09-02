@@ -91,7 +91,6 @@ public class SignTileEntity extends TileEntity {
         this.renderText[line] = null;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public String getRenderText(int line, Function<ITextComponent, String> p_212364_2_) {
         if (this.renderText[line] == null && this.signText[line] != null) {
@@ -100,7 +99,6 @@ public class SignTileEntity extends TileEntity {
 
         return this.renderText[line];
     }
-
 
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, 9, this.getUpdateTag());

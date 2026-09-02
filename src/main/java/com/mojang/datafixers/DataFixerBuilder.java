@@ -22,8 +22,6 @@ public class DataFixerBuilder {
     }
 
     public void addFixer(Object fixer) {
-        // Since we are not fully implementing individual fixers in this port, we accept them as Object and ignore
-        // If IFixableData is provided, it could be registered to the DataFixer in buildUnoptimized
     }
 
     public DataFixer buildUnoptimized() {

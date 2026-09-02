@@ -37,12 +37,10 @@ public class SRemoveEntityEffectPacket implements IPacket<IClientPlayNetHandler>
         handler.handleRemoveEntityEffect(this);
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public Entity getEntity(World worldIn) {
         return worldIn.getEntityByID(this.entityId);
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public Effect getPotion() {

@@ -26,6 +26,7 @@ public class NetworkPlayerInfo {
     private boolean playerTexturesLoaded;
     private String skinType;
     private ITextComponent displayName;
+    private ITextComponent displayNameProfanityFilter;
     private int lastHealth;
     private int displayHealth;
     private long lastHealthTime;
@@ -97,7 +98,6 @@ public class NetworkPlayerInfo {
         return DefaultPlayerSkin.getDefaultSkin(this.gameProfile.getId());
     }
 
-
     public ResourceLocation getLocationCape() {
         if (Minecraft.getInstance().getConnection() != null) {
             net.lax1dude.eaglercraft.profile.ServerCapeCache cache = Minecraft.getInstance().getConnection().getCapeCache();
@@ -108,11 +108,9 @@ public class NetworkPlayerInfo {
         return null;
     }
 
-
     public ResourceLocation getLocationElytra() {
         return null;
     }
-
 
     public ScorePlayerTeam getPlayerTeam() {
         return Minecraft.getInstance().world.getScoreboard().getPlayersTeam(this.getGameProfile().getName());
@@ -120,16 +118,24 @@ public class NetworkPlayerInfo {
 
     protected void loadPlayerTextures() {
 
-
     }
 
     public void setDisplayName(ITextComponent displayNameIn) {
         this.displayName = displayNameIn;
     }
 
-
     public ITextComponent getDisplayName() {
         return this.displayName;
+    }
+
+    public ITextComponent getDisplayNameProfanityFilter() {
+        if (net.minecraft.client.Minecraft.getInstance().isEnableProfanityFilter()) {
+            if (displayNameProfanityFilter == null && displayName != null) {
+                displayNameProfanityFilter = net.lax1dude.eaglercraft.profanity_filter.ProfanityFilter.getInstance().profanityFilterChatComponent(displayName);
+            }
+            return displayNameProfanityFilter != null ? displayNameProfanityFilter : displayName;
+        }
+        return displayName;
     }
 
     public int getLastHealth() {

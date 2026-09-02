@@ -73,7 +73,6 @@ public class CUseEntityPacket implements IPacket<IServerPlayNetHandler> {
         handler.processUseEntity(this);
     }
 
-
     public Entity getEntityFromWorld(World worldIn) {
         return worldIn.getEntityByID(this.entityId);
     }

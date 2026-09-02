@@ -216,12 +216,10 @@ public class AdvancementsScreen extends Screen implements ClientAdvancementManag
         this.selectedTab = null;
     }
 
-
     public AdvancementEntryGui getAdvancementGui(Advancement p_191938_1_) {
         AdvancementTabGui advancementtabgui = this.getTab(p_191938_1_);
         return advancementtabgui == null ? null : advancementtabgui.getAdvancementGui(p_191938_1_);
     }
-
 
     private AdvancementTabGui getTab(Advancement p_191935_1_) {
         while (p_191935_1_.getParent() != null) {

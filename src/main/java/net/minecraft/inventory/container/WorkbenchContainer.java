@@ -71,7 +71,6 @@ public class WorkbenchContainer extends RecipeBookContainer<CraftingInventory> {
                     org.apache.logging.log4j.LogManager.getLogger().warn("[CRAFT DEBUG] canUseRecipe returned false for: {}", icraftingrecipe.getId());
                 }
             } else {
-                // org.apache.logging.log4j.LogManager.getLogger().warn(sb.toString());
             }
 
             p_217066_4_.setInventorySlotContents(0, itemstack);

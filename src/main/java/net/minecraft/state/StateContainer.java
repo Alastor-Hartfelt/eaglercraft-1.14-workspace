@@ -69,7 +69,6 @@ public class StateContainer<O, S extends IStateHolder<S>> {
         return MoreObjects.toStringHelper(this).add("block", this.owner).add("properties", this.properties.values().stream().map(IProperty::getName).collect(Collectors.toList())).toString();
     }
 
-
     public IProperty<?> getProperty(String propertyName) {
         return this.properties.get(propertyName);
     }

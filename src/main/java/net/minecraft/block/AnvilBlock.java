@@ -49,7 +49,6 @@ public class AnvilBlock extends FallingBlock {
         return true;
     }
 
-
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
         return new SimpleNamedContainerProvider((p_220272_2_, p_220272_3_, p_220272_4_) -> {
             return new RepairContainer(p_220272_2_, p_220272_3_, IWorldPosCallable.of(worldIn, pos));
@@ -72,7 +71,6 @@ public class AnvilBlock extends FallingBlock {
     public void onBroken(World worldIn, BlockPos pos) {
         worldIn.playEvent(1029, pos, 0);
     }
-
 
     public static BlockState damage(BlockState state) {
         Block block = state.getBlock();

@@ -16,7 +16,6 @@ public class SalmonRenderer extends MobRenderer<SalmonEntity, SalmonModel<Salmon
       super(p_i48862_1_, new SalmonModel<>(), 0.4F);
    }
 
-
    protected ResourceLocation getEntityTexture(SalmonEntity entity) {
       return SALMON_LOCATION;
    }

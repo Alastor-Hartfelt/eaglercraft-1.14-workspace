@@ -14,7 +14,6 @@ public class UserListEntry<T> {
         this.value = valueIn;
     }
 
-
     T getValue() {
         return this.value;
     }

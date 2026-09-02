@@ -51,7 +51,6 @@ public class AdvancementManager extends JsonReloadListener {
         this.field_223388_c = advancementlist;
     }
 
-
     public Advancement getAdvancement(ResourceLocation id) {
         return this.field_223388_c.getAdvancement(id);
     }

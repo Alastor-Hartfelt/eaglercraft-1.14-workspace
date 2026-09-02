@@ -243,7 +243,6 @@ public class DragonFightManager {
         return false;
     }
 
-
     private BlockPattern.PatternHelper findExitPortal() {
         for (int i = -8; i <= 8; ++i) {
             for (int j = -8; j <= 8; ++j) {

@@ -10,7 +10,7 @@ public class EaglerPlayerList extends PlayerList {
 
     public EaglerPlayerList(EaglerMinecraftServer server, int viewDistance) {
         super(server, 20);
-        this.setViewDistance(Math.max(2, Math.min(viewDistance, 6)));
+        this.setViewDistance(Math.max(2, Math.min(viewDistance, 32)));
     }
 
     @Override

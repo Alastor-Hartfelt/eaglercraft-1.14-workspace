@@ -113,7 +113,6 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
         return this.isRemote;
     }
 
-
     public MinecraftServer getServer() {
         return null;
     }
@@ -546,16 +545,11 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
                 BlockPos blockpos = tileentity.getPos();
                 if (this.chunkProvider.canTick(blockpos) && this.getWorldBorder().contains(blockpos)) {
                     try {
-                        iprofiler.startSection(() -> {
-                            return String.valueOf((Object) TileEntityType.getId(tileentity.getType()));
-                        });
                         if (tileentity.getType().isValidBlock(this.getBlockState(blockpos).getBlock())) {
                             ((ITickableTileEntity) tileentity).tick();
                         } else {
                             tileentity.warnInvalidBlock();
                         }
-
-                        iprofiler.endSection();
                     } catch (Throwable throwable) {
                         CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                         CrashReportCategory crashreportcategory = crashreport.makeCategory("Block entity being ticked");
@@ -663,7 +657,6 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
         }
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public BlockState findBlockstateInArea(AxisAlignedBB area, Block blockIn) {
         int i = MathHelper.floor(area.minX);
@@ -741,7 +734,6 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
         return this.chunkProvider.makeString();
     }
 
-
     public TileEntity getTileEntity(BlockPos pos) {
         if (isOutsideBuildHeight(pos)) {
             return null;
@@ -764,7 +756,6 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
             return tileentity;
         }
     }
-
 
     private TileEntity getPendingTileEntityAt(BlockPos pos) {
         for (int i = 0; i < this.addedTileEntityList.size(); ++i) {
@@ -863,6 +854,13 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
 
     public List<Entity> getEntitiesInAABBexcluding(Entity entityIn, AxisAlignedBB boundingBox, Predicate<? super Entity> predicate) {
         List<Entity> list = Lists.newArrayList();
+        this.getEntitiesInAABBexcluding(entityIn, boundingBox, predicate, list);
+        return list;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void getEntitiesInAABBexcluding(Entity entityIn, AxisAlignedBB boundingBox,
+                                            Predicate<? super Entity> predicate, List<Entity> result) {
         int i = MathHelper.floor((boundingBox.minX - 2.0D) / 16.0D);
         int j = MathHelper.floor((boundingBox.maxX + 2.0D) / 16.0D);
         int k = MathHelper.floor((boundingBox.minZ - 2.0D) / 16.0D);
@@ -872,12 +870,10 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
             for (int j1 = k; j1 <= l; ++j1) {
                 Chunk chunk = this.getChunkProvider().getChunk(i1, j1, false);
                 if (chunk != null) {
-                    chunk.getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
+                    chunk.getEntitiesWithinAABBForEntity(entityIn, boundingBox, result, predicate);
                 }
             }
         }
-
-        return list;
     }
 
     public List<Entity> getEntitiesWithinAABB(EntityType<?> p_217394_1_, AxisAlignedBB p_217394_2_, Predicate<? super Entity> p_217394_3_) {
@@ -938,7 +934,6 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
 
         return list;
     }
-
 
     public abstract Entity getEntityByID(int id);
 
@@ -1151,7 +1146,6 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
         return biome.isHighHumidity();
     }
 
-
     public abstract MapData func_217406_a(String p_217406_1_);
 
     public abstract void func_217399_a(MapData p_217399_1_);
@@ -1247,7 +1241,6 @@ public abstract class World implements IEnviromentBlockReader, IWorld, AutoClose
     public void sendPacketToServer(IPacket<?> packetIn) {
         throw new UnsupportedOperationException("Can't send packets to server unless you're on the client.");
     }
-
 
     public BlockPos findNearestStructure(String name, BlockPos pos, int radius, boolean p_211157_4_) {
         return null;

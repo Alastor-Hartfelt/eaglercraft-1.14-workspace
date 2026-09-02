@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer;
 
+import net.lax1dude.eaglercraft.EagRuntime;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.lax1dude.eaglercraft.internal.buffer.ByteBuffer;
@@ -10,6 +11,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class WorldVertexBufferUploader {
    private ByteBuffer uploadBuffer;
+   private final byte[] copyBuffer = new byte[12];
 
    public void draw(BufferBuilder bufferBuilderIn) {
       if (bufferBuilderIn.getVertexCount() > 0) {
@@ -42,11 +44,15 @@ public class WorldVertexBufferUploader {
 
             int dstSize = dstStride * vertexCount;
             if (uploadBuffer == null || uploadBuffer.capacity() < dstSize) {
+               ByteBuffer oldBuffer = uploadBuffer;
                uploadBuffer = GLAllocation.createDirectByteBuffer(dstSize);
+               if (oldBuffer != null) {
+                  EagRuntime.freeByteBuffer(oldBuffer);
+               }
             }
             uploadBuffer.clear();
 
-            byte[] tmpBuf = new byte[Math.max(12, Math.max(8, 4))];
+            byte[] tmpBuf = this.copyBuffer;
             int pos = src.position();
             for (int i = 0; i < vertexCount; ++i) {
                int base = i * stride;

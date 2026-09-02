@@ -293,7 +293,7 @@ public class GuiInviteFriendScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256) {  // Escape
+        if (Screen.isCloseKey(keyCode, scanCode)) {
             this.mc.displayGuiScreen(parentScreen);
             return true;
         }

@@ -52,7 +52,7 @@ public final class FrozenOceanBiome extends Biome {
       this.addSpawn(EntityClassification.MONSTER, new Biome.SpawnListEntry(EntityType.WITCH, 5, 1, 1));
    }
 
-   protected float getTemperature(BlockPos pos) {
+   public float getTemperature(BlockPos pos) {
       float f = this.getDefaultTemperature();
       double d0 = field_205163_aV.getValue((double)pos.getX() * 0.05D, (double)pos.getZ() * 0.05D);
       double d1 = INFO_NOISE.getValue((double)pos.getX() * 0.2D, (double)pos.getZ() * 0.2D);

@@ -86,6 +86,5 @@ public class DownloadingTexture extends SimpleTexture {
     }
 
     protected void loadTextureFromServer() {
-        // Eaglercraft uses its own skin networking; downloading texture directly is a stub.
     }
 }

@@ -99,7 +99,6 @@ public class SharedMonsterAttributes {
 
    }
 
-
    public static AttributeModifier readAttributeModifier(CompoundNBT compound) {
       EaglercraftUUID uuid = compound.getUniqueId("EaglercraftUUID");
 

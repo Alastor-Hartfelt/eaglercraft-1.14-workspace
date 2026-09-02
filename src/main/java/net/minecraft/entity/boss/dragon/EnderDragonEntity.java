@@ -597,7 +597,6 @@ public class EnderDragonEntity extends MobEntity implements IMob {
         return i;
     }
 
-
     public Path findPath(int startIdx, int finishIdx, PathPoint andThen) {
         for (int i = 0; i < 24; ++i) {
             PathPoint pathpoint = this.pathPoints[i];
@@ -810,7 +809,6 @@ public class EnderDragonEntity extends MobEntity implements IMob {
     public PhaseManager getPhaseManager() {
         return this.phaseManager;
     }
-
 
     public DragonFightManager getFightManager() {
         return this.fightManager;

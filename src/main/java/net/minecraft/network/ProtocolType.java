@@ -227,7 +227,6 @@ public enum ProtocolType {
         return this.directionMaps.get(direction).inverse().get(packetIn.getClass());
     }
 
-
     public IPacket<?> getPacket(PacketDirection direction, int packetId) {
         Map<Integer, Supplier<IPacket<?>>> suppliers = this.supplierMaps.get(direction);
         if (suppliers == null) {

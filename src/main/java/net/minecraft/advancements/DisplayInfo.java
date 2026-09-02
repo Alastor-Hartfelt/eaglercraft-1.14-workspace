@@ -55,7 +55,6 @@ public class DisplayInfo {
         return this.icon;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public ResourceLocation getBackground() {
         return this.background;

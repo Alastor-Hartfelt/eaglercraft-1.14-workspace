@@ -52,12 +52,10 @@ public class SwimNodeProcessor extends NodeProcessor {
       }
    }
 
-
    private PathPoint getWaterNode(int p_186328_1_, int p_186328_2_, int p_186328_3_) {
       PathNodeType pathnodetype = this.isFree(p_186328_1_, p_186328_2_, p_186328_3_);
       return (!this.field_205202_j || pathnodetype != PathNodeType.BREACH) && pathnodetype != PathNodeType.WATER ? null : this.openPoint(p_186328_1_, p_186328_2_, p_186328_3_);
    }
-
 
    protected PathPoint openPoint(int x, int y, int z) {
       PathPoint pathpoint = null;

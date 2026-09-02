@@ -54,7 +54,6 @@ public class RegionSectionCache<R extends IDynamicSerializable> extends RegionFi
 
     }
 
-
     protected Optional<R> func_219106_c(long p_219106_1_) {
         return this.data.get(p_219106_1_);
     }
@@ -99,7 +98,6 @@ public class RegionSectionCache<R extends IDynamicSerializable> extends RegionFi
     private void func_219107_b(ChunkPos p_219107_1_) {
         this.func_219119_a(p_219107_1_, NBTDynamicOps.INSTANCE, this.func_223138_c(p_219107_1_));
     }
-
 
     private CompoundNBT func_223138_c(ChunkPos p_223138_1_) {
         try {

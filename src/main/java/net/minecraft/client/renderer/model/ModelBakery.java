@@ -160,20 +160,24 @@ public class ModelBakery {
       p_217844_1_.startSection("atlas");
       this.textureMap.upload(this.field_217853_J);
       p_217844_1_.endStartSection("baking");
-      this.field_217851_H.keySet().forEach((p_217835_1_) -> {
-         IBakedModel ibakedmodel = null;
+      BakedQuad.beginVertexDataCompaction();
+      try {
+         for (ResourceLocation location : this.field_217851_H.keySet()) {
+            IBakedModel ibakedmodel = null;
 
-         try {
-            ibakedmodel = this.func_217845_a(p_217835_1_, ModelRotation.X0_Y0);
-         } catch (Exception exception) {
-            LOGGER.warn("Unable to bake model: '{}': {}", p_217835_1_, exception);
+            try {
+               ibakedmodel = this.func_217845_a(location, ModelRotation.X0_Y0);
+            } catch (Exception exception) {
+               LOGGER.warn("Unable to bake model: '{}': {}", location, exception);
+            }
+
+            if (ibakedmodel != null) {
+               this.field_217852_I.put(location, ibakedmodel);
+            }
          }
-
-         if (ibakedmodel != null) {
-            this.field_217852_I.put(p_217835_1_, ibakedmodel);
-         }
-
-      });
+      } finally {
+         BakedQuad.endVertexDataCompaction();
+      }
       p_217844_1_.endSection();
    }
 
@@ -214,7 +218,6 @@ public class ModelBakery {
          }
       };
    }
-
 
    static <T extends Comparable<T>> T parseValue(IProperty<T> property, String value) {
       return (T)(property.parseValue(value).orElse((T)null));
@@ -402,19 +405,16 @@ public class ModelBakery {
       });
    }
 
-
    public IBakedModel func_217845_a(ResourceLocation p_217845_1_, ISprite p_217845_2_) {
       Triple<ResourceLocation, ModelRotation, Boolean> triple = new Triple<ResourceLocation, ModelRotation, Boolean>() {
          @Override
          public ResourceLocation getLeft() {
             return p_217845_1_;
          }
-         
          @Override
          public ModelRotation getMiddle() {
             return p_217845_2_.getRotation();
          }
-         
          @Override
          public Boolean getRight() {
             return p_217845_2_.isUvLock();

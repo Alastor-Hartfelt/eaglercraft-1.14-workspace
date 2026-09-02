@@ -98,7 +98,6 @@ public class GlDebugTextUtils {
 
     public static void setDebugVerbosity(int debugVerbosity, boolean p_209247_1_) {
 
-
     }
 
     static {

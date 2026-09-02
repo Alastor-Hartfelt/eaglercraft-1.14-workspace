@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.fonts.providers.DefaultGlyphProvider;
@@ -180,7 +180,6 @@ public class FontResourceManager implements AutoCloseable {
         this.textureManager = textureManagerIn;
         this.forceUnicodeFont = forceUnicodeFontIn;
     }
-
 
     public FontRenderer getFontRenderer(ResourceLocation id) {
         return this.fontRenderers.computeIfAbsent(id, (p_212318_1_) -> {

@@ -18,7 +18,12 @@ public class BiomeColors {
       return p_210279_0_.getWaterFogColor();
    };
 
-   private static final ThreadLocal<BlockPos.MutableBlockPos> MUTABLE_POS = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
+   private static final ThreadLocal<BlockPos.MutableBlockPos> MUTABLE_POS = new ThreadLocal<BlockPos.MutableBlockPos>() {
+      @Override
+      protected BlockPos.MutableBlockPos initialValue() {
+         return new BlockPos.MutableBlockPos();
+      }
+   };
 
    private static int getColor(IEnviromentBlockReader reader, BlockPos pos, BiomeColors.IColorResolver resolver) {
       int i = 0;

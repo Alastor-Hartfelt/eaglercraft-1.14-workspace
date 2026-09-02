@@ -31,7 +31,6 @@ public class CSpectatePacket implements IPacket<IServerPlayNetHandler> {
         handler.handleSpectate(this);
     }
 
-
     public Entity getEntity(ServerWorld worldIn) {
         return worldIn.getEntityByUuid(this.id);
     }

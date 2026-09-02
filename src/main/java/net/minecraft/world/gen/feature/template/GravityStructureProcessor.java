@@ -20,7 +20,6 @@ public class GravityStructureProcessor extends StructureProcessor {
       this(Heightmap.Type.func_203501_a(p_i51329_1_.get("heightmap").asString(Heightmap.Type.WORLD_SURFACE_WG.getId())), p_i51329_1_.get("offset").asInt(0));
    }
 
-
    public Template.BlockInfo process(IWorldReader p_215194_1_, BlockPos p_215194_2_, Template.BlockInfo p_215194_3_, Template.BlockInfo p_215194_4_, PlacementSettings p_215194_5_) {
       int i = p_215194_1_.getHeight(this.heightmap, p_215194_4_.pos.getX(), p_215194_4_.pos.getZ()) + this.offset;
       int j = p_215194_3_.pos.getY();

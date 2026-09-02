@@ -19,7 +19,6 @@ public class DrownedRenderer extends AbstractZombieRenderer<DrownedEntity, Drown
       this.addLayer(new DrownedOuterLayer<>(this));
    }
 
-
    protected ResourceLocation getEntityTexture(ZombieEntity entity) {
       return DROWNED_LOCATION;
    }

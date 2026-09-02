@@ -7,7 +7,7 @@ public class EaglercraftVersion {
     /// Customize these to fit your fork:
 
     public static final String projectForkName = "Eaglercraft 1.14.4";
-    public static final String projectForkVersion = "u0";
+    public static final String projectForkVersion = "u1 pre-release";
     public static final String projectForkVendor = "EymenWSMC";
 
     public static final String projectForkURL = "";
@@ -16,7 +16,7 @@ public class EaglercraftVersion {
 
     public static final String projectOriginName = "Eaglercraft 1.14.4";
     public static final String projectOriginAuthor = "EymenWSMC";
-    public static final String projectOriginVersion = "u0";
+    public static final String projectOriginVersion = "u1 pre-release";
     public static final String projectOriginServerVersion = "";
 
     public static final String projectOriginURL = "";

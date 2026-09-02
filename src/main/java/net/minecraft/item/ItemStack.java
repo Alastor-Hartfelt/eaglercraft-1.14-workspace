@@ -399,7 +399,6 @@ public final class ItemStack {
         return !this.isEmpty && this.tag != null && !this.tag.isEmpty();
     }
 
-
     public CompoundNBT getTag() {
         return this.tag;
     }
@@ -421,7 +420,6 @@ public final class ItemStack {
             return compoundnbt;
         }
     }
-
 
     public CompoundNBT getChildTag(String key) {
         return this.tag != null && this.tag.contains(key, 10) ? this.tag.getCompound(key) : null;
@@ -722,7 +720,6 @@ public final class ItemStack {
     public void setItemFrame(ItemFrameEntity frame) {
         this.itemFrame = frame;
     }
-
 
     public ItemFrameEntity getItemFrame() {
         return this.isEmpty ? null : this.itemFrame;

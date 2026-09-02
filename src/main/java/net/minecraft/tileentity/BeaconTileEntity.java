@@ -237,7 +237,6 @@ public class BeaconTileEntity extends TileEntity implements INamedContainerProvi
         return this.levels;
     }
 
-
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, 3, this.getUpdateTag());
     }
@@ -250,7 +249,6 @@ public class BeaconTileEntity extends TileEntity implements INamedContainerProvi
     public double getMaxRenderDistanceSquared() {
         return 65536.0D;
     }
-
 
     private static Effect isBeaconEffect(int p_184279_0_) {
         Effect effect = Effect.get(p_184279_0_);
@@ -284,7 +282,6 @@ public class BeaconTileEntity extends TileEntity implements INamedContainerProvi
     public void setCustomName(ITextComponent aname) {
         this.customName = aname;
     }
-
 
     public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
         return LockableTileEntity.canUnlock(p_createMenu_3_, this.field_213936_m, this.getDisplayName()) ? new BeaconContainer(p_createMenu_1_, p_createMenu_2_, this.field_213937_n, IWorldPosCallable.of(this.world, this.getPos())) : null;

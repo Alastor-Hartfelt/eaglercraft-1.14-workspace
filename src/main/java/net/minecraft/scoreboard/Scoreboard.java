@@ -34,7 +34,6 @@ public class Scoreboard {
       return this.scoreObjectives.get(p_197899_1_);
    }
 
-
    public ScoreObjective getObjective( String name) {
       return this.scoreObjectives.get(name);
    }
@@ -169,7 +168,6 @@ public class Scoreboard {
       this.objectiveDisplaySlots[objectiveSlot] = objective;
    }
 
-
    public ScoreObjective getObjectiveInDisplaySlot(int slotIn) {
       return this.objectiveDisplaySlots[slotIn];
    }
@@ -243,7 +241,6 @@ public class Scoreboard {
    public Collection<ScorePlayerTeam> getTeams() {
       return this.teams.values();
    }
-
 
    public ScorePlayerTeam getPlayersTeam(String username) {
       return this.teamMemberships.get(username);

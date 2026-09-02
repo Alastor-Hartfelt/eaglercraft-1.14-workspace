@@ -18,7 +18,6 @@ public interface IAttributeInstance {
 
    boolean hasModifier(AttributeModifier modifier);
 
-
    AttributeModifier getModifier(EaglercraftUUID uuid);
 
    void applyModifier(AttributeModifier modifier);

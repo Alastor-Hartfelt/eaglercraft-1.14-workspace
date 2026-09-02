@@ -39,7 +39,6 @@ public class EndDimension extends Dimension {
         return 0.0F;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public float[] calcSunriseSunsetColors(float celestialAngle, float partialTicks) {
         return null;
@@ -77,7 +76,6 @@ public class EndDimension extends Dimension {
         return 8.0F;
     }
 
-
     public BlockPos findSpawn(ChunkPos chunkPosIn, boolean checkValid) {
         Random random = new Random(this.world.getSeed());
         BlockPos blockpos = new BlockPos(chunkPosIn.getXStart() + random.nextInt(15), 0, chunkPosIn.getZEnd() + random.nextInt(15));
@@ -87,7 +85,6 @@ public class EndDimension extends Dimension {
     public BlockPos getSpawnCoordinate() {
         return SPAWN;
     }
-
 
     public BlockPos findSpawn(int posX, int posZ, boolean checkValid) {
         return this.findSpawn(new ChunkPos(posX >> 4, posZ >> 4), checkValid);
@@ -117,7 +114,6 @@ public class EndDimension extends Dimension {
         }
 
     }
-
 
     public DragonFightManager getDragonFightManager() {
         return this.dragonFightManager;

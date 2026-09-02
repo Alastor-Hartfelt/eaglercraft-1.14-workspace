@@ -113,7 +113,6 @@ public class WanderingTraderSpawner {
       }
    }
 
-
    private BlockPos func_221244_a(BlockPos p_221244_1_, int p_221244_2_) {
       BlockPos blockpos = null;
 

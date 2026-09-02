@@ -23,7 +23,6 @@ public class PathFinder {
         this.field_215751_d = p_i51280_2_;
     }
 
-
     public Path func_224775_a(IWorldReader p_224775_1_, MobEntity p_224775_2_, Set<BlockPos> p_224775_3_, float p_224775_4_, int p_224775_5_) {
         this.path.clearPath();
         this.nodeProcessor.init(p_224775_1_, p_224775_2_);
@@ -35,7 +34,6 @@ public class PathFinder {
         this.nodeProcessor.postProcess();
         return path;
     }
-
 
     private Path func_224779_a(PathPoint p_224779_1_, Map<FlaggedPathPoint, BlockPos> p_224779_2_, float p_224779_3_, int p_224779_4_) {
         Set<FlaggedPathPoint> set = p_224779_2_.keySet();

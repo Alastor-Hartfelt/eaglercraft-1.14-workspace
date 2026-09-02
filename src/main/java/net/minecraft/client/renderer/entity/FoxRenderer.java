@@ -29,7 +29,6 @@ public class FoxRenderer extends MobRenderer<FoxEntity, FoxModel<FoxEntity>> {
 
    }
 
-
    protected ResourceLocation getEntityTexture(FoxEntity entity) {
       if (entity.getVariantType() == FoxEntity.Type.RED) {
          return entity.isSleeping() ? field_217768_j : field_217767_a;

@@ -53,24 +53,15 @@ public class RegionFileCache {
       }
    }
 
-   /**
-    * clears region file references
-    */
    public static synchronized void clearRegionFileReferences() {
       REGIONS_BY_FILE.clear();
    }
 
-   /**
-    * Gets an input stream for the chunk at the specified location.
-    */
    public static DataInputStream getChunkInputStream(VFile2 worldDir, int chunkX, int chunkZ) {
       RegionFile regionfile = createOrLoadRegionFile(worldDir, chunkX, chunkZ);
       return regionfile.getChunkDataInputStream(chunkX & 31, chunkZ & 31);
    }
 
-   /**
-    * Gets an output stream for the specified chunk.
-    */
    public static DataOutputStream getChunkOutputStream(VFile2 worldDir, int chunkX, int chunkZ) throws IOException {
       RegionFile regionfile = createOrLoadRegionFile(worldDir, chunkX, chunkZ);
       return regionfile.getChunkDataOutputStream(chunkX & 31, chunkZ & 31);
@@ -81,7 +72,6 @@ public class RegionFileCache {
       return regionfile != null ? regionfile.isChunkSaved(p_191064_1_ & 31, p_191064_2_ & 31) : false;
    }
 
-   // Instance methods for ChunkLoader/EaglerChunkLoader inheritance chain
    public CompoundNBT readChunk(ChunkPos pos) throws IOException {
       return null;
    }

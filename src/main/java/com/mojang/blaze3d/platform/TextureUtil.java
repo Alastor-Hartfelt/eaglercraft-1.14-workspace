@@ -50,5 +50,4 @@ public class TextureUtil {
         GlStateManager.bindTexture(p_bind_0_);
     }
 
-
 }

@@ -130,7 +130,6 @@ public class MessageArgument implements ArgumentType<MessageArgument.Message> {
             return this.end;
         }
 
-
         public ITextComponent toComponent(CommandSource source) throws CommandSyntaxException {
             return EntitySelector.joinNames(this.selector.select(source));
         }

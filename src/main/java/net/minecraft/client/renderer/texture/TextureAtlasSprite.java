@@ -37,6 +37,11 @@ public class TextureAtlasSprite {
     private float maxV;
     protected int frameCounter;
     protected int tickCounter;
+    private boolean animated;
+    private boolean animationActive = true;
+    private static List<TextureAtlasSprite> animationCollector;
+    private static int animationCollectionGeneration;
+    private int lastAnimationCollectionGeneration;
     private static final float[] COLOR_GAMMAS = Util.make(new float[256], (p_203415_0_) -> {
         for (int i = 0; i < p_203415_0_.length; ++i) {
             p_203415_0_[i] = (float) Math.pow((double) ((float) i / 255.0F), 2.2D);
@@ -273,6 +278,10 @@ public class TextureAtlasSprite {
 
     public void updateAnimation() {
         ++this.tickCounter;
+        if (!this.animationActive) {
+            return;
+        }
+        this.animationActive = false;
         if (this.tickCounter >= this.animationMetadata.getFrameTimeSingle(this.frameCounter)) {
             int i = this.animationMetadata.getFrameIndex(this.frameCounter);
             int j = this.animationMetadata.getFrameCount() == 0 ? this.getFrameCount() : this.animationMetadata.getFrameCount();
@@ -286,6 +295,30 @@ public class TextureAtlasSprite {
             this.updateAnimationInterpolated();
         }
 
+    }
+
+    public void markActive() {
+        if (this.hasAnimationMetadata()) {
+            if (animationCollector != null) {
+                if (this.lastAnimationCollectionGeneration != animationCollectionGeneration) {
+                    this.lastAnimationCollectionGeneration = animationCollectionGeneration;
+                    animationCollector.add(this);
+                }
+            } else {
+                this.animationActive = true;
+            }
+        }
+    }
+
+    public static void beginAnimationCollection(List<TextureAtlasSprite> collector) {
+        animationCollector = collector;
+        if (++animationCollectionGeneration == 0) {
+            ++animationCollectionGeneration;
+        }
+    }
+
+    public static void endAnimationCollection() {
+        animationCollector = null;
     }
 
     private void updateAnimationInterpolated() {
@@ -420,6 +453,7 @@ public class TextureAtlasSprite {
 
             this.animationMetadata = new AnimationMetadataSection(list, this.width, this.height, l1, flag);
         }
+        this.animated = this.animationMetadata != null && this.animationMetadata.getFrameCount() > 1;
 
     }
 
@@ -468,7 +502,7 @@ public class TextureAtlasSprite {
     }
 
     public boolean hasAnimationMetadata() {
-        return this.animationMetadata != null && this.animationMetadata.getFrameCount() > 1;
+        return this.animated;
     }
 
     public String toString() {

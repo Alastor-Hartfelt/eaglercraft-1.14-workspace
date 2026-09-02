@@ -239,12 +239,10 @@ public class ShulkerBoxBlock extends ContainerBlock {
       return itemstack;
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public static DyeColor getColorFromItem(Item itemIn) {
       return getColorFromBlock(Block.getBlockFromItem(itemIn));
    }
-
 
    @OnlyIn(Dist.CLIENT)
    public static DyeColor getColorFromBlock(Block blockIn) {
@@ -292,7 +290,6 @@ public class ShulkerBoxBlock extends ContainerBlock {
          }
       }
    }
-
 
    public DyeColor getColor() {
       return this.color;

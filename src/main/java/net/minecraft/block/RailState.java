@@ -92,7 +92,6 @@ public class RailState {
         return AbstractRailBlock.isRail(this.world, p_196902_1_) || AbstractRailBlock.isRail(this.world, p_196902_1_.up()) || AbstractRailBlock.isRail(this.world, p_196902_1_.down());
     }
 
-
     private RailState createForAdjacent(BlockPos p_196908_1_) {
         BlockState blockstate = this.world.getBlockState(p_196908_1_);
         if (AbstractRailBlock.isRail(blockstate)) {

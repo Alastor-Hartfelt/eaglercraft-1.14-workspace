@@ -1,5 +1,6 @@
 package net.minecraft.client.resources;
 
+import net.lax1dude.eaglercraft.HString;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -34,7 +35,7 @@ public class Language implements com.mojang.bridge.game.Language, Comparable<Lan
    }
 
    public String toString() {
-      return String.format("%s (%s)", this.name, this.region);
+      return HString.format("%s (%s)", this.name, this.region);
    }
 
    public boolean equals(Object p_equals_1_) {

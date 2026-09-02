@@ -10,7 +10,6 @@ import net.minecraft.util.math.BlockPos;
 public enum EmptyBlockReader implements IBlockReader {
     INSTANCE;
 
-
     public TileEntity getTileEntity(BlockPos pos) {
         return null;
     }

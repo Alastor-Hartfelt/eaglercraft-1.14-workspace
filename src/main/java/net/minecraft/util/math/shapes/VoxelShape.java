@@ -130,7 +130,6 @@ public abstract class VoxelShape {
         return this.part.contains(this.getClosestIndex(Direction.Axis.X, x), this.getClosestIndex(Direction.Axis.Y, y), this.getClosestIndex(Direction.Axis.Z, z));
     }
 
-
     public BlockRayTraceResult rayTrace(Vec3d p_212433_1_, Vec3d p_212433_2_, BlockPos p_212433_3_) {
         if (this.isEmpty()) {
             return null;

@@ -30,6 +30,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class EntityRenderer<T extends Entity> {
    private static final ResourceLocation SHADOW_TEXTURES = new ResourceLocation("textures/misc/shadow.png");
    protected final EntityRendererManager renderManager;
+   private final BlockPos.MutableBlockPos shadowBlockPos = new BlockPos.MutableBlockPos();
    protected float shadowSize;
    protected float shadowOpaque = 1.0F;
    protected boolean renderOutlines;
@@ -48,12 +49,14 @@ public abstract class EntityRenderer<T extends Entity> {
       } else if (livingEntity.ignoreFrustumCheck) {
          return true;
       } else {
-         AxisAlignedBB axisalignedbb = livingEntity.getRenderBoundingBox().grow(0.5D);
-         if (axisalignedbb.hasNaN() || axisalignedbb.getAverageEdgeLength() == 0.0D) {
-            axisalignedbb = new AxisAlignedBB(livingEntity.posX - 2.0D, livingEntity.posY - 2.0D, livingEntity.posZ - 2.0D, livingEntity.posX + 2.0D, livingEntity.posY + 2.0D, livingEntity.posZ + 2.0D);
+         AxisAlignedBB axisalignedbb = livingEntity.getRenderBoundingBox();
+         if (axisalignedbb.hasNaN()) {
+            return camera.isBoxInFrustum(livingEntity.posX - 2.0D, livingEntity.posY - 2.0D, livingEntity.posZ - 2.0D,
+                  livingEntity.posX + 2.0D, livingEntity.posY + 2.0D, livingEntity.posZ + 2.0D);
          }
 
-         return camera.isBoundingBoxInFrustum(axisalignedbb);
+         return camera.isBoxInFrustum(axisalignedbb.minX - 0.5D, axisalignedbb.minY - 0.5D, axisalignedbb.minZ - 0.5D,
+               axisalignedbb.maxX + 0.5D, axisalignedbb.maxY + 0.5D, axisalignedbb.maxZ + 0.5D);
       }
    }
 
@@ -71,7 +74,11 @@ public abstract class EntityRenderer<T extends Entity> {
 
    protected void renderName(T entity, double x, double y, double z) {
       if (this.canRenderName(entity)) {
-         this.renderLivingLabel(entity, entity.getDisplayName().getFormattedText(), x, y, z, 64);
+         String str = entity.getDisplayName().getFormattedText();
+         if (net.minecraft.client.Minecraft.getInstance().isEnableProfanityFilter()) {
+            str = net.lax1dude.eaglercraft.profanity_filter.ProfanityFilter.getInstance().profanityFilterString(str);
+         }
+         this.renderLivingLabel(entity, str, x, y, z, 64);
       }
    }
 
@@ -82,7 +89,6 @@ public abstract class EntityRenderer<T extends Entity> {
    protected void renderEntityName(T entityIn, double x, double y, double z, String name, double distanceSq) {
       this.renderLivingLabel(entityIn, name, x, y, z, 64);
    }
-
 
    protected abstract ResourceLocation getEntityTexture(T entity);
 
@@ -180,9 +186,10 @@ public abstract class EntityRenderer<T extends Entity> {
       Tessellator tessellator = Tessellator.getInstance();
       BufferBuilder bufferbuilder = tessellator.getBuffer();
       bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+      BlockPos.MutableBlockPos blockposBelow = this.shadowBlockPos;
 
-      for(BlockPos blockpos : BlockPos.getAllInBoxMutable(new BlockPos(i, k, i1), new BlockPos(j, l, j1))) {
-         BlockPos blockpos1 = blockpos.down();
+      for(BlockPos blockpos : BlockPos.getAllInBoxMutable(i, k, i1, j, l, j1)) {
+         BlockPos blockpos1 = blockposBelow.setPos(blockpos).move(0, -1, 0);
          BlockState blockstate = iworldreader.getBlockState(blockpos1);
          if (blockstate.getRenderType() != BlockRenderType.INVISIBLE && iworldreader.getLight(blockpos) > 3) {
             this.func_217759_a(blockstate, iworldreader, blockpos1, x, y, z, blockpos, shadowAlpha, f, d2, d3, d4);
@@ -201,7 +208,7 @@ public abstract class EntityRenderer<T extends Entity> {
 
    private void func_217759_a(BlockState p_217759_1_, IWorldReader p_217759_2_, BlockPos p_217759_3_, double p_217759_4_, double p_217759_6_, double p_217759_8_, BlockPos p_217759_10_, float p_217759_11_, float p_217759_12_, double p_217759_13_, double p_217759_15_, double p_217759_17_) {
       if (p_217759_1_.func_224756_o(p_217759_2_, p_217759_3_)) {
-         VoxelShape voxelshape = p_217759_1_.getShape(this.getWorldFromRenderManager(), p_217759_10_.down());
+         VoxelShape voxelshape = p_217759_1_.getShape(this.getWorldFromRenderManager(), p_217759_3_);
          if (!voxelshape.isEmpty()) {
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();
@@ -296,6 +303,19 @@ public abstract class EntityRenderer<T extends Entity> {
          float f2 = entityIn.getHeight() + 0.5F - (flag ? 0.25F : 0.0F);
          int i = "deadmau5".equals(str) ? -10 : 0;
          GameRenderer.drawNameplate(this.getFontRendererFromRenderManager(), str, (float)x, (float)y + f2, (float)z, i, f, f1, flag);
+
+         if (entityIn instanceof net.minecraft.client.entity.player.AbstractClientPlayerEntity) {
+            if (net.lax1dude.eaglercraft.voice.VoiceClientController.getVoiceStatus() == net.lax1dude.eaglercraft.voice.EnumVoiceChannelStatus.CONNECTED) {
+               com.mojang.blaze3d.platform.GlStateManager.pushMatrix();
+               com.mojang.blaze3d.platform.GlStateManager.translatef((float)x, (float)y + f2, (float)z);
+               com.mojang.blaze3d.platform.GlStateManager.normal3f(0.0F, 1.0F, 0.0F);
+               com.mojang.blaze3d.platform.GlStateManager.rotatef(-f, 0.0F, 1.0F, 0.0F);
+               com.mojang.blaze3d.platform.GlStateManager.rotatef(f1, 1.0F, 0.0F, 0.0F);
+               com.mojang.blaze3d.platform.GlStateManager.scalef(-0.025F, -0.025F, 0.025F);
+               net.lax1dude.eaglercraft.voice.VoiceTagRenderer.renderVoiceNameTag(net.minecraft.client.Minecraft.getInstance(), (net.minecraft.client.entity.player.AbstractClientPlayerEntity) entityIn, i);
+               com.mojang.blaze3d.platform.GlStateManager.popMatrix();
+            }
+         }
       }
    }
 

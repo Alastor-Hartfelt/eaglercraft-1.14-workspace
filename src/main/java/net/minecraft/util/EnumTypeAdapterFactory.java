@@ -16,7 +16,6 @@ public class EnumTypeAdapterFactory implements TypeAdapterFactory {
         if (type == null || !type.isEnum()) {
             return null;
         }
-        //i hate this
         return new TypeAdapter() {
             public void write(JsonWriter out, Object value) throws IOException {
                 if (value == null) {

@@ -52,7 +52,6 @@ public abstract class LockableTileEntity extends TileEntity implements IInventor
         return this.getName();
     }
 
-
     public ITextComponent getCustomName() {
         return this.customName;
     }
@@ -72,7 +71,6 @@ public abstract class LockableTileEntity extends TileEntity implements IInventor
             return true;
         }
     }
-
 
     public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
         return this.canOpen(p_createMenu_3_) ? this.createMenu(p_createMenu_1_, p_createMenu_2_) : null;

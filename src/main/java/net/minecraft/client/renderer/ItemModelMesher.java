@@ -39,7 +39,6 @@ public class ItemModelMesher {
         return ibakedmodel == null ? this.modelManager.getMissingModel() : ibakedmodel;
     }
 
-
     public IBakedModel getItemModel(Item itemIn) {
         return this.itemModels.get(getIndex(itemIn));
     }

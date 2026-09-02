@@ -13,7 +13,6 @@ public class AbstractMapItem extends Item {
         return true;
     }
 
-
     public IPacket<?> getUpdatePacket(ItemStack stack, World worldIn, PlayerEntity player) {
         return null;
     }

@@ -23,8 +23,8 @@ java {
 sourceSets {
 	named("main") {
 		java.srcDirs(
+			"../src/main/java",
 			"../src/teavm/java",
-			"../src/teavm-boot-menu/java"
 		)
 		resources.srcDirs(
 			"../src/teavm/resources"
@@ -36,7 +36,6 @@ dependencies {
 	teavm(teavm.libs.jso)
 	teavm(teavm.libs.jsoApis)
 	compileOnly("org.teavm:teavm-core:0.9.2") // workaround for a few hacks
-	implementation(rootProject)
 	implementation(libs.jorbis)
 	implementation(libs.bundles.common)
 }
@@ -53,7 +52,7 @@ teavm.js {
 	fastGlobalAnalysis = false
 	processMemory = 512
 	entryPointName.set("main")
-	mainClass = "net.lax1dude.eaglercraft.v1_8.internal.teavm.MainClass"
+	mainClass = "net.lax1dude.eaglercraft.internal.teavm.MainClass"
 	outputDir = file(jsFolder)
 	properties = mapOf("java.util.TimeZone.autodetect" to "true")
 	debugInformation = false

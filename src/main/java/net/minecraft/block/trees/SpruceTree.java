@@ -12,7 +12,6 @@ public class SpruceTree extends BigTree {
         return new TallTaigaTreeFeature(NoFeatureConfig::deserialize, true);
     }
 
-
     protected AbstractTreeFeature<NoFeatureConfig> getBigTreeFeature(Random random) {
         return new MegaPineTree(NoFeatureConfig::deserialize, false, random.nextBoolean());
     }

@@ -109,7 +109,6 @@ public class VexEntity extends MonsterEntity {
         return this.owner;
     }
 
-
     public BlockPos getBoundOrigin() {
         return this.boundOrigin;
     }
@@ -171,7 +170,6 @@ public class VexEntity extends MonsterEntity {
     public float getBrightness() {
         return 1.0F;
     }
-
 
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         this.setEquipmentBasedOnDifficulty(difficultyIn);

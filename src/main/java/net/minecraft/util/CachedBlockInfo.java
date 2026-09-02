@@ -28,7 +28,6 @@ public class CachedBlockInfo {
       return this.state;
    }
 
-
    public TileEntity getTileEntity() {
       if (this.tileEntity == null && !this.tileEntityInitialized) {
          this.tileEntity = this.world.getTileEntity(this.pos);

@@ -65,7 +65,6 @@ public class TrackingChunkStatusListener implements IChunkStatusListener {
         return this.loggingListener.getPercentDone();
     }
 
-
     public ChunkStatus func_219525_a(int p_219525_1_, int p_219525_2_) {
         return this.statuses.get(ChunkPos.asLong(p_219525_1_ + this.center.x - this.field_219530_e, p_219525_2_ + this.center.z - this.field_219530_e));
     }

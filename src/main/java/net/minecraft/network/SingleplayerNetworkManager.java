@@ -101,7 +101,6 @@ public class SingleplayerNetworkManager extends NetworkManager {
 				}
 
 			} catch (Throwable t) {
-				// skip
 			}
 		}
 		recievedPacketBufferCounter = 0;

@@ -80,7 +80,6 @@ public class FarmTask extends Task<VillagerEntity> {
       }
    }
 
-
    private BlockPos func_223517_a(ServerWorld p_223517_1_) {
       return this.field_223518_f.isEmpty() ? null : this.field_223518_f.get(p_223517_1_.getRandom().nextInt(this.field_223518_f.size()));
    }

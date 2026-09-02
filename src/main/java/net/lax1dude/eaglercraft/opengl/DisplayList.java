@@ -26,6 +26,7 @@ class DisplayList {
     int attribs = -1;
     int mode = -1;
     int count = 0;
+    int bufferCapacity = 0;
     byte bindQuad = 0;
 
 }

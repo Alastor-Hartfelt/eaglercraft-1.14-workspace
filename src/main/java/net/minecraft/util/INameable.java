@@ -13,7 +13,6 @@ public interface INameable {
       return this.getName();
    }
 
-
    default ITextComponent getCustomName() {
       return null;
    }

@@ -71,7 +71,6 @@ public interface INestedGuiEventHandler extends IGuiEventListener {
         return this.getFocused() != null && this.getFocused().charTyped(p_charTyped_1_, p_charTyped_2_);
     }
 
-
     IGuiEventListener getFocused();
 
     void setFocused(IGuiEventListener p_setFocused_1_);

@@ -1,6 +1,5 @@
 package net.minecraft.client.gui;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.lax1dude.eaglercraft.EaglerBidiReorder;
 import net.lax1dude.eaglercraft.Random;
@@ -9,7 +8,7 @@ import net.minecraft.client.gui.fonts.IGlyph;
 import net.minecraft.client.gui.fonts.TexturedGlyph;
 import net.minecraft.client.gui.fonts.providers.IGlyphProvider;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
@@ -19,6 +18,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
@@ -28,6 +28,11 @@ public class FontRenderer implements AutoCloseable {
     private final TextureManager textureManager;
     private final Font font;
     private boolean bidiFlag;
+    private final BufferBuilder decorationBuffer = new BufferBuilder(4096);
+    private final WorldVertexBufferUploader batchUploader = new WorldVertexBufferUploader();
+    private final List<FontRenderer.Entry> batchDecorations = new ArrayList<>();
+    private final List<GlyphBatch> glyphBatches = new ArrayList<>();
+    private int batchDepth;
 
     public FontRenderer(TextureManager textureManagerIn, Font fontIn) {
         this.textureManager = textureManagerIn;
@@ -43,12 +48,10 @@ public class FontRenderer implements AutoCloseable {
     }
 
     public int drawStringWithShadow(String text, float x, float y, int color) {
-        GlStateManager.enableAlphaTest();
         return this.renderString(text, x, y, color, true);
     }
 
     public int drawString(String text, float x, float y, int color) {
-        GlStateManager.enableAlphaTest();
         return this.renderString(text, x, y, color, false);
     }
 
@@ -60,20 +63,31 @@ public class FontRenderer implements AutoCloseable {
         if (text == null) {
             return 0;
         } else {
-            if (this.bidiFlag) {
-                text = this.bidiReorder(text);
+            boolean ownBatch = this.batchDepth == 0;
+            if (ownBatch) {
+                this.beginBatch();
             }
 
-            if ((color & -67108864) == 0) {
-                color |= -16777216;
-            }
+            try {
+                if (this.bidiFlag) {
+                    text = this.bidiReorder(text);
+                }
 
-            if (dropShadow) {
-                this.renderStringAtPos(text, x, y, color, true);
-            }
+                if ((color & -67108864) == 0) {
+                    color |= -16777216;
+                }
 
-            x = this.renderStringAtPos(text, x, y, color, false);
-            return (int) x + (dropShadow ? 1 : 0);
+                if (dropShadow) {
+                    this.renderStringAtPos(text, x, y, color, true);
+                }
+
+                x = this.renderStringAtPos(text, x, y, color, false);
+                return (int) x + (dropShadow ? 1 : 0);
+            } finally {
+                if (ownBatch) {
+                    this.endBatch();
+                }
+            }
         }
     }
 
@@ -86,18 +100,11 @@ public class FontRenderer implements AutoCloseable {
         float f5 = f2;
         float f6 = f3;
         float f7 = (float) (color >> 24 & 255) / 255.0F;
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        ResourceLocation resourcelocation = null;
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
         boolean flag = false;
         boolean flag1 = false;
         boolean flag2 = false;
         boolean flag3 = false;
         boolean flag4 = false;
-        List<FontRenderer.Entry> list = null;
 
         for (int i = 0; i < text.length(); ++i) {
             char c0 = text.charAt(i);
@@ -139,13 +146,7 @@ public class FontRenderer implements AutoCloseable {
                 TexturedGlyph texturedglyph = flag && c0 != ' ' ? this.font.obfuscate(iglyph) : this.font.getGlyph(c0);
                 ResourceLocation resourcelocation1 = texturedglyph.getTextureLocation();
                 if (resourcelocation1 != null) {
-                    if (resourcelocation != resourcelocation1) {
-                        tessellator.draw();
-                        this.textureManager.bindTexture(resourcelocation1);
-                        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-                        resourcelocation = resourcelocation1;
-                    }
-
+                    BufferBuilder bufferbuilder = this.getBatchBuffer(resourcelocation1);
                     float f8 = flag1 ? iglyph.getBoldOffset() : 0.0F;
                     float f9 = isShadow ? iglyph.getShadowOffset() : 0.0F;
                     this.renderGlyph(texturedglyph, flag1, flag2, f8, x + f9, y + f9, bufferbuilder, f4, f5, f6, f7);
@@ -154,32 +155,90 @@ public class FontRenderer implements AutoCloseable {
                 float f10 = iglyph.getAdvance(flag1);
                 float f11 = isShadow ? 1.0F : 0.0F;
                 if (flag4) {
-                    if (list == null) list = Lists.newArrayList();
-                    list.add(new FontRenderer.Entry(x + f11 - 1.0F, y + f11 + 4.5F, x + f11 + f10, y + f11 + 4.5F - 1.0F, f4, f5, f6, f7));
+                    this.batchDecorations.add(new FontRenderer.Entry(x + f11 - 1.0F, y + f11 + 4.5F,
+                            x + f11 + f10, y + f11 + 4.5F - 1.0F, f4, f5, f6, f7));
                 }
                 if (flag3) {
-                    if (list == null) list = Lists.newArrayList();
-                    list.add(new FontRenderer.Entry(x + f11 - 1.0F, y + f11 + 9.0F, x + f11 + f10, y + f11 + 9.0F - 1.0F, f4, f5, f6, f7));
+                    this.batchDecorations.add(new FontRenderer.Entry(x + f11 - 1.0F, y + f11 + 9.0F,
+                            x + f11 + f10, y + f11 + 9.0F - 1.0F, f4, f5, f6, f7));
                 }
 
                 x += f10;
             }
         }
 
-        tessellator.draw();
-        if (list != null && !list.isEmpty()) {
-            GlStateManager.disableTexture();
-            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        return x;
+    }
 
-            for (FontRenderer.Entry fontrenderer$entry : list) {
-                fontrenderer$entry.pipe(bufferbuilder);
-            }
+    public void beginBatch() {
+        ++this.batchDepth;
+    }
 
-            tessellator.draw();
-            GlStateManager.enableTexture();
+    public void endBatch() {
+        if (this.batchDepth <= 0) {
+            throw new IllegalStateException("Font batch is not active");
         }
 
-        return x;
+        if (--this.batchDepth == 0) {
+            this.flushBatch();
+        }
+    }
+
+    private BufferBuilder getBatchBuffer(ResourceLocation texture) {
+        for (int i = 0; i < this.glyphBatches.size(); ++i) {
+            GlyphBatch batch = this.glyphBatches.get(i);
+            if (texture.equals(batch.texture)) {
+                if (!batch.drawing) {
+                    batch.buffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                    batch.drawing = true;
+                }
+                return batch.buffer;
+            }
+        }
+
+        GlyphBatch batch = new GlyphBatch(texture);
+        batch.buffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        batch.drawing = true;
+        this.glyphBatches.add(batch);
+        return batch.buffer;
+    }
+
+    private void flushBatch() {
+        this.flushGlyphs();
+
+        if (!this.batchDecorations.isEmpty()) {
+            GlStateManager.enableBlend();
+            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                    GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+                    GlStateManager.DestFactor.ZERO);
+            GlStateManager.disableTexture();
+            this.decorationBuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+            for (int i = 0; i < this.batchDecorations.size(); ++i) {
+                this.batchDecorations.get(i).pipe(this.decorationBuffer);
+            }
+            this.decorationBuffer.finishDrawing();
+            this.batchUploader.draw(this.decorationBuffer);
+            this.batchDecorations.clear();
+            GlStateManager.enableTexture();
+        }
+    }
+
+    private void flushGlyphs() {
+        GlStateManager.enableTexture();
+        GlStateManager.enableAlphaTest();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+                GlStateManager.DestFactor.ZERO);
+        for (int i = 0; i < this.glyphBatches.size(); ++i) {
+            GlyphBatch batch = this.glyphBatches.get(i);
+            if (batch.drawing) {
+                batch.buffer.finishDrawing();
+                this.textureManager.bindTexture(batch.texture);
+                this.batchUploader.draw(batch.buffer);
+                batch.drawing = false;
+            }
+        }
     }
 
     private void renderGlyph(TexturedGlyph p_212452_1_, boolean p_212452_2_, boolean p_212452_3_, float p_212452_4_, float p_212452_5_, float p_212452_6_, BufferBuilder p_212452_7_, float p_212452_8_, float p_212452_9_, float p_212452_10_, float p_212452_11_) {
@@ -188,6 +247,16 @@ public class FontRenderer implements AutoCloseable {
             p_212452_1_.render(this.textureManager, p_212452_3_, p_212452_5_ + p_212452_4_, p_212452_6_, p_212452_7_, p_212452_8_, p_212452_9_, p_212452_10_, p_212452_11_);
         }
 
+    }
+
+    private static class GlyphBatch {
+        private final ResourceLocation texture;
+        private final BufferBuilder buffer = new BufferBuilder(4096);
+        private boolean drawing;
+
+        private GlyphBatch(ResourceLocation texture) {
+            this.texture = texture;
+        }
     }
 
     public int getStringWidth(String text) {

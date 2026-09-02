@@ -17,7 +17,6 @@ import net.lax1dude.eaglercraft.EaglerZLIB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.lax1dude.eaglercraft.IOUtils;
-// STB imports removed for TeaVM compatibility
 import net.lax1dude.eaglercraft.opengl.ImageData;
 import net.lax1dude.eaglercraft.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.EagRuntime;
@@ -31,8 +30,6 @@ public final class NativeImage implements AutoCloseable {
    private final boolean stbiPointer;
    private long imagePointer;
    private final int size;
-   
-   // ImageData wrapper
    public ImageData imageData;
 
    public NativeImage(int widthIn, int heightIn, boolean clear) {
@@ -45,9 +42,7 @@ public final class NativeImage implements AutoCloseable {
       this.height = heightIn;
       this.size = widthIn * heightIn * pixelFormatIn.getPixelSize();
       this.stbiPointer = false;
-      this.imagePointer = 0L; // Dummy pointer for compatibility
-      
-      // Create ImageData
+      this.imagePointer = 0L; 
       this.imageData = new ImageData(widthIn, heightIn, initialize);
       if (initialize) {
          this.imageData.fillAlpha();
@@ -61,8 +56,6 @@ public final class NativeImage implements AutoCloseable {
       this.stbiPointer = stbiPointerIn;
       this.imagePointer = pointer;
       this.size = widthIn * heightIn * pixelFormatIn.getPixelSize();
-      
-      // Create ImageData
       this.imageData = new ImageData(widthIn, heightIn, true);
    }
 
@@ -80,7 +73,6 @@ public final class NativeImage implements AutoCloseable {
          if (imgData == null) {
             throw new IOException("Failed to load image");
          }
-         
          NativeImage nativeImage = new NativeImage(pixelFormatIn, imgData.width, imgData.height, false);
          nativeImage.imageData = imgData;
          return nativeImage;
@@ -101,12 +93,10 @@ public final class NativeImage implements AutoCloseable {
       } else {
          byte[] data = new byte[byteBufferIn.remaining()];
          byteBufferIn.get(data);
-         
          ImageData imgData = ImageData.loadImageFile(data);
          if (imgData == null) {
             throw new IOException("Failed to load image");
          }
-         
          NativeImage nativeImage = new NativeImage(pixelFormatIn, imgData.width, imgData.height, false);
          nativeImage.imageData = imgData;
          return nativeImage;
@@ -191,7 +181,6 @@ public final class NativeImage implements AutoCloseable {
       if (xIn >= 0 && xIn < this.width && yIn >= 0 && yIn < this.height) {
          int currentPixel = this.imageData.pixels[yIn * this.width + xIn];
          int alpha = (colIn >> 24) & 255;
-         
          if (alpha == 255) {
             this.imageData.pixels[yIn * this.width + xIn] = colIn;
          } else if (alpha > 0) {
@@ -199,16 +188,13 @@ public final class NativeImage implements AutoCloseable {
             int g1 = (currentPixel >> 8) & 255;
             int b1 = currentPixel & 255;
             int a1 = (currentPixel >> 24) & 255;
-            
             int r2 = (colIn >> 16) & 255;
             int g2 = (colIn >> 8) & 255;
             int b2 = colIn & 255;
-            
             int newAlpha = 255 - ((255 - alpha) * (255 - a1) / 255);
             int newR = (r2 * alpha + r1 * (255 - alpha) * a1 / 255) / newAlpha;
             int newG = (g2 * alpha + g1 * (255 - alpha) * a1 / 255) / newAlpha;
             int newB = (b2 * alpha + b1 * (255 - alpha) * a1 / 255) / newAlpha;
-            
             this.imageData.pixels[yIn * this.width + xIn] = (newAlpha << 24) | (newR << 16) | (newG << 8) | newB;
          }
       }
@@ -259,9 +245,7 @@ public final class NativeImage implements AutoCloseable {
          setWrapST(true);
       }
 
-      if (mipmap) {
-         setMinMagFilters(blur, true);
-      }
+      setMinMagFilters(blur, mipmap);
    }
 
    public void downloadFromTexture(int level, boolean opaque) {
@@ -309,10 +293,10 @@ public final class NativeImage implements AutoCloseable {
          int row = y * w;
          for (int x = 0; x < w; ++x) {
             int c = px[row + x];
-            raw[p++] = (byte) (c & 0xFF);          // R
-            raw[p++] = (byte) ((c >>> 8) & 0xFF);  // G
-            raw[p++] = (byte) ((c >>> 16) & 0xFF); // B
-            raw[p++] = (byte) ((c >>> 24) & 0xFF); // A
+            raw[p++] = (byte) (c & 0xFF);          
+            raw[p++] = (byte) ((c >>> 8) & 0xFF);  
+            raw[p++] = (byte) ((c >>> 16) & 0xFF); 
+            raw[p++] = (byte) ((c >>> 24) & 0xFF); 
          }
       }
       ByteArrayOutputStream idat = new ByteArrayOutputStream();
@@ -320,15 +304,15 @@ public final class NativeImage implements AutoCloseable {
       def.write(raw);
       def.close();
       ByteArrayOutputStream out = new ByteArrayOutputStream();
-      out.write(new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }); // PNG signature
+      out.write(new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }); 
       ByteArrayOutputStream ihdr = new ByteArrayOutputStream();
       writeIntBE(ihdr, w);
       writeIntBE(ihdr, h);
-      ihdr.write(8); // bit depth
-      ihdr.write(6); // color type: RGBA
-      ihdr.write(0); // compression method
-      ihdr.write(0); // filter method
-      ihdr.write(0); // interlace method
+      ihdr.write(8); 
+      ihdr.write(6); 
+      ihdr.write(0); 
+      ihdr.write(0); 
+      ihdr.write(0); 
       writeChunk(out, "IHDR", ihdr.toByteArray());
       writeChunk(out, "IDAT", idat.toByteArray());
       writeChunk(out, "IEND", new byte[0]);
@@ -360,11 +344,9 @@ public final class NativeImage implements AutoCloseable {
    public void copyImageData(NativeImage from) {
       this.checkImage();
       from.checkImage();
-      
       if (from.width != this.width || from.height != this.height) {
          throw new IllegalArgumentException("Source image dimensions don't match");
       }
-      
       System.arraycopy(from.imageData.pixels, 0, this.imageData.pixels, 0, this.imageData.pixels.length);
    }
 
@@ -383,8 +365,6 @@ public final class NativeImage implements AutoCloseable {
 
    public void copyAreaRGBA(int xFrom, int yFrom, int xToDelta, int yToDelta, int widthIn, int heightIn, boolean mirrorX, boolean mirrorY) {
       this.checkImage();
-      // This would need to be implemented if needed for area copying
-      // For now, just a placeholder
    }
 
    public void flip() {
@@ -481,7 +461,6 @@ public final class NativeImage implements AutoCloseable {
    }
 
    public void untrack() {
-      // No-op for compatibility
    }
 
    public static NativeImage func_216511_b(String p_216511_0_) throws IOException {

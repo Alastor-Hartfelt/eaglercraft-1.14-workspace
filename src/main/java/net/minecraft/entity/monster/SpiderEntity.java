@@ -136,7 +136,6 @@ public class SpiderEntity extends MonsterEntity {
       this.dataManager.set(CLIMBING, b0);
    }
 
-
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason,  ILivingEntityData spawnDataIn,  CompoundNBT dataTag) {
       spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
       if (worldIn.getRandom().nextInt(100) == 0) {

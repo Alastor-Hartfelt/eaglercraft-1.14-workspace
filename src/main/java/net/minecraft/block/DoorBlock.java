@@ -117,7 +117,6 @@ public class DoorBlock extends Block {
       return this.material == Material.IRON ? 1005 : 1006;
    }
 
-   
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       BlockPos blockpos = context.getPos();
       if (blockpos.getY() < 255 && context.getWorld().getBlockState(blockpos.up()).isReplaceable(context)) {

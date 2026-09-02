@@ -12,7 +12,6 @@ public class FileUtil {
     private static final Pattern field_214996_a = Pattern.compile("(.*) \\((\\d*)\\)", 66);
     private static final Pattern field_214997_b = Pattern.compile(".*\\.|(?:COM|CLOCK\\$|CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\\..*)?", 2);
 
-
     @OnlyIn(Dist.CLIENT)
     public static String func_214992_a(VFile2 p_214992_0_, String p_214992_1_, String p_214992_2_) throws IOException {
         for (char c0 : SharedConstants.ILLEGAL_FILE_CHARACTERS) {

@@ -59,7 +59,6 @@ public class StemBlock extends BushBlock implements IGrowable {
         }
     }
 
-
     @OnlyIn(Dist.CLIENT)
     protected Item getSeedItem() {
         if (this.crop == Blocks.PUMPKIN) {

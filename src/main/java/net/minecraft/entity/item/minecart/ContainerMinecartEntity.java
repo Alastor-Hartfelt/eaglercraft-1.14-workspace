@@ -108,7 +108,6 @@ public abstract class ContainerMinecartEntity extends AbstractMinecartEntity imp
         }
     }
 
-
     public Entity changeDimension(DimensionType destination) {
         this.dropContentsWhenDead = false;
         return super.changeDimension(destination);
@@ -185,7 +184,6 @@ public abstract class ContainerMinecartEntity extends AbstractMinecartEntity imp
         this.lootTable = lootTableIn;
         this.lootTableSeed = lootTableSeedIn;
     }
-
 
     public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
         if (this.lootTable != null && p_createMenu_3_.isSpectator()) {

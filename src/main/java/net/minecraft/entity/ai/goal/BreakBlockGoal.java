@@ -108,7 +108,6 @@ public class BreakBlockGoal extends MoveToBlockGoal {
 
    }
 
-
    private BlockPos findTarget(BlockPos p_203115_1_, IBlockReader p_203115_2_) {
       if (p_203115_2_.getBlockState(p_203115_1_).getBlock() == this.block) {
          return p_203115_1_;

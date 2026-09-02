@@ -550,11 +550,9 @@ public class Raid {
         return itemstack;
     }
 
-
     public AbstractRaiderEntity getLeader(int p_221332_1_) {
         return this.leaders.get(p_221332_1_);
     }
-
 
     private BlockPos func_221298_a(int p_221298_1_, int p_221298_2_) {
         int i = p_221298_1_ == 0 ? 2 : 2 - p_221298_1_;

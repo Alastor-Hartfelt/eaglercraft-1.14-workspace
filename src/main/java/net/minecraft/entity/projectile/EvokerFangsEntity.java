@@ -43,7 +43,6 @@ public class EvokerFangsEntity extends Entity {
       this.casterUuid = p_190549_1_ == null ? null : p_190549_1_.getUniqueID();
    }
 
-
    public LivingEntity getCaster() {
       if (this.caster == null && this.casterUuid != null && this.world instanceof ServerWorld) {
          Entity entity = ((ServerWorld)this.world).getEntityByUuid(this.casterUuid);

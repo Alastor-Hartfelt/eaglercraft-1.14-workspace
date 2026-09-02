@@ -54,7 +54,6 @@ public class ShulkerEntity extends GolemEntity implements IMob {
         this.experienceValue = 5;
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         this.renderYawOffset = 180.0F;
         this.prevRenderYawOffset = 180.0F;
@@ -374,7 +373,6 @@ public class ShulkerEntity extends GolemEntity implements IMob {
         return this.getPeekTick() == 0;
     }
 
-
     public AxisAlignedBB getCollisionBoundingBox() {
         return this.isAlive() ? this.getBoundingBox() : null;
     }
@@ -382,7 +380,6 @@ public class ShulkerEntity extends GolemEntity implements IMob {
     public Direction getAttachmentFacing() {
         return this.dataManager.get(ATTACHED_FACE);
     }
-
 
     public BlockPos getAttachmentPos() {
         return this.dataManager.get(ATTACHED_BLOCK_POS).orElse((BlockPos) null);
@@ -448,7 +445,6 @@ public class ShulkerEntity extends GolemEntity implements IMob {
     public boolean isAttachedToBlock() {
         return this.currentAttachmentPosition != null && this.getAttachmentPos() != null;
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public DyeColor getColor() {

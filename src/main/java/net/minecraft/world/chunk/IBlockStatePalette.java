@@ -10,7 +10,6 @@ public interface IBlockStatePalette<T> {
 
    boolean contains(T p_222626_1_);
 
-   
    T get(int indexKey);
 
    @OnlyIn(Dist.CLIENT)

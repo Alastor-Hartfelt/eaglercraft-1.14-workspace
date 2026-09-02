@@ -50,6 +50,7 @@ public class EaglerMinecraftServer extends MinecraftServer {
             private int totalChunks;
             private int loadedChunks;
             private long nextLogTime;
+            private boolean tracking;
             private net.minecraft.util.math.ChunkPos center = new net.minecraft.util.math.ChunkPos(0, 0);
             private int eRadius = 11 + net.minecraft.world.chunk.ChunkStatus.func_222600_b();
             private int diameter = eRadius * 2 + 1;
@@ -78,12 +79,18 @@ public class EaglerMinecraftServer extends MinecraftServer {
             }
 
             public void start(net.minecraft.util.math.ChunkPos center) {
+                this.tracking = true;
+                this.statuses.clear();
+                this.loadedChunks = 0;
                 this.center = center;
                 this.nextLogTime = net.minecraft.util.Util.milliTime();
                 EaglerIntegratedServerWorker.sendProgress("chk:" + center.x + ":" + center.z + ": ", 0.0f);
             }
 
             public void statusChanged(net.minecraft.util.math.ChunkPos pos, net.minecraft.world.chunk.ChunkStatus status) {
+                if (!this.tracking) {
+                    return;
+                }
                 if (status == net.minecraft.world.chunk.ChunkStatus.FULL) {
                     ++this.loadedChunks;
                 }
@@ -108,6 +115,8 @@ public class EaglerMinecraftServer extends MinecraftServer {
             }
 
             public void stop() {
+                this.tracking = false;
+                this.statuses.clear();
                 EaglerIntegratedServerWorker.sendProgress("singleplayer.busy.startingIntegratedServer", 1.0f);
             }
         }, folderName);
@@ -238,9 +247,9 @@ public class EaglerMinecraftServer extends MinecraftServer {
 
     public void mainLoop(boolean singleThreadMode) {
         long k = Util.milliTime();
-        this.sendTPSToClient(k);
         if (isGamePaused) {
             localTime = k;
+            this.sendTPSToClient(k);
             return;
         }
 
@@ -259,12 +268,22 @@ public class EaglerMinecraftServer extends MinecraftServer {
             this.localTime = k;
         }
 
-        if (j >= 50L) {
+        // A single-thread server may only be entered once per rendered frame. Catch
+        // up within a small wall-time budget so chunk rendering cannot cap TPS to FPS.
+        int ticksRemaining = singleThreadMode ? 10 : 1;
+        long tickDeadline = singleThreadMode ? k + 25L : Long.MAX_VALUE;
+        while (j >= 50L && ticksRemaining-- > 0) {
             this.localTime += 50L;
             this.tick(() -> true);
             this.drainScheduledTasks();
             ++counterTicksPerSecond;
+            j = k - this.localTime;
+            if (singleThreadMode && Util.milliTime() >= tickDeadline) {
+                break;
+            }
         }
+
+        this.sendTPSToClient(Util.milliTime());
     }
 
     private void drainScheduledTasks() {
@@ -301,6 +320,10 @@ public class EaglerMinecraftServer extends MinecraftServer {
     }
 
     protected void sendTPSToClient(long millis) {
+        if (lastTPSUpdate == 0L) {
+            lastTPSUpdate = millis;
+            return;
+        }
         if (millis - lastTPSUpdate > 1000l) {
             lastTPSUpdate = millis;
             if (isServerRunning() && this.getWorld(DimensionType.OVERWORLD) != null) {

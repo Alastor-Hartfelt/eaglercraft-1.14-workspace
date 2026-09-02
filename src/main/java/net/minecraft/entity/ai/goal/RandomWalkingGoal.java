@@ -52,7 +52,6 @@ public class RandomWalkingGoal extends Goal {
       }
    }
 
-
    protected Vec3d getPosition() {
       return RandomPositionGenerator.findRandomTarget(this.creature, 10, 7);
    }

@@ -29,7 +29,6 @@ public class MapBanner {
       return new MapBanner(blockpos, dyecolor, itextcomponent);
    }
 
-
    public static MapBanner fromWorld(IBlockReader p_204301_0_, BlockPos p_204301_1_) {
       TileEntity tileentity = p_204301_0_.getTileEntity(p_204301_1_);
       if (tileentity instanceof BannerTileEntity) {
@@ -85,7 +84,6 @@ public class MapBanner {
          return MapDecoration.Type.BANNER_BLACK;
       }
    }
-
 
    public ITextComponent getName() {
       return this.name;

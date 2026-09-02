@@ -99,7 +99,6 @@ public class CombatTracker {
         }
     }
 
-
     public LivingEntity getBestAttacker() {
         LivingEntity livingentity = null;
         PlayerEntity playerentity = null;
@@ -124,7 +123,6 @@ public class CombatTracker {
             return livingentity;
         }
     }
-
 
     private CombatEntry getBestCombatEntry() {
         CombatEntry combatentry = null;

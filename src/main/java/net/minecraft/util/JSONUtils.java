@@ -286,7 +286,6 @@ public class JSONUtils {
         }
     }
 
-
     public static <T> T fromJson(Gson gsonIn, Reader readerIn, Class<T> adapter, boolean lenient) {
         try {
             JsonReader jsonreader = new JsonReader(readerIn);
@@ -296,7 +295,6 @@ public class JSONUtils {
             throw new JsonParseException(ioexception);
         }
     }
-
 
     public static <T> T fromJson(Gson gson, Reader reader, Type type, boolean lenient) {
         if (reader == null) {
@@ -311,33 +309,27 @@ public class JSONUtils {
         }
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public static <T> T fromJson(Gson gson, String json, Type type, boolean lenient) {
         return fromJson(gson, new StringReader(json), type, lenient);
     }
 
-
     public static <T> T fromJson(Gson gsonIn, String json, Class<T> adapter, boolean lenient) {
         return fromJson(gsonIn, new StringReader(json), adapter, lenient);
     }
 
-
     public static <T> T fromJson(Gson gson, Reader reader, Type type) {
         return fromJson(gson, reader, type, false);
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public static <T> T fromJson(Gson gson, String json, Type type) {
         return fromJson(gson, json, type, false);
     }
 
-
     public static <T> T fromJson(Gson gson, Reader reader, Class<T> jsonClass) {
         return fromJson(gson, reader, jsonClass, false);
     }
-
 
     public static <T> T fromJson(Gson gsonIn, String json, Class<T> adapter) {
         return fromJson(gsonIn, json, adapter, false);

@@ -94,7 +94,6 @@ public class WorldType {
         return this.versioned;
     }
 
-
     public static WorldType byName(String type) {
         for (WorldType worldtype : WORLD_TYPES) {
             if (worldtype != null && worldtype.name.equalsIgnoreCase(type)) {

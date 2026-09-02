@@ -82,7 +82,6 @@ public class BlockItem extends Item {
         return state.getSoundType().getPlaceSound();
     }
 
-
     public BlockItemUseContext getBlockItemUseContext(BlockItemUseContext context) {
         return context;
     }
@@ -90,7 +89,6 @@ public class BlockItem extends Item {
     protected boolean onBlockPlaced(BlockPos pos, World worldIn, PlayerEntity player, ItemStack stack, BlockState state) {
         return setTileEntityNBT(worldIn, player, pos, stack);
     }
-
 
     protected BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = this.getBlock().getStateForPlacement(context);

@@ -356,7 +356,7 @@ public class RecipeBookGui extends AbstractGui implements IRenderable, IGuiEvent
    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
       this.field_199738_u = false;
       if (this.isVisible() && !this.mc.player.isSpectator()) {
-         if (p_keyPressed_1_ == 256 && !this.isOffsetNextToMainGUI()) {
+         if (Screen.isCloseKey(p_keyPressed_1_, p_keyPressed_2_) && !this.isOffsetNextToMainGUI()) {
             this.setVisible(false);
             return true;
          } else if (this.searchBar.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {

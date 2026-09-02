@@ -468,9 +468,7 @@ public class TextFieldWidget extends Widget implements IRenderable, IGuiEventLis
                 GlStateManager.DestFactor.ZERO
         );
 
-
         GlStateManager.color4f(0.0F, 0.4F, 1.0F, 0.40F);
-
 
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
         bufferbuilder.pos((double) startX, (double) endY, 0.0D).endVertex();
@@ -478,6 +476,7 @@ public class TextFieldWidget extends Widget implements IRenderable, IGuiEventLis
         bufferbuilder.pos((double) endX, (double) startY, 0.0D).endVertex();
         bufferbuilder.pos((double) startX, (double) startY, 0.0D).endVertex();
         tessellator.draw();
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableBlend();
         GlStateManager.enableTexture();
     }

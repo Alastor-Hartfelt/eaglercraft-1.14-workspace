@@ -1,16 +1,25 @@
 package net.minecraft.client.gui.screen;
 
+import net.lax1dude.eaglercraft.internal.EnumPlatformType;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.gui.AccessibilityScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.LockIconButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.AbstractOption;
+import net.lax1dude.eaglercraft.EagRuntime;
+import net.lax1dude.eaglercraft.Mouse;
+import net.lax1dude.eaglercraft.cookie.GuiScreenRevokeSessionToken;
+import net.lax1dude.eaglercraft.cookie.ServerCookieDataStore;
+import net.lax1dude.eaglercraft.internal.EnumCursorType;
+import net.lax1dude.eaglercraft.opengl.GlStateManager;
+import net.lax1dude.eaglercraft.profile.GuiScreenGenericErrorMessage;
 import net.lax1dude.eaglercraft.recording.GuiScreenRecordingNote;
 import net.lax1dude.eaglercraft.recording.GuiScreenRecordingSettings;
 import net.lax1dude.eaglercraft.recording.ScreenRecordingController;
 import net.minecraft.network.play.client.CLockDifficultyPacket;
 import net.minecraft.network.play.client.CSetDifficultyPacket;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
 import net.minecraftforge.api.distmarker.Dist;
@@ -64,9 +73,6 @@ public class OptionsScreen extends Screen {
 
       }
 
-      this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20, "Performance Settings", (p_213057_1_) -> {
-         this.mc.displayGuiScreen(new PerformanceSettingsScreen(this, this.settings));
-      }));
       this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 48 - 6, 150, 20, I18n.format("options.skinCustomisation"), (p_213055_1_) -> {
          this.mc.displayGuiScreen(new CustomizeSkinScreen(this));
       }));
@@ -79,8 +85,21 @@ public class OptionsScreen extends Screen {
       this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 72 - 6, 150, 20, I18n.format("options.controls"), (p_213052_1_) -> {
          this.mc.displayGuiScreen(new ControlsScreen(this, this.settings));
       }));
+      this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20, I18n.format("options.language"), (p_213053_1_) -> {
+         this.mc.displayGuiScreen(new LanguageScreen(this, this.settings, this.mc.getLanguageManager()));
+      }));
+      this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20, I18n.format("options.chat.title"), (p_213049_1_) -> {
+         this.mc.displayGuiScreen(new ChatOptionsScreen(this, this.settings));
+      }));
+      this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, I18n.format("options.resourcepack"), (p_213060_1_) -> {
+         this.mc.displayGuiScreen(new ResourcePacksScreen(this));
+      }));
+      this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20, I18n.format("options.accessibility.title"), (p_213058_1_) -> {
+         this.mc.displayGuiScreen(new AccessibilityScreen(this, this.settings));
+      }));
+      int bottomRow = this.height / 6 + 138;
       boolean support = ScreenRecordingController.isSupported();
-      this.addButton(recordingButton = new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20,
+      this.addButton(recordingButton = new Button(this.width / 2 - 155, bottomRow, 150, 20,
               I18n.format(support ? "options.screenRecording.button" : "options.screenRecording.unsupported"), (p_213050_1_) -> {
          if (ScreenRecordingController.isSupported()) {
             Screen screen;
@@ -93,18 +112,13 @@ public class OptionsScreen extends Screen {
          }
       }));
       recordingButton.active = support;
-      this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6 + 24, 150, 20, I18n.format("options.language"), (p_213053_1_) -> {
-         this.mc.displayGuiScreen(new LanguageScreen(this, this.settings, this.mc.getLanguageManager()));
-      }));
-      this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6 + 24, 150, 20, I18n.format("options.chat.title"), (p_213049_1_) -> {
-         this.mc.displayGuiScreen(new ChatOptionsScreen(this, this.settings));
-      }));
-      this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6 + 24, 150, 20, I18n.format("options.resourcepack"), (p_213060_1_) -> {
-         this.mc.displayGuiScreen(new ResourcePacksScreen(this));
-      }));
-      this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 120 - 6 + 24, 150, 20, I18n.format("options.accessibility.title"), (p_213058_1_) -> {
-         this.mc.displayGuiScreen(new AccessibilityScreen(this, this.settings));
-      }));
+      Button retard = new Button(this.width / 2 + 5, bottomRow, 150, 20, "Debug Console", (p_213057_1_) -> {
+         EagRuntime.showDebugConsole();
+      });
+
+      retard.active = (EagRuntime.getPlatformType() == EnumPlatformType.DESKTOP) ? false : true;
+
+      this.addButton(retard);
       this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, I18n.format("gui.done"), (p_213056_1_) -> {
          this.mc.displayGuiScreen(this.lastScreen);
       }));
@@ -132,6 +146,41 @@ public class OptionsScreen extends Screen {
    public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
       this.renderBackground();
       this.drawCenteredString(this.font, this.title.getFormattedText(), this.width / 2, 15, 16777215);
+
+      if (EagRuntime.getConfiguration().isEnableServerCookies() && this.mc.player == null) {
+         GlStateManager.pushMatrix();
+         GlStateManager.scale(0.75f, 0.75f, 0.75f);
+         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+
+         String text = I18n.format("revokeSessionToken.button");
+
+         int w = this.font.getStringWidth(text);
+         boolean hover = p_render_1_ > width - 5 - (w + 5) * 3 / 4 && p_render_2_ > 1 && p_render_1_ < width - 2 && p_render_2_ < 12;
+         if (hover) {
+            Mouse.showCursor(EnumCursorType.HAND);
+         }
+
+         this.drawString(this.font, TextFormatting.UNDERLINE + text, (width - 1) * 4 / 3 - w - 5, 5,
+                 hover ? 0xFFEEEE22 : 0xFFCCCCCC);
+
+         GlStateManager.popMatrix();
+      }
+
       super.render(p_render_1_, p_render_2_, p_render_3_);
+   }
+
+   @Override
+   public boolean mouseClicked(double mouseX, double mouseY, int button) {
+      if (EagRuntime.getConfiguration().isEnableServerCookies() && this.mc.player == null) {
+         int w = this.font.getStringWidth(I18n.format("revokeSessionToken.button"));
+         if (mouseX > width - 5 - (w + 5) * 3 / 4 && mouseY > 1 && mouseX < width - 2 && mouseY < 12) {
+            ServerCookieDataStore.flush();
+            this.mc.displayGuiScreen(ServerCookieDataStore.numRevokable() == 0
+                    ? new GuiScreenGenericErrorMessage("errorNoSessions.title", "errorNoSessions.desc", this)
+                    : new GuiScreenRevokeSessionToken(this));
+            return true;
+         }
+      }
+      return super.mouseClicked(mouseX, mouseY, button);
    }
 }

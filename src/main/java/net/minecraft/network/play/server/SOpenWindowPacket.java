@@ -46,7 +46,6 @@ public class SOpenWindowPacket implements IPacket<IClientPlayNetHandler> {
         return this.windowId;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public ContainerType<?> getContainerType() {
         return Registry.MENU.getByValue(this.menuId);

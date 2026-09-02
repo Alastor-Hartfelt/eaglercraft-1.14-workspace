@@ -3,7 +3,6 @@ package com.mojang.authlib;
 import com.mojang.authlib.properties.PropertyMap;
 import net.lax1dude.eaglercraft.EaglercraftUUID;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class GameProfile {
     private final EaglercraftUUID id;
@@ -70,7 +69,8 @@ public class GameProfile {
     }
 
     public String toString() {
-        return (new ToStringBuilder(this)).append("id", this.id).append("name", this.name).append("properties", this.properties).append("legacy", this.legacy).toString();
+        return "GameProfile[id=" + this.id + ",name=" + this.name + ",properties=" + this.properties
+                + ",legacy=" + this.legacy + "]";
     }
 
     public boolean isLegacy() {

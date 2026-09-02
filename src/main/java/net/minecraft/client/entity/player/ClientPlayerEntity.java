@@ -246,7 +246,6 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
 
    }
 
-
    public ItemEntity dropItem(boolean dropAll) {
       CPlayerDiggingPacket.Action cplayerdiggingpacket$action = dropAll ? CPlayerDiggingPacket.Action.DROP_ALL_ITEMS : CPlayerDiggingPacket.Action.DROP_ITEM;
       this.connection.sendPacket(new CPlayerDiggingPacket(cplayerdiggingpacket$action, BlockPos.ZERO, Direction.DOWN));
@@ -786,7 +785,6 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
    public boolean isRowingBoat() {
       return this.rowingBoat;
    }
-
 
    public EffectInstance removeActivePotionEffect( Effect potioneffectin) {
       if (potioneffectin == Effects.NAUSEA) {

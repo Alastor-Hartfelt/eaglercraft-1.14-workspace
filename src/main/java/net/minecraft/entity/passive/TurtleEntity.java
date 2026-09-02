@@ -157,7 +157,6 @@ public class TurtleEntity extends AnimalEntity {
       this.setTravelPos(new BlockPos(l, i1, j1));
    }
 
-
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason,  ILivingEntityData spawnDataIn,  CompoundNBT dataTag) {
       this.setHome(new BlockPos(this));
       this.setTravelPos(BlockPos.ZERO);
@@ -202,7 +201,6 @@ public class TurtleEntity extends AnimalEntity {
       return 200;
    }
 
-
    protected SoundEvent getAmbientSound() {
       return !this.isInWater() && this.onGround && !this.isChild() ? SoundEvents.ENTITY_TURTLE_AMBIENT_LAND : super.getAmbientSound();
    }
@@ -215,11 +213,9 @@ public class TurtleEntity extends AnimalEntity {
       return SoundEvents.ENTITY_TURTLE_SWIM;
    }
 
-
    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
       return this.isChild() ? SoundEvents.ENTITY_TURTLE_HURT_BABY : SoundEvents.ENTITY_TURTLE_HURT;
    }
-
 
    protected SoundEvent getDeathSound() {
       return this.isChild() ? SoundEvents.ENTITY_TURTLE_DEATH_BABY : SoundEvents.ENTITY_TURTLE_DEATH;
@@ -245,7 +241,6 @@ public class TurtleEntity extends AnimalEntity {
    protected PathNavigator createNavigator(World worldIn) {
       return new TurtleEntity.Navigator(this, worldIn);
    }
-
 
    public AgeableEntity createChild(AgeableEntity ageable) {
       return EntityType.TURTLE.create(this.world);

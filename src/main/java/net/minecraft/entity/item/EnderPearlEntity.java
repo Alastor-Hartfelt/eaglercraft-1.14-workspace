@@ -119,7 +119,6 @@ public class EnderPearlEntity extends ProjectileItemEntity {
 
    }
 
-
    public Entity changeDimension(DimensionType destination) {
       if (this.owner.dimension != destination) {
          this.owner = null;

@@ -186,7 +186,6 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
         return i;
     }
 
-
     protected PathPoint openPoint(int x, int y, int z) {
         PathPoint pathpoint = null;
         PathNodeType pathnodetype = this.getPathNodeType(this.entity, x, y, z);

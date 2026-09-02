@@ -1,7 +1,7 @@
 package net.minecraft.block;
 
 import com.google.common.cache.LoadingCache;
-import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
+import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import net.lax1dude.eaglercraft.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
@@ -79,17 +79,7 @@ public class Block implements IItemProvider {
     private String translationKey;
 
     private Item item;
-    private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.RenderSideCacheKey>> SHOULD_SIDE_RENDER_CACHE = new ThreadLocal<Object2ByteLinkedOpenHashMap<Block.RenderSideCacheKey>>() {
-        @Override
-        protected Object2ByteLinkedOpenHashMap<Block.RenderSideCacheKey> initialValue() {
-            Object2ByteLinkedOpenHashMap<Block.RenderSideCacheKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<Block.RenderSideCacheKey>(200) {
-                protected void rehash(int p_rehash_1_) {
-                }
-            };
-            object2bytelinkedopenhashmap.defaultReturnValue((byte) 127);
-            return object2bytelinkedopenhashmap;
-        }
-    };
+    private static final BlockOcclusionCache OCCLUSION_CACHE = new BlockOcclusionCache();
 
     public static int getStateId(BlockState state) {
         if (state == null) {
@@ -295,47 +285,9 @@ public class Block implements IItemProvider {
     public int getPackedLightmapCoords(BlockState state, IEnviromentBlockReader worldIn, BlockPos pos) {
         return worldIn.getCombinedLight(pos, state.getLightValue());
     }
-   private static final BlockPos.MutableBlockPos SHOULD_SIDE_POS = new BlockPos.MutableBlockPos();
-   private static final ThreadLocal<Block.RenderSideCacheKey> REUSABLE_CACHE_KEY = ThreadLocal.withInitial(() -> new Block.RenderSideCacheKey(null, null, null));
-
-
     @OnlyIn(Dist.CLIENT)
     public static boolean shouldSideBeRendered(BlockState adjacentState, IBlockReader blockState, BlockPos blockAccess, Direction pos) {
-        SHOULD_SIDE_POS.setPos(blockAccess.getX() + pos.getXOffset(), blockAccess.getY() + pos.getYOffset(), blockAccess.getZ() + pos.getZOffset());
-        BlockPos blockpos = SHOULD_SIDE_POS;
-        BlockState blockstate = blockState.getBlockState(blockpos);
-        if (adjacentState.isSideInvisible(blockstate, pos)) {
-            return false;
-        } else if (adjacentState.isOpaqueCube(blockState, blockAccess) && blockstate.isOpaqueCube(blockState, blockpos)) {
-            return false;
-        } else if (blockstate.isSolid()) {
-            VoxelShape voxelshape1 = blockstate.func_215702_a(blockState, blockpos, pos.getOpposite());
-            if (voxelshape1 == VoxelShapes.fullCube()) {
-                return false;
-            }
-
-            Block.RenderSideCacheKey reusableKey = REUSABLE_CACHE_KEY.get();
-            reusableKey.state = adjacentState;
-            reusableKey.adjacentState = blockstate;
-            reusableKey.side = pos;
-            Object2ByteLinkedOpenHashMap<Block.RenderSideCacheKey> object2bytelinkedopenhashmap = SHOULD_SIDE_RENDER_CACHE.get();
-            byte b0 = object2bytelinkedopenhashmap.getAndMoveToFirst(reusableKey);
-            if (b0 != 127) {
-                return b0 != 0;
-            } else {
-                VoxelShape voxelshape = adjacentState.func_215702_a(blockState, blockAccess, pos);
-                boolean flag = VoxelShapes.compare(voxelshape, voxelshape1, IBooleanFunction.ONLY_FIRST);
-                if (object2bytelinkedopenhashmap.size() == 200) {
-                    object2bytelinkedopenhashmap.removeLastByte();
-                }
-
-                // Only allocate a new key when inserting into cache (cache miss)
-                object2bytelinkedopenhashmap.putAndMoveToFirst(new Block.RenderSideCacheKey(adjacentState, blockstate, pos), (byte) (flag ? 1 : 0));
-                return flag;
-            }
-        } else {
-            return true;
-        }
+        return OCCLUSION_CACHE.shouldDrawSide(adjacentState, blockState, blockAccess, pos);
     }
 
     @Deprecated
@@ -439,7 +391,6 @@ public class Block implements IItemProvider {
     public int tickRate(IWorldReader worldIn) {
         return 10;
     }
-
 
     @Deprecated
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
@@ -590,7 +541,6 @@ public class Block implements IItemProvider {
 
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn) {
     }
-
 
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         return this.getDefaultState();
@@ -887,7 +837,6 @@ public class Block implements IItemProvider {
     }
 
     public static final class RenderSideCacheKey {
-        // Non-final to allow reuse of a mutable instance for cache lookups
         BlockState state;
         BlockState adjacentState;
         Direction side;

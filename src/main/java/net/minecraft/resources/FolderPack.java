@@ -49,7 +49,6 @@ public class FolderPack extends ResourcePack {
         return this.getFile(resourcePath) != null;
     }
 
-
     private VFile2 getFile(String p_195776_1_) {
         try {
             VFile2 file1 = new VFile2(this.file, p_195776_1_);
@@ -75,7 +74,7 @@ public class FolderPack extends ResourcePack {
                 int slashIndex = relative.indexOf('/');
                 if (slashIndex != -1) {
                     String dirName = relative.substring(0, slashIndex);
-                    validDirs.add(new VFile2(folderPath, dirName));
+                    validDirs.add(new VFile2(file1, dirName));
                 }
             }
         }

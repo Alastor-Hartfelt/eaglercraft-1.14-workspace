@@ -132,7 +132,7 @@ public class GuiSocialRegisterScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256) {
+        if (Screen.isCloseKey(keyCode, scanCode)) {
             this.mc.displayGuiScreen(loginScreen);
             return true;
         }

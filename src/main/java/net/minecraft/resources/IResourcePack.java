@@ -23,7 +23,6 @@ public interface IResourcePack extends Closeable {
 
    Set<String> getResourceNamespaces(ResourcePackType type);
 
-
    <T> T getMetadata(IMetadataSectionSerializer<T> deserializer) throws IOException;
 
    String getName();

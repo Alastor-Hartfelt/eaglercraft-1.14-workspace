@@ -148,17 +148,14 @@ public class SnowGolemEntity extends GolemEntity implements IRangedAttackMob {
 
    }
 
-   
    protected SoundEvent getAmbientSound() {
       return SoundEvents.ENTITY_SNOW_GOLEM_AMBIENT;
    }
 
-   
    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
       return SoundEvents.ENTITY_SNOW_GOLEM_HURT;
    }
 
-   
    protected SoundEvent getDeathSound() {
       return SoundEvents.ENTITY_SNOW_GOLEM_DEATH;
    }

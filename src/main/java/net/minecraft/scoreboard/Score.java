@@ -56,7 +56,6 @@ public class Score {
 
    }
 
-
    public ScoreObjective getObjective() {
       return this.objective;
    }

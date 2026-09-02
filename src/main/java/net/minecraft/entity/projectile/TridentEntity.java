@@ -98,7 +98,6 @@ public class TridentEntity extends AbstractArrowEntity {
         return this.thrownStack.copy();
     }
 
-
     protected EntityRayTraceResult func_213866_a(Vec3d p_213866_1_, Vec3d p_213866_2_) {
         return this.dealtDamage ? null : super.func_213866_a(p_213866_1_, p_213866_2_);
     }

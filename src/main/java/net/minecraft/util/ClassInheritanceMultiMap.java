@@ -1,65 +1,75 @@
 package net.minecraft.util;
 
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 public class ClassInheritanceMultiMap<T> extends AbstractCollection<T> {
-    private final Map<Class<?>, List<T>> map = Maps.newHashMap();
+    private Map<Class<?>, List<T>> map;
+    private Map<Class<?>, Collection<T>> mapViews;
     private final Class<T> baseClass;
     private final List<T> values = Lists.newArrayList();
+    private final Collection<T> valuesView = Collections.unmodifiableList(this.values);
 
     public ClassInheritanceMultiMap(Class<T> baseClassIn) {
         this.baseClass = baseClassIn;
-        this.map.put(baseClassIn, this.values);
     }
 
     public boolean add(T p_add_1_) {
-        boolean flag = false;
-
-        for (Entry<Class<?>, List<T>> entry : this.map.entrySet()) {
-            if (entry.getKey().isInstance(p_add_1_)) {
-                flag |= entry.getValue().add(p_add_1_);
+        boolean added = this.values.add(p_add_1_);
+        if (this.map != null) {
+            for (Map.Entry<Class<?>, List<T>> entry : this.map.entrySet()) {
+                if (entry.getKey().isInstance(p_add_1_)) {
+                    entry.getValue().add(p_add_1_);
+                }
             }
         }
-
-        return flag;
+        return added;
     }
 
     public boolean remove(Object p_remove_1_) {
-        boolean flag = false;
-
-        for (Entry<Class<?>, List<T>> entry : this.map.entrySet()) {
-            if (entry.getKey().isInstance(p_remove_1_)) {
-                List<T> list = entry.getValue();
-                flag |= list.remove(p_remove_1_);
+        boolean removed = this.values.remove(p_remove_1_);
+        if (this.map != null) {
+            for (Map.Entry<Class<?>, List<T>> entry : this.map.entrySet()) {
+                if (entry.getKey().isInstance(p_remove_1_)) {
+                    entry.getValue().remove(p_remove_1_);
+                }
             }
         }
-
-        return flag;
+        return removed;
     }
 
     public boolean contains(Object p_contains_1_) {
-        return this.func_219790_a(p_contains_1_.getClass()).contains(p_contains_1_);
+        return this.values.contains(p_contains_1_);
     }
 
     public <S> Collection<S> func_219790_a(Class<S> p_219790_1_) {
-        if (!this.baseClass.isAssignableFrom(p_219790_1_)) {
-            throw new IllegalArgumentException("Don't know how to search for " + p_219790_1_);
-        } else {
-            List<T> list = this.map.computeIfAbsent(p_219790_1_, (p_219791_1_) -> {
-                return this.values.stream().filter(p_219791_1_::isInstance).collect(Collectors.toList());
-            });
-            return (Collection<S>) Collections.unmodifiableCollection(list);
+        if (p_219790_1_ == this.baseClass) {
+            return (Collection<S>) this.valuesView;
         }
+        if (this.map == null) {
+            this.map = new HashMap<>(4);
+            this.mapViews = new HashMap<>(4);
+        }
+        List<T> list = this.map.get(p_219790_1_);
+        if (list == null) {
+            if (!this.baseClass.isAssignableFrom(p_219790_1_)) {
+                throw new IllegalArgumentException("Don't know how to search for " + p_219790_1_);
+            }
+            list = new ArrayList<>();
+            for (int i = 0, len = this.values.size(); i < len; ++i) {
+                T value = this.values.get(i);
+                if (p_219790_1_.isInstance(value)) {
+                    list.add(value);
+                }
+            }
+            this.map.put(p_219790_1_, list);
+            this.mapViews.put(p_219790_1_, Collections.unmodifiableList(list));
+        }
+        return (Collection<S>) this.mapViews.get(p_219790_1_);
     }
 
     public Iterator<T> iterator() {
-        return (Iterator<T>) (this.values.isEmpty() ? Collections.emptyIterator() : Iterators.unmodifiableIterator(this.values.iterator()));
+        return this.valuesView.iterator();
     }
 
     public int size() {

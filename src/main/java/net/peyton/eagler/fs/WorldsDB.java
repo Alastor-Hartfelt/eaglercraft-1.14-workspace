@@ -22,7 +22,6 @@ public class WorldsDB {
     public static void setWorldsDBProvider(Supplier<IEaglerFilesystem> provider) {
         fsGetter = provider;
     }
-
     public static VFile2 newVFile(Object... path) {
         return VFile2.create(fsGetter, path);
     }

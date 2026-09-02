@@ -72,7 +72,6 @@ public class Criterion {
 
     }
 
-
     public ICriterionInstance getCriterionInstance() {
         return this.criterionInstance;
     }

@@ -18,7 +18,7 @@ public class VideoSettingsScreen extends Screen {
     private final Screen parentGuiScreen;
     private final GameSettings guiGameSettings;
     private OptionsRowList optionsRowList;
-    private static final AbstractOption[] OPTIONS = new AbstractOption[]{AbstractOption.GRAPHICS, AbstractOption.RENDER_DISTANCE, AbstractOption.AO, AbstractOption.FRAMERATE_LIMIT, AbstractOption.VSYNC, AbstractOption.VIEW_BOBBING, AbstractOption.GUI_SCALE, AbstractOption.ATTACK_INDICATOR, AbstractOption.GAMMA, AbstractOption.RENDER_CLOUDS, AbstractOption.FULLSCREEN, AbstractOption.PARTICLES, AbstractOption.MIPMAP_LEVELS, AbstractOption.ENTITY_SHADOWS, AbstractOption.BIOME_BLEND_RADIUS, AbstractOption.SHOW_FPS, AbstractOption.SHOW_XYZ};
+    private static final AbstractOption[] OPTIONS = new AbstractOption[]{AbstractOption.GRAPHICS, AbstractOption.RENDER_DISTANCE, AbstractOption.AO, AbstractOption.FRAMERATE_LIMIT, AbstractOption.VSYNC, AbstractOption.VIEW_BOBBING, AbstractOption.GUI_SCALE, AbstractOption.ATTACK_INDICATOR, AbstractOption.GAMMA, AbstractOption.RENDER_CLOUDS, AbstractOption.FULLSCREEN, AbstractOption.PARTICLES, AbstractOption.MIPMAP_LEVELS, AbstractOption.ENTITY_SHADOWS, AbstractOption.BIOME_BLEND_RADIUS, AbstractOption.FOG, AbstractOption.SHOW_FPS, AbstractOption.SHOW_XYZ, AbstractOption.SHOW_WORLD_HUD, AbstractOption.SHOW_STATS_HUD, AbstractOption.CHUNK_FIX, AbstractOption.UPDATES_PER_FRAME, AbstractOption.FAST_ENTITY_RENDER, AbstractOption.FAST_TILEENTITY_RENDER, AbstractOption.DISABLE_WEATHER};
     private int field_213108_e;
 
     public VideoSettingsScreen(Screen parentScreenIn, GameSettings gameSettingsIn) {
@@ -32,7 +32,7 @@ public class VideoSettingsScreen extends Screen {
         this.optionsRowList = new OptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25);
         this.optionsRowList.func_214335_a(OPTIONS);
         this.children.add(this.optionsRowList);
-        this.addButton(new Button(this.width / 2 - 155, this.height - 27, 150, 20, I18n.format("shaders.gui.button"), (p_213106_2_) -> {
+        this.addButton(new Button(this.width / 2 - 155, this.height - 27, 150, 20, I18n.format("gui.shaders"), (p_213106_2_) -> {
             if (EaglerDeferredPipeline.isSupported()) {
                 this.mc.displayGuiScreen(new GuiShaderConfig(this));
             } else {
@@ -43,7 +43,12 @@ public class VideoSettingsScreen extends Screen {
         this.addButton(new Button(this.width / 2 + 5, this.height - 27, 150, 20, I18n.format("gui.done"), (p_213106_1_) -> {
             this.mc.gameSettings.saveOptions();
             this.mc.mainWindow.update();
-            this.mc.displayGuiScreen(this.parentGuiScreen);
+            Screen contScreen = this.parentGuiScreen;
+            int vidIssues = this.mc.gameSettings.checkBadVideoSettings();
+            if (vidIssues != 0) {
+                contScreen = new GuiScreenVideoSettingsWarning(contScreen, vidIssues);
+            }
+            this.mc.displayGuiScreen(contScreen);
         }));
     }
 

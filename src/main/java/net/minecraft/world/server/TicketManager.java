@@ -21,7 +21,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import java.util.Set;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.concurrent.ITaskExecutor;
@@ -85,9 +85,7 @@ public abstract class TicketManager {
 
    protected abstract boolean func_219371_a(long p_219371_1_);
 
-
    protected abstract ChunkHolder func_219335_b(long p_219335_1_);
-
 
    protected abstract ChunkHolder func_219372_a(long p_219372_1_, int p_219372_3_,  ChunkHolder p_219372_4_, int p_219372_5_);
 

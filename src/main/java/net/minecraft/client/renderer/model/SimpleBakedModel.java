@@ -105,11 +105,13 @@ public class SimpleBakedModel implements IBakedModel {
       }
 
       public SimpleBakedModel.Builder addFaceQuad(Direction facing, BakedQuad quad) {
+         quad.compactVertexData();
          this.builderFaceQuads.get(facing).add(quad);
          return this;
       }
 
       public SimpleBakedModel.Builder addGeneralQuad(BakedQuad quad) {
+         quad.compactVertexData();
          this.builderGeneralQuads.add(quad);
          return this;
       }

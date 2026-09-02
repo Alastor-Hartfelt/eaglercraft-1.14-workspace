@@ -46,7 +46,9 @@ tasks.register<JavaExec>("eaglercraftDebugRuntime") {
 
 	val daArgs: MutableList<String> = mutableListOf(
 		"-Xmx1G",
-		"-Xms1G"
+		"-Xms1G",
+		"-XX:ErrorFile=/dev/null",
+		"-XX:-CreateCoredumpOnCrash"
 	)
 
 	if (System.getProperty("os.name").lowercase(Locale.getDefault()).contains("mac")) {
@@ -57,7 +59,8 @@ tasks.register<JavaExec>("eaglercraftDebugRuntime") {
 
 	workingDir = file("../desktopRuntime")
 	systemProperties = mapOf(
-		"java.library.path" to workingDir.absolutePath
+		"java.library.path" to workingDir.absolutePath,
+		"sun.java2d.opengl" to "true"
 	)
 
 	environment("LD_LIBRARY_PATH", workingDir.absolutePath)

@@ -53,7 +53,6 @@ public class SoundEventAccessor implements ISoundEventAccessor<Sound> {
       this.accessorList.add(accessor);
    }
 
-
    public ITextComponent getSubtitle() {
       return this.subtitle;
    }

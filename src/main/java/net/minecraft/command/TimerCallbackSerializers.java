@@ -33,7 +33,6 @@ public class TimerCallbackSerializers<C> {
       return compoundnbt;
    }
 
-   
    public ITimerCallback<C> func_216341_a(CompoundNBT p_216341_1_) {
       ResourceLocation resourcelocation = ResourceLocation.tryCreate(p_216341_1_.getString("Type"));
       ITimerCallback.Serializer<C, ?> serializer = this.field_216344_c.get(resourcelocation);

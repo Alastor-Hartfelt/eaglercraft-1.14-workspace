@@ -18,7 +18,6 @@ public class ScaffoldingItem extends BlockItem {
         super(p_i50039_1_, p_i50039_2_);
     }
 
-
     public BlockItemUseContext getBlockItemUseContext(BlockItemUseContext context) {
         BlockPos blockpos = context.getPos();
         World world = context.getWorld();

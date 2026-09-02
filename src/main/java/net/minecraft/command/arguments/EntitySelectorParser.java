@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.lax1dude.eaglercraft.EaglercraftUUID;
 import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.advancements.criterion.MinMaxBoundsWrapped;
@@ -368,16 +368,13 @@ public class EntitySelectorParser {
         this.yRotation = yRotationIn;
     }
 
-
     public Double getX() {
         return this.x;
     }
 
-
     public Double getY() {
         return this.y;
     }
-
 
     public Double getZ() {
         return this.z;
@@ -407,16 +404,13 @@ public class EntitySelectorParser {
         this.dz = dzIn;
     }
 
-
     public Double getDx() {
         return this.dx;
     }
 
-
     public Double getDy() {
         return this.dy;
     }
-
 
     public Double getDz() {
         return this.dz;

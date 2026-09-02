@@ -29,20 +29,25 @@ public class BossOverlayGui extends AbstractGui {
             int i = this.client.mainWindow.getScaledWidth();
             int j = 12;
 
-            for (ClientBossInfo clientbossinfo : this.mapBossInfos.values()) {
-                int k = i / 2 - 91;
-                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                this.client.getTextureManager().bindTexture(GUI_BARS_TEXTURES);
-                this.render(k, j, clientbossinfo);
-                String s = clientbossinfo.getName().getFormattedText();
-                int l = this.client.fontRenderer.getStringWidth(s);
-                int i1 = i / 2 - l / 2;
-                int j1 = j - 9;
-                this.client.fontRenderer.drawStringWithShadow(s, (float) i1, (float) j1, 16777215);
-                j += 10 + 9;
-                if (j >= this.client.mainWindow.getScaledHeight() / 3) {
-                    break;
+            this.client.fontRenderer.beginBatch();
+            try {
+                for (ClientBossInfo clientbossinfo : this.mapBossInfos.values()) {
+                    int k = i / 2 - 91;
+                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    this.client.getTextureManager().bindTexture(GUI_BARS_TEXTURES);
+                    this.render(k, j, clientbossinfo);
+                    String s = clientbossinfo.getName().getFormattedText();
+                    int l = this.client.fontRenderer.getStringWidth(s);
+                    int i1 = i / 2 - l / 2;
+                    int j1 = j - 9;
+                    this.client.fontRenderer.drawStringWithShadow(s, (float) i1, (float) j1, 16777215);
+                    j += 10 + 9;
+                    if (j >= this.client.mainWindow.getScaledHeight() / 3) {
+                        break;
+                    }
                 }
+            } finally {
+                this.client.fontRenderer.endBatch();
             }
 
         }

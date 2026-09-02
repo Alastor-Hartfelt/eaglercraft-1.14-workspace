@@ -30,7 +30,6 @@ public class ResourceIndex {
         return this.getFile(location.toString());
     }
 
-
     public VFile2 getFile(String p_200009_1_) {
         return this.resourceMap.get(p_200009_1_);
     }

@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Consumer;
 
+import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.EarlyLoadScreen;
 import org.teavm.interop.Import;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSObject;
@@ -52,7 +53,6 @@ import net.lax1dude.eaglercraft.internal.buffer.WASMGCBufferAllocator;
 import net.lax1dude.eaglercraft.internal.buffer.WASMGCDirectArrayConverter;
 import net.lax1dude.eaglercraft.internal.vfs2.VFile2;
 import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.BetterJSStringConverter;
-import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.EarlyLoadScreen;
 import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.WASMGCClientConfigAdapter;
 import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.WebGLBackBuffer;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
@@ -82,9 +82,7 @@ public class PlatformRuntime {
 		PlatformOpenGL.initContext();
 		PlatformInput.initContext(win, parent, canvas);
 
-		// Should contain an event to update the initial screen size
 		pollJSEventsAfterSleep();
-
 		WebGLBackBuffer.initBackBuffer(PlatformInput.getWindowWidth(), PlatformInput.getWindowHeight());
 
 		PlatformAssets.readAssetsTeaVM();
@@ -105,7 +103,7 @@ public class PlatformRuntime {
 		HTMLElement el = parent.querySelector("._eaglercraftX_early_splash_element");
 		if(el != null) {
 			el.delete();
-		}
+		};
 
 		sleep(20);
 
@@ -119,8 +117,11 @@ public class PlatformRuntime {
 
 		PlatformAudio.initialize();
 		PlatformScreenRecord.initContext(win, canvas);
-	}
 
+		PlatformWebRTC.initialize();
+		PlatformVoiceClient.initialize();
+
+	}
 	@Import(module = "platformRuntime", name = "getRootElement")
 	private static native HTMLElement getRootElement();
 
@@ -264,6 +265,9 @@ public class PlatformRuntime {
 					break;
 				case EVENT_TYPE_RUNTIME:
 					handleJSEvent(evt);
+					break;
+				case EVENT_TYPE_VOICE:
+					PlatformVoiceClient.handleJSEvent(evt);
 					break;
 				default:
 					break;

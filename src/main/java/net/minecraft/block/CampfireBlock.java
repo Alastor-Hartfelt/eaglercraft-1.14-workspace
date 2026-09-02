@@ -92,7 +92,6 @@ public class CampfireBlock extends ContainerBlock implements IWaterLoggable {
       }
    }
 
-
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       IWorld iworld = context.getWorld();
       BlockPos blockpos = context.getPos();

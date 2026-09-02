@@ -86,7 +86,6 @@ public class AdvancementEntryGui extends AbstractGui {
         }
     }
 
-
     private AdvancementEntryGui getFirstVisibleParent(Advancement advancementIn) {
         while (true) {
             advancementIn = advancementIn.getParent();

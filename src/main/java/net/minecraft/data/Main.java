@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 
-
 public class Main {
     public static void main(String[] p_main_0_) throws IOException {
 

@@ -701,11 +701,9 @@ public class ArmorStandEntity extends LivingEntity {
         return SoundEvents.ENTITY_ARMOR_STAND_FALL;
     }
 
-
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         return SoundEvents.ENTITY_ARMOR_STAND_HIT;
     }
-
 
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_ARMOR_STAND_BREAK;

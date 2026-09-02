@@ -30,7 +30,11 @@ import static org.lwjgl.opengles.OESVertexArrayObject.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengles.EXTMultiDrawArrays;
 import org.lwjgl.opengles.GLESCapabilities;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 public class PlatformOpenGL {
 
@@ -51,6 +55,7 @@ public class PlatformOpenGL {
 	private static boolean hasOESTextureHalfFloat = false;
 	private static boolean hasOESTextureHalfFloatLinear = false;
 	private static boolean hasEXTTextureFilterAnisotropic = false;
+	private static boolean hasEXTMultiDrawArrays = false;
 
 	private static boolean hasFBO16FSupport = false;
 	private static boolean hasFBO32FSupport = false;
@@ -86,6 +91,7 @@ public class PlatformOpenGL {
 				&& (glesVersIn == 310 || glesVersIn == 300 || glesVersIn == 200) && caps.GL_EXT_color_buffer_half_float;
 		hasEXTInstancedArrays = !hasANGLEInstancedArrays && glesVersIn == 200 && caps.GL_EXT_instanced_arrays;
 		hasEXTShaderTextureLOD = glesVersIn == 200 && caps.GL_EXT_shader_texture_lod;
+		hasEXTMultiDrawArrays = caps.GL_EXT_multi_draw_arrays;
 		hasEXTTextureStorage = glesVersIn == 200 && caps.GL_EXT_texture_storage;
 		hasOESGPUShader5 = glesVersIn == 310 && caps.GL_OES_gpu_shader5;
 		hasEXTGPUShader5 = !hasOESGPUShader5 && glesVersIn == 310 && caps.GL_EXT_gpu_shader5;
@@ -133,6 +139,9 @@ public class PlatformOpenGL {
 		return exts;
 	}
 
+	public static boolean checkMultiDrawCapable() {
+		return glesVers >= 300 && hasEXTMultiDrawArrays;
+	}
 	public static void _wglEnable(int glEnum) {
 		glEnable(glEnum);
 	}
@@ -709,6 +718,66 @@ public class PlatformOpenGL {
 	public static void _wglFramebufferTextureLayer(int target, int attachment, ITextureGL texture, int level, int layer) {
 		glFramebufferTextureLayer(target, attachment, ((OpenGLObjects.TextureGL) texture).ptr, level, layer);
 	}
+
+	public static void _wglCopyBufferSubData(int readTarget, int writeTarget, int readOffset, int writeOffset, int size){
+		glCopyBufferSubData(readTarget, writeTarget, readOffset, writeOffset, size);
+	}
+
+	public static void _wglMultiDrawArrays(int mode, IntBuffer firsts, IntBuffer counts, int drawCount){
+		if (firsts == null || counts == null || drawCount <= 0) {
+			return;
+		}
+
+		if (hasEXTMultiDrawArrays) {
+			EXTMultiDrawArrays.nglMultiDrawArraysEXT(
+					mode,
+					EaglerLWJGLAllocator.getAddress(firsts),
+					EaglerLWJGLAllocator.getAddress(counts),
+					drawCount
+			);
+		} else {
+			int firstsPos = firsts.position();
+			int countsPos = counts.position();
+
+			for (int i = 0; i < drawCount; i++) {
+				int first = firsts.get(firstsPos + i);
+				int count = counts.get(countsPos + i);
+
+				if (count > 0) {
+					glDrawArrays(mode, first, count);
+				}
+			}
+		}
+	}
+
+	public static void _wglMultiDrawElements(int mode, IntBuffer counts, int type, IntBuffer offsets, int drawCount) {
+		if (counts == null || offsets == null || drawCount <= 0) {
+			return;
+		}
+
+		if (hasEXTMultiDrawArrays) {
+			int offsetsPos = offsets.position();
+			try (MemoryStack stack = MemoryStack.stackPush()) {
+				PointerBuffer pointerOffsets = stack.mallocPointer(drawCount);
+				for (int i = 0; i < drawCount; ++i) {
+					pointerOffsets.put(Integer.toUnsignedLong(offsets.get(offsetsPos + i)));
+				}
+				pointerOffsets.flip();
+				EXTMultiDrawArrays.nglMultiDrawElementsEXT(mode, EaglerLWJGLAllocator.getAddress(counts), type,
+						MemoryUtil.memAddress(pointerOffsets), drawCount);
+			}
+		} else {
+			int countsPos = counts.position();
+			int offsetsPos = offsets.position();
+			for (int i = 0; i < drawCount; ++i) {
+				int count = counts.get(countsPos + i);
+				if (count > 0) {
+					glDrawElements(mode, count, type, offsets.get(offsetsPos + i));
+				}
+			}
+		}
+	}
+
 
 	public static void _wglBlitFramebuffer(int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0,
 			int dstX1, int dstY1, int bits, int filter) {

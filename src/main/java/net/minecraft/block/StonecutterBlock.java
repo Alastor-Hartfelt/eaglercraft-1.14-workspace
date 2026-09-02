@@ -43,7 +43,6 @@ public class StonecutterBlock extends Block {
       return true;
    }
 
-
    public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
       return new SimpleNamedContainerProvider((p_220283_2_, p_220283_3_, p_220283_4_) -> {
          return new StonecutterContainer(p_220283_2_, p_220283_3_, IWorldPosCallable.of(worldIn, pos));

@@ -47,7 +47,6 @@ public class MapDecoration {
       return this.type.isRenderedOnFrame();
    }
 
-
    public ITextComponent getCustomName() {
       return this.customName;
    }

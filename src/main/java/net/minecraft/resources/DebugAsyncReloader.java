@@ -1,8 +1,7 @@
 package net.minecraft.resources;
 import java.util.List;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.profiler.IProfileResult;
 import net.minecraft.profiler.Profiler;

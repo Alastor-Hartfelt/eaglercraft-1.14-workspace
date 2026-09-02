@@ -192,18 +192,15 @@ public abstract class Registry<T> implements IObjectIntIterable<T> {
         return (R) (REGISTRY.register(resourcelocation, p_222939_1_));
     }
 
-
     public abstract ResourceLocation getKey(T value);
 
     public abstract int getId(T value);
-
 
     public abstract T getOrDefault(ResourceLocation name);
 
     public abstract Optional<T> getValue(ResourceLocation key);
 
     public abstract Set<ResourceLocation> keySet();
-
 
     public abstract T getRandom(Random random);
 

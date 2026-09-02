@@ -25,7 +25,7 @@ public class SleepInMultiplayerScreen extends ChatScreen {
     }
 
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (p_keyPressed_1_ == 256) {
+        if (Screen.isCloseKey(p_keyPressed_1_, p_keyPressed_2_)) {
             this.wakeFromSleep();
         } else if (p_keyPressed_1_ == 257 || p_keyPressed_1_ == 335) {
             String s = this.inputField.getText().trim();

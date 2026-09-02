@@ -43,7 +43,6 @@ public class MinecraftGame implements RunningGame {
         }
     }
 
-
     public GameSession getCurrentSession() {
         ClientWorld clientworld = this.gameInstance.world;
         return clientworld == null ? null : new ClientGameSession(clientworld, this.gameInstance.player, this.gameInstance.player.connection);

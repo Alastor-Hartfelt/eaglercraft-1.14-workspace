@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Collection;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 import net.minecraft.command.arguments.EntityAnchorArgument;
@@ -139,7 +139,6 @@ public class CommandSource implements ISuggestionProvider {
    public ServerWorld getWorld() {
       return this.world;
    }
-
 
    public Entity getEntity() {
       return this.entity;

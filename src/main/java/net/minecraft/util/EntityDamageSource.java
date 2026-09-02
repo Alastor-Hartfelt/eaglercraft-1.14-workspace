@@ -27,7 +27,6 @@ public class EntityDamageSource extends DamageSource {
       return this.isThornsDamage;
    }
 
-
    public Entity getTrueSource() {
       return this.damageSourceEntity;
    }
@@ -41,7 +40,6 @@ public class EntityDamageSource extends DamageSource {
    public boolean isDifficultyScaled() {
       return this.damageSourceEntity != null && this.damageSourceEntity instanceof LivingEntity && !(this.damageSourceEntity instanceof PlayerEntity);
    }
-
 
    public Vec3d getDamageLocation() {
       return new Vec3d(this.damageSourceEntity.posX, this.damageSourceEntity.posY, this.damageSourceEntity.posZ);

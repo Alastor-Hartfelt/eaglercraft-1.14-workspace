@@ -45,11 +45,9 @@ public class LootParameterSets {
         }
     }
 
-
     public static LootParameterSet getValue(ResourceLocation p_216256_0_) {
         return REGISTRY.get(p_216256_0_);
     }
-
 
     public static ResourceLocation getKey(LootParameterSet p_216257_0_) {
         return REGISTRY.inverse().get(p_216257_0_);

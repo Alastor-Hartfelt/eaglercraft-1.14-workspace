@@ -17,7 +17,7 @@ public class ShareToLanScreen extends Screen {
 
     private final Screen lastScreen;
 
-    private String networkScope = "OFF"; // "OFF", "LAN", "ONLINE"
+    private String networkScope = "OFF"; 
     private String gameMode = "survival";
     private boolean allowCommands;
 
@@ -42,7 +42,6 @@ public class ShareToLanScreen extends Screen {
 
     @Override
     protected void init() {
-        // Detect current state
         boolean lanOpen = LANServerController.isLANOpen();
         boolean onlineOpen = NetworkHandler.ourOpenWorld != null;
         if (onlineOpen) {
@@ -57,7 +56,6 @@ public class ShareToLanScreen extends Screen {
         this.initialAllowCommands = this.allowCommands;
 
         int midX = this.width / 2;
-
 
         this.networkScopeButton = this.addButton(new Button(midX - 100, 68, 200, 20,
                 getScopeDisplayText(), (btn) -> {
@@ -76,7 +74,6 @@ public class ShareToLanScreen extends Screen {
         this.worldNameField.setText(this.mc.getSession().getUsername() + "'s World");
         this.worldNameField.setMaxStringLength(252);
         this.children.add(this.worldNameField);
-
 
         this.gameModeButton = this.addButton(new Button(midX - 155, 150, 150, 20,
                 getGameModeDisplayText(), (btn) -> {

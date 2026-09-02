@@ -22,15 +22,24 @@ public class IngameMenuScreen extends Screen {
     private static final ResourceLocation FRIENDS_TEX = new ResourceLocation("textures/gui/friends.png");
 
     private final boolean isFullMenu;
+    private net.lax1dude.eaglercraft.notifications.GuiButtonNotifBell notifBellButton;
+    private net.lax1dude.eaglercraft.voice.GuiVoiceMenu voiceMenu;
 
     public IngameMenuScreen(boolean p_i51519_1_) {
         super(p_i51519_1_ ? new TranslationTextComponent("menu.game") : new TranslationTextComponent("menu.paused"));
         this.isFullMenu = p_i51519_1_;
+        if (net.lax1dude.eaglercraft.EagRuntime.getConfiguration().isAllowVoiceClient() && !Minecraft.getInstance().isSingleplayer()) {
+            voiceMenu = new net.lax1dude.eaglercraft.voice.GuiVoiceMenu(this);
+        }
     }
 
     protected void init() {
         if (this.isFullMenu) {
             this.addButtons();
+        }
+
+        if (this.voiceMenu != null) {
+            this.voiceMenu.setResolution(this.mc, this.width, this.height);
         }
 
     }
@@ -187,7 +196,6 @@ public class IngameMenuScreen extends Screen {
                     GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                     this.blit(this.x + 2, this.y + 2, 0, 0, 16, 16, 16, 16);
 
-                    // Red dot indicator for pending requests
                     if (NetworkHandler.pendingRequests.size() > 0 || NetworkHandler.pendingJoinRequests.size() > 0) {
                         int dotX = this.x + this.width - 5;
                         int dotY = this.y + 1;
@@ -202,11 +210,23 @@ public class IngameMenuScreen extends Screen {
             });
         }
 
+        if (!this.mc.isSingleplayer()) {
+            this.addButton(notifBellButton = new net.lax1dude.eaglercraft.notifications.GuiButtonNotifBell(11, this.width - 22, this.height - 22, (btn) -> {
+                this.mc.displayGuiScreen(new net.lax1dude.eaglercraft.notifications.GuiScreenNotifications(this));
+            }));
+        }
+
     }
 
     public void tick() {
         NetworkHandler.tick();
         super.tick();
+        if (this.notifBellButton != null && this.mc.player != null) {
+            this.notifBellButton.setUnread(this.mc.player.connection.getNotifManager().getUnread());
+        }
+        if (this.voiceMenu != null) {
+            this.voiceMenu.updateScreen();
+        }
         if (Mouse.isActuallyGrabbed()) {
             Mouse.setGrabbed(false);
             this.mc.mouseHelper.ungrabMouse();
@@ -244,6 +264,42 @@ public class IngameMenuScreen extends Screen {
             GlStateManager.popMatrix();
         }
 
-        super.render(p_render_1_, p_render_2_, p_render_3_);
+        try {
+            if (this.voiceMenu != null) {
+                if (this.voiceMenu.isBlockingInput()) {
+                    super.render(0, 0, p_render_3_);
+                } else {
+                    super.render(p_render_1_, p_render_2_, p_render_3_);
+                }
+                this.voiceMenu.drawScreen(p_render_1_, p_render_2_, p_render_3_);
+            } else {
+                super.render(p_render_1_, p_render_2_, p_render_3_);
+            }
+        } catch (net.lax1dude.eaglercraft.voice.GuiVoiceMenu.AbortedException ex) {
+        }
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.voiceMenu != null) {
+            try {
+                this.voiceMenu.mouseClicked((int) mouseX, (int) mouseY, button);
+            } catch (net.lax1dude.eaglercraft.voice.GuiVoiceMenu.AbortedException ex) {
+                return true;
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.voiceMenu != null) {
+            try {
+                this.voiceMenu.keyTyped((char) keyCode, keyCode);
+            } catch (net.lax1dude.eaglercraft.voice.GuiVoiceMenu.AbortedException ex) {
+                return true;
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

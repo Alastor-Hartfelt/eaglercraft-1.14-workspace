@@ -71,7 +71,6 @@ public class Slot {
       return this.getSlotStackLimit();
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public String getSlotTexture() {
       return null;

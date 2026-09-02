@@ -172,7 +172,6 @@ public class ChestBlock extends ContainerBlock implements IWaterLoggable {
         return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
     }
 
-
     private Direction getDirectionToAttach(BlockItemUseContext p_196312_1_, Direction p_196312_2_) {
         BlockState blockstate = p_196312_1_.getWorld().getBlockState(p_196312_1_.getPos().offset(p_196312_2_));
         return blockstate.getBlock() == this && blockstate.get(TYPE) == ChestType.SINGLE ? blockstate.get(FACING) : null;
@@ -218,7 +217,6 @@ public class ChestBlock extends ContainerBlock implements IWaterLoggable {
         return Stats.CUSTOM.get(Stats.OPEN_CHEST);
     }
 
-
     public static <T> T func_220106_a(BlockState p_220106_0_, IWorld p_220106_1_, BlockPos p_220106_2_, boolean allowBlocked, ChestBlock.InventoryFactory<T> p_220106_4_) {
         TileEntity tileentity = p_220106_1_.getTileEntity(p_220106_2_);
         if (!(tileentity instanceof ChestTileEntity)) {
@@ -254,11 +252,9 @@ public class ChestBlock extends ContainerBlock implements IWaterLoggable {
         }
     }
 
-
     public static IInventory getInventory(BlockState p_220105_0_, World p_220105_1_, BlockPos p_220105_2_, boolean allowBlocked) {
         return func_220106_a(p_220105_0_, p_220105_1_, p_220105_2_, allowBlocked, field_220109_i);
     }
-
 
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
         return func_220106_a(state, worldIn, pos, false, field_220110_j);

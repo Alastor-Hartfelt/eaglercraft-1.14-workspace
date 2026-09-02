@@ -166,6 +166,7 @@ public class VillagerEntity extends AbstractVillagerEntity implements IReputatio
     }
 
     protected void updateAITasks() {
+        this.checkForLostWorkstation((ServerWorld) this.world);
         this.world.getProfiler().startSection("brain");
         this.getBrain().tick((ServerWorld) this.world, this);
         this.world.getProfiler().endSection();
@@ -199,6 +200,29 @@ public class VillagerEntity extends AbstractVillagerEntity implements IReputatio
         }
 
         super.updateAITasks();
+    }
+
+    private void checkForLostWorkstation(ServerWorld worldIn) {
+        VillagerData villagerdata = this.getVillagerData();
+        if (villagerdata.getProfession() == VillagerProfession.NONE || villagerdata.getProfession() == VillagerProfession.NITWIT || this.getXp() != 0 || villagerdata.getLevel() > 1) {
+            return;
+        }
+
+        Optional<GlobalPos> optional = this.getBrain().getMemory(MemoryModuleType.JOB_SITE);
+        if (!optional.isPresent()) {
+            return;
+        }
+
+        GlobalPos globalpos = optional.get();
+        boolean validWorkstation = worldIn.getDimension().getType().equals(globalpos.getDimension())
+                && PointOfInterestType.forState(worldIn.getBlockState(globalpos.getPos()))
+                        .filter((pointOfInterest) -> pointOfInterest == villagerdata.getProfession().getPointOfInterest())
+                        .isPresent();
+        if (!validWorkstation) {
+            this.getBrain().removeMemory(MemoryModuleType.JOB_SITE);
+            this.setVillagerData(villagerdata.withProfession(VillagerProfession.NONE));
+            this.resetBrain(worldIn);
+        }
     }
 
     public void tick() {
@@ -420,7 +444,6 @@ public class VillagerEntity extends AbstractVillagerEntity implements IReputatio
         return false;
     }
 
-
     protected SoundEvent getAmbientSound() {
         if (this.isSleeping()) {
             return null;
@@ -624,7 +647,6 @@ public class VillagerEntity extends AbstractVillagerEntity implements IReputatio
 
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         if (reason == SpawnReason.BREEDING) {
             this.setVillagerData(this.getVillagerData().withProfession(VillagerProfession.NONE));
@@ -821,7 +843,6 @@ public class VillagerEntity extends AbstractVillagerEntity implements IReputatio
             return false;
         }
     }
-
 
     private IronGolemEntity func_213759_ey() {
         BlockPos blockpos = new BlockPos(this);

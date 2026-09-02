@@ -45,6 +45,12 @@ public class MouseHelper {
          this.ignoreFirstMove = true;
          this.minecraft.leftClickCounter = 10000;
       }
+      if (net.lax1dude.eaglercraft.PointerInputAbstraction.isTouchMode()) {
+          int dx = net.lax1dude.eaglercraft.PointerInputAbstraction.getVCursorDX();
+          int dy = net.lax1dude.eaglercraft.PointerInputAbstraction.getVCursorDY();
+          this.xVelocity += dx;
+          this.yVelocity += dy;
+      }
       while (Mouse.next()) {
          int button = Mouse.getEventButton();
          if (button == -1) {

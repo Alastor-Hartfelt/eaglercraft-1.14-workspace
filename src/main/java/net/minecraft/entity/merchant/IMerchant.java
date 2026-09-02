@@ -17,7 +17,6 @@ import java.util.OptionalInt;
 public interface IMerchant {
     void setCustomer(PlayerEntity player);
 
-
     PlayerEntity getCustomer();
 
     MerchantOffers getOffers();

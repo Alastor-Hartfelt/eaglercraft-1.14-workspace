@@ -44,7 +44,6 @@ public abstract class LightEngine<M extends LightDataMap<M>, S extends SectionLi
 
     }
 
-
     private IBlockReader getChunkReader(int chunkX, int chunkZ) {
         long i = ChunkPos.asLong(chunkX, chunkZ);
 
@@ -141,6 +140,7 @@ public abstract class LightEngine<M extends LightDataMap<M>, S extends SectionLi
             if (this.storage.needsUpdate()) {
                 toUpdateCount = this.storage.processUpdates(toUpdateCount);
                 if (toUpdateCount == 0) {
+                    this.storage.updateAndNotify();
                     return toUpdateCount;
                 }
             }
@@ -152,9 +152,6 @@ public abstract class LightEngine<M extends LightDataMap<M>, S extends SectionLi
         if (this.needsUpdate()) {
             toUpdateCount = this.processUpdates(toUpdateCount);
             this.invalidateCaches();
-            if (toUpdateCount == 0) {
-                return toUpdateCount;
-            }
         }
 
         this.field_215629_e = false;
@@ -165,7 +162,6 @@ public abstract class LightEngine<M extends LightDataMap<M>, S extends SectionLi
     protected void setData(long sectionPosIn, NibbleArray array) {
         this.storage.setData(sectionPosIn, array);
     }
-
 
     public NibbleArray getData(SectionPos p_215612_1_) {
         return this.storage.getArray(p_215612_1_.asLong());

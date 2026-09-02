@@ -3,6 +3,7 @@ package net.minecraft.client.gui;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
@@ -15,6 +16,9 @@ public abstract class AbstractGui {
    public static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
    public static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
    protected int blitOffset;
+   private static final BufferBuilder HUD_COLOR_BATCH = new BufferBuilder(16384);
+   private static final WorldVertexBufferUploader HUD_BATCH_UPLOADER = new WorldVertexBufferUploader();
+   private static int hudBatchDepth;
 
    public static void hLine(int p_hLine_1_, int p_hLine_2_, int p_hLine_3_, int p_hLine_4_) {
       if (p_hLine_2_ < p_hLine_1_) {
@@ -53,6 +57,13 @@ public abstract class AbstractGui {
       float f = (float)(p_fill_4_ >> 16 & 255) / 255.0F;
       float f1 = (float)(p_fill_4_ >> 8 & 255) / 255.0F;
       float f2 = (float)(p_fill_4_ & 255) / 255.0F;
+      if (hudBatchDepth > 0) {
+         HUD_COLOR_BATCH.pos((double)p_fill_0_, (double)p_fill_3_, 0.0D).color(f, f1, f2, f3).endVertex();
+         HUD_COLOR_BATCH.pos((double)p_fill_2_, (double)p_fill_3_, 0.0D).color(f, f1, f2, f3).endVertex();
+         HUD_COLOR_BATCH.pos((double)p_fill_2_, (double)p_fill_1_, 0.0D).color(f, f1, f2, f3).endVertex();
+         HUD_COLOR_BATCH.pos((double)p_fill_0_, (double)p_fill_1_, 0.0D).color(f, f1, f2, f3).endVertex();
+         return;
+      }
       Tessellator tessellator = Tessellator.getInstance();
       BufferBuilder bufferbuilder = tessellator.getBuffer();
       GlStateManager.disableDepthTest();
@@ -72,6 +83,38 @@ public abstract class AbstractGui {
       GlStateManager.enableAlphaTest();
       GlStateManager.disableBlend();
       GlStateManager.enableDepthTest();
+   }
+
+   public static void beginHudBatch() {
+      if (hudBatchDepth++ == 0) {
+         HUD_COLOR_BATCH.begin(7, DefaultVertexFormats.POSITION_COLOR);
+      }
+   }
+
+   public static void endHudBatch() {
+      if (hudBatchDepth <= 0) {
+         throw new IllegalStateException("HUD batch is not active");
+      }
+
+      if (--hudBatchDepth == 0) {
+         HUD_COLOR_BATCH.finishDrawing();
+         if (HUD_COLOR_BATCH.getVertexCount() > 0) {
+            GlStateManager.disableDepthTest();
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.enableBlend();
+            GlStateManager.disableTexture();
+            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                    GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+                    GlStateManager.DestFactor.ZERO);
+            HUD_BATCH_UPLOADER.draw(HUD_COLOR_BATCH);
+            GlStateManager.enableTexture();
+            GlStateManager.enableAlphaTest();
+            GlStateManager.disableBlend();
+            GlStateManager.enableDepthTest();
+         } else {
+            HUD_COLOR_BATCH.reset();
+         }
+      }
    }
 
    protected void fillGradient(int p_fillGradient_1_, int p_fillGradient_2_, int p_fillGradient_3_, int p_fillGradient_4_, int p_fillGradient_5_, int p_fillGradient_6_) {
@@ -116,6 +159,7 @@ public abstract class AbstractGui {
    }
 
    public static void blit(int p_blit_0_, int p_blit_1_, int p_blit_2_, int p_blit_3_, int p_blit_4_, TextureAtlasSprite p_blit_5_) {
+      p_blit_5_.markActive();
       innerBlit(p_blit_0_, p_blit_0_ + p_blit_3_, p_blit_1_, p_blit_1_ + p_blit_4_, p_blit_2_, p_blit_5_.getMinU(), p_blit_5_.getMaxU(), p_blit_5_.getMinV(), p_blit_5_.getMaxV());
    }
 

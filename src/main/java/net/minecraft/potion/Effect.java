@@ -27,7 +27,6 @@ public class Effect {
 
     private String name;
 
-
     public static Effect get(int potionID) {
         return Registry.EFFECTS.getByValue(potionID);
     }

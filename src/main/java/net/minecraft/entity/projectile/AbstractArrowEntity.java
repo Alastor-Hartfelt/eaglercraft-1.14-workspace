@@ -440,7 +440,6 @@ public abstract class AbstractArrowEntity extends Entity implements IProjectile 
     protected void arrowHit(LivingEntity living) {
     }
 
-
     protected EntityRayTraceResult func_213866_a(Vec3d p_213866_1_, Vec3d p_213866_2_) {
         return ProjectileHelper.func_221271_a(this.world, this, p_213866_1_, p_213866_2_, this.getBoundingBox().expand(this.getMotion()).grow(1.0D), (p_213871_1_) -> {
             return !p_213871_1_.isSpectator() && p_213871_1_.isAlive() && p_213871_1_.canBeCollidedWith() && (p_213871_1_ != this.getShooter() || this.ticksInAir >= 5) && (this.field_213878_az == null || !this.field_213878_az.contains(p_213871_1_.getEntityId()));
@@ -505,7 +504,6 @@ public abstract class AbstractArrowEntity extends Entity implements IProjectile 
         }
 
     }
-
 
     public Entity getShooter() {
         return this.shootingEntity != null && this.world instanceof ServerWorld ? ((ServerWorld) this.world).getEntityByUuid(this.shootingEntity) : null;

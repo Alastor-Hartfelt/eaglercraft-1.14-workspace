@@ -19,9 +19,6 @@ package org.apache.logging.log4j;
 import net.lax1dude.eaglercraft.EagRuntime;
 import net.lax1dude.eaglercraft.internal.PlatformRuntime;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class Logger {
 
     public final String loggerName;
@@ -126,14 +123,10 @@ public class Logger {
         logExcp(Level.FATAL, msg, t);
     }
 
-    private static final SimpleDateFormat fmt = new SimpleDateFormat("hh:mm:ss+SSS");
-    private static final Date dateInstance = new Date();
-
     public void log(Level level, String msg) {
         if (level.levelInt >= LogManager.logLevel.levelInt) {
             synchronized (LogManager.logLock) {
-                dateInstance.setTime(System.currentTimeMillis());
-                String line = "[" + fmt.format(dateInstance) + "]" +
+                String line = "[" + formatTimestamp(System.currentTimeMillis()) + "]" +
                         "[" + EagRuntime.currentThreadName() + "/" + level.levelName + "]" +
                         "[" + loggerName + "]: " + msg;
                 level.getPrintStream().println(line);
@@ -155,8 +148,7 @@ public class Logger {
                 args = shortened;
             }
             synchronized (LogManager.logLock) {
-                dateInstance.setTime(System.currentTimeMillis());
-                String line = "[" + fmt.format(dateInstance) + "]" +
+                String line = "[" + formatTimestamp(System.currentTimeMillis()) + "]" +
                         "[" + EagRuntime.currentThreadName() + "/" + level.levelName + "]" +
                         "[" + loggerName + "]: " + formatParams(msg, args);
                 level.getPrintStream().println(line);
@@ -168,6 +160,46 @@ public class Logger {
                 logExcp(level, "Exception Thrown", trailing);
             }
         }
+    }
+
+    private static String formatTimestamp(long timeMillis) {
+        int timeOfDay = (int)(timeMillis % 86400000L);
+        if (timeOfDay < 0) {
+            timeOfDay += 86400000;
+        }
+        int millis = timeOfDay % 1000;
+        int totalSeconds = timeOfDay / 1000;
+        int seconds = totalSeconds % 60;
+        int totalMinutes = totalSeconds / 60;
+        int minutes = totalMinutes % 60;
+        int hours = totalMinutes / 60;
+        hours %= 12;
+        if (hours == 0) {
+            hours = 12;
+        }
+
+        StringBuilder builder = new StringBuilder(12);
+        appendTwoDigits(builder, hours);
+        builder.append(':');
+        appendTwoDigits(builder, minutes);
+        builder.append(':');
+        appendTwoDigits(builder, seconds);
+        builder.append('+');
+        if (millis < 100) {
+            builder.append('0');
+        }
+        if (millis < 10) {
+            builder.append('0');
+        }
+        builder.append(millis);
+        return builder.toString();
+    }
+
+    private static void appendTwoDigits(StringBuilder builder, int value) {
+        if (value < 10) {
+            builder.append('0');
+        }
+        builder.append(value);
     }
 
     private static int countPlaceholders(String msg) {

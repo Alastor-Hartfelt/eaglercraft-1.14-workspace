@@ -67,7 +67,6 @@ public class FallingDustParticle extends SpriteTexturedParticle {
             this.spriteSet = p_i51109_1_;
         }
 
-
         public Particle makeParticle(BlockParticleData typeIn, World worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
             BlockState blockstate = typeIn.getBlockState();
             if (!blockstate.isAir() && blockstate.getRenderType() == BlockRenderType.INVISIBLE) {

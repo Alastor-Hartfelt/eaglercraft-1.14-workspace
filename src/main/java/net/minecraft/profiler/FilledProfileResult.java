@@ -104,7 +104,6 @@ public class FilledProfileResult implements IProfileResult {
     }
 
     public boolean writeToFile(VFile2 p_219919_1_) {
-        /* mkdirs removed (      (p_219919_1_.getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(p_219919_1_.getParent()) : null) ) */
         Writer writer = null;
 
         boolean flag1;

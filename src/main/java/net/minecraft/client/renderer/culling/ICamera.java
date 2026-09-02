@@ -8,5 +8,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public interface ICamera {
     boolean isBoundingBoxInFrustum(AxisAlignedBB p_78546_1_);
 
+    boolean isBoxInFrustum(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
+
     void setPosition(double xIn, double yIn, double zIn);
 }

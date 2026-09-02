@@ -162,7 +162,6 @@ public class CrashReport {
             return false;
         } else {
             if ((toFile.getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(toFile.getParent()) : null) != null) {
-                /* mkdirs removed (            (toFile.getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(toFile.getParent()) : null) ) */
             }
 
             Writer writer = null;

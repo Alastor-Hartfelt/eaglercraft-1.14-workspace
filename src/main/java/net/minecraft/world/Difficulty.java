@@ -34,7 +34,6 @@ public enum Difficulty {
       return ID_MAPPING[id % ID_MAPPING.length];
    }
 
-
    public static Difficulty byName(String nameIn) {
       for(Difficulty difficulty : values()) {
          if (difficulty.translationKey.equals(nameIn)) {

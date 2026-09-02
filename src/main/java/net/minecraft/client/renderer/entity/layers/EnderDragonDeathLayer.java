@@ -14,6 +14,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class EnderDragonDeathLayer extends LayerRenderer<EnderDragonEntity, EnderDragonModel> {
+    private final Random random = new Random();
+
     public EnderDragonDeathLayer(IEntityRenderer<EnderDragonEntity, EnderDragonModel> p_i50941_1_) {
         super(p_i50941_1_);
     }
@@ -29,7 +31,8 @@ public class EnderDragonDeathLayer extends LayerRenderer<EnderDragonEntity, Ende
                 f1 = (f - 0.8F) / 0.2F;
             }
 
-            Random random = new Random(432L);
+            Random random = this.random;
+            random.setSeed(432L);
             GlStateManager.disableTexture();
             GlStateManager.shadeModel(7425);
             GlStateManager.enableBlend();

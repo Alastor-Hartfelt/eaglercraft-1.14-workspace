@@ -28,7 +28,6 @@ public interface IParticleRenderType {
       net.lax1dude.eaglercraft.opengl.GlStateManager.boundTexture[net.lax1dude.eaglercraft.opengl.GlStateManager.activeTexture] = -1;
    }
 
-
    IParticleRenderType TERRAIN_SHEET = new IParticleRenderType() {
       public void beginRender(BufferBuilder p_217600_1_, TextureManager p_217600_2_) {
          RenderHelper.disableStandardItemLighting();

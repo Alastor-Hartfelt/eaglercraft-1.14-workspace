@@ -20,7 +20,6 @@ public abstract class ContainerBlock extends Block implements ITileEntityProvide
         return tileentity == null ? false : tileentity.receiveClientEvent(id, param);
     }
 
-
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
         TileEntity tileentity = worldIn.getTileEntity(pos);
         return tileentity instanceof INamedContainerProvider ? (INamedContainerProvider) tileentity : null;

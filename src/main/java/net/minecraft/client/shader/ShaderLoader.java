@@ -26,13 +26,11 @@ public class ShaderLoader {
 
     public void detachShader() {
 
-
     }
 
     public String getShaderFilename() {
         return this.shaderFilename;
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public static enum ShaderType {

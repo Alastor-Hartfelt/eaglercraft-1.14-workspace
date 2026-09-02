@@ -59,7 +59,6 @@ public class LANConnectingScreen extends Screen {
                 }
             } else {
                 if (networkManager.checkDisconnected()) {
-                    // this.mc.getSession().reset();
                     if (mc.currentScreen == this) {
                         mc.loadWorld(null);
                         mc.displayGuiScreen(new DisconnectedScreen(parent, "connect.failed", new StringTextComponent("LAN Connection Refused")));
@@ -88,7 +87,6 @@ public class LANConnectingScreen extends Screen {
                 }else {
                     sock = RelayManager.relayManager.connectHandshake(relay, 0x02, code);
                 }
-                
                 if(sock == null) {
                     this.mc.displayGuiScreen(new ScreenNoRelays(parent));
                     return;
@@ -102,13 +100,8 @@ public class LANConnectingScreen extends Screen {
 
                 completed = true;
 
-                // this.mc.getSession().setLAN();
                 networkManager.setConnectionState(ProtocolType.LOGIN);
-                
-                // We use LoginClientHandler which is 1.14.4's version of NetHandlerSingleplayerLogin.
-                // Or ClientLoginNetHandler.
                 networkManager.setNetHandler(new net.minecraft.client.network.login.ClientLoginNetHandler(networkManager, mc, parent, (str) -> {}));
-                
                 networkManager.sendPacket(new CLoginStartPacket(this.mc.getSession().getProfile(), new byte[0], new byte[0], new byte[0], net.lax1dude.eaglercraft.EaglercraftUUID.randomUUID()));
             }
         }

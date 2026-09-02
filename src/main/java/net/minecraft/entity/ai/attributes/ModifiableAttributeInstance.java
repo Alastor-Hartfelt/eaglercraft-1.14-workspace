@@ -61,7 +61,6 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
         return set;
     }
 
-
     public AttributeModifier getModifier(EaglercraftUUID uuid) {
         return this.mapByUUID.get(uuid);
     }

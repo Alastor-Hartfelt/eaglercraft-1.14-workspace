@@ -30,11 +30,9 @@ public class SaveHandler implements IPlayerFileData {
    public SaveHandler(VFile2 p_i51278_1_, String p_i51278_2_,  MinecraftServer p_i51278_3_, DataFixer p_i51278_4_) {
       this.field_215772_a = p_i51278_4_;
       this.field_215774_c = new VFile2(p_i51278_1_, p_i51278_2_);
-/* mkdirs removed (      this.field_215774_c ) */
       this.playersDirectory = new VFile2(this.field_215774_c, "playerdata");
       this.field_215777_f = p_i51278_2_;
       if (p_i51278_3_ != null) {
-/* mkdirs removed (         this.playersDirectory ) */
          this.field_215778_g = new TemplateManager(p_i51278_3_, new java.io.File(this.field_215774_c.getPath()), p_i51278_4_);
       } else {
          this.field_215778_g = null;
@@ -112,7 +110,6 @@ public class SaveHandler implements IPlayerFileData {
       }
    }
 
-
    public WorldInfo loadWorldInfo() {
       VFile2 file1 = new VFile2(this.field_215774_c, "level.dat");
       if (file1.exists()) {
@@ -140,7 +137,6 @@ public class SaveHandler implements IPlayerFileData {
       }
 
    }
-
 
    public CompoundNBT readPlayerData(PlayerEntity player) {
       CompoundNBT compoundnbt = null;

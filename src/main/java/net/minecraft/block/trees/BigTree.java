@@ -24,7 +24,6 @@ public abstract class BigTree extends Tree {
         return super.spawn(worldIn, pos, blockUnder, random);
     }
 
-
     protected abstract AbstractTreeFeature<NoFeatureConfig> getBigTreeFeature(Random random);
 
     public boolean spawnBigTree(IWorld worldIn, BlockPos pos, BlockState blockUnder, Random random, int xOffset, int zOffset) {

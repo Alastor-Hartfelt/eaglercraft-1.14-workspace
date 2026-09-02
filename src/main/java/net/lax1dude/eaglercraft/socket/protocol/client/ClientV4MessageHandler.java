@@ -7,7 +7,10 @@ import net.lax1dude.eaglercraft.cookie.ServerCookieDataStore;
 import net.lax1dude.eaglercraft.profile.EaglerProfile;
 import net.lax1dude.eaglercraft.profile.SkinModel;
 import net.lax1dude.eaglercraft.socket.protocol.pkt.GameMessageHandler;
+import net.lax1dude.eaglercraft.voice.VoiceClientController;
 import net.lax1dude.eaglercraft.socket.protocol.pkt.server.*;
+
+import java.nio.charset.StandardCharsets;
 import net.lax1dude.eaglercraft.socket.protocol.util.SkinPacketVersionCache;
 import net.lax1dude.eaglercraft.webview.ServerInfoCache;
 import net.minecraft.client.Minecraft;
@@ -78,49 +81,49 @@ public class ClientV4MessageHandler implements GameMessageHandler {
     }
 
     public void handleServer(SPacketVoiceSignalAllowedEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeAllowed(packet.allowed, packet.iceServers);
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeAllowed(packet.allowed, packet.iceServers);
+        }
     }
 
     public void handleServer(SPacketVoiceSignalConnectV4EAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeConnect(new EaglercraftUUID(packet.uuidMost, packet.uuidLeast), packet.offer);
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeConnect(new EaglercraftUUID(packet.uuidMost, packet.uuidLeast), packet.offer);
+        }
     }
 
     public void handleServer(SPacketVoiceSignalConnectAnnounceV4EAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeConnectAnnounce(new EaglercraftUUID(packet.uuidMost, packet.uuidLeast));
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeConnectAnnounce(new EaglercraftUUID(packet.uuidMost, packet.uuidLeast));
+        }
     }
 
     public void handleServer(SPacketVoiceSignalDescEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeDescription(
-//					new EaglercraftUUID(packet.uuidMost, packet.uuidLeast),
-//					new String(packet.desc, StandardCharsets.UTF_8));
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeDescription(
+                    new EaglercraftUUID(packet.uuidMost, packet.uuidLeast),
+                    new String(packet.desc, StandardCharsets.UTF_8));
+        }
     }
 
     public void handleServer(SPacketVoiceSignalDisconnectPeerEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeDisconnect(new EaglercraftUUID(packet.uuidMost, packet.uuidLeast));
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeDisconnect(new EaglercraftUUID(packet.uuidMost, packet.uuidLeast));
+        }
     }
 
     public void handleServer(SPacketVoiceSignalGlobalEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeGlobalNew(packet.users);
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeGlobalNew(packet.users);
+        }
     }
 
     public void handleServer(SPacketVoiceSignalICEEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeICECandidate(
-//					new EaglercraftUUID(packet.uuidMost, packet.uuidLeast),
-//					new String(packet.ice, StandardCharsets.UTF_8));
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeICECandidate(
+                    new EaglercraftUUID(packet.uuidMost, packet.uuidLeast),
+                    new String(packet.ice, StandardCharsets.UTF_8));
+        }
     }
 
     public void handleServer(SPacketForceClientSkinPresetV4EAG packet) {

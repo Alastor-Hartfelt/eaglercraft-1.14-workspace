@@ -302,7 +302,6 @@ public class RabbitEntity extends AnimalEntity {
         this.dataManager.set(RABBIT_TYPE, rabbitTypeId);
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
         int i = this.func_213610_a(worldIn);

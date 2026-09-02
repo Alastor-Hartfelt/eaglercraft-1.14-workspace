@@ -19,7 +19,6 @@ public class MoveTowardsVillageGoal extends RandomWalkingGoal {
         return serverworld.func_217483_b_(blockpos) ? false : super.shouldExecute();
     }
 
-
     protected Vec3d getPosition() {
         ServerWorld serverworld = (ServerWorld) this.creature.world;
         BlockPos blockpos = new BlockPos(this.creature);

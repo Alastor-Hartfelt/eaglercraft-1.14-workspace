@@ -133,7 +133,6 @@ public class BellBlock extends ContainerBlock {
         return BlockRenderType.MODEL;
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         Direction direction = context.getFace();
         BlockPos blockpos = context.getPos();
@@ -203,7 +202,6 @@ public class BellBlock extends ContainerBlock {
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(field_220133_a, field_220134_b);
     }
-
 
     public TileEntity createNewTileEntity(IBlockReader worldIn) {
         return new BellTileEntity();

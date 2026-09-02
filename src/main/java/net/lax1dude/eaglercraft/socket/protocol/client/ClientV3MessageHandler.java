@@ -4,7 +4,10 @@ import net.lax1dude.eaglercraft.EaglercraftUUID;
 import net.lax1dude.eaglercraft.profile.SkinModel;
 import net.lax1dude.eaglercraft.socket.protocol.pkt.GameMessageHandler;
 import net.lax1dude.eaglercraft.socket.protocol.pkt.server.*;
+import net.lax1dude.eaglercraft.voice.VoiceClientController;
 import net.minecraft.client.Minecraft;
+
+import java.nio.charset.StandardCharsets;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 
 /**
@@ -73,42 +76,42 @@ public class ClientV3MessageHandler implements GameMessageHandler {
     }
 
     public void handleServer(SPacketVoiceSignalAllowedEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeAllowed(packet.allowed, packet.iceServers);
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeAllowed(packet.allowed, packet.iceServers);
+        }
     }
 
     public void handleServer(SPacketVoiceSignalConnectV3EAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			if (packet.isAnnounceType) {
-//				VoiceClientController.handleVoiceSignalPacketTypeConnectAnnounce(
-//						new EaglercraftUUID(packet.uuidMost, packet.uuidLeast));
-//			} else {
-//				VoiceClientController.handleVoiceSignalPacketTypeConnect(
-//						new EaglercraftUUID(packet.uuidMost, packet.uuidLeast), packet.offer);
-//			}
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            if (packet.isAnnounceType) {
+                VoiceClientController.handleVoiceSignalPacketTypeConnectAnnounce(
+                        new EaglercraftUUID(packet.uuidMost, packet.uuidLeast));
+            } else {
+                VoiceClientController.handleVoiceSignalPacketTypeConnect(
+                        new EaglercraftUUID(packet.uuidMost, packet.uuidLeast), packet.offer);
+            }
+        }
     }
 
     public void handleServer(SPacketVoiceSignalDescEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeDescription(
-//					new EaglercraftUUID(packet.uuidMost, packet.uuidLeast),
-//					new String(packet.desc, StandardCharsets.UTF_8));
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeDescription(
+                    new EaglercraftUUID(packet.uuidMost, packet.uuidLeast),
+                    new String(packet.desc, StandardCharsets.UTF_8));
+        }
     }
 
     public void handleServer(SPacketVoiceSignalDisconnectPeerEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeDisconnect(
-//					new EaglercraftUUID(packet.uuidMost, packet.uuidLeast));
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeDisconnect(
+                    new EaglercraftUUID(packet.uuidMost, packet.uuidLeast));
+        }
     }
 
     public void handleServer(SPacketVoiceSignalGlobalEAG packet) {
-//		if (VoiceClientController.isClientSupported()) {
-//			VoiceClientController.handleVoiceSignalPacketTypeGlobalNew(packet.users);
-//		}
+        if (VoiceClientController.isClientSupported()) {
+            VoiceClientController.handleVoiceSignalPacketTypeGlobalNew(packet.users);
+        }
     }
 
     public void handleServer(SPacketVoiceSignalICEEAG packet) {

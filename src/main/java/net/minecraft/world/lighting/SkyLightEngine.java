@@ -58,7 +58,6 @@ public final class SkyLightEngine extends LightEngine<SkyLightStorage.StorageMap
                     }
 
                     BlockState blockstate1 = this.getBlockAndOpacity(startPos);
-                    // Fast path: if both blocks are opaque full cubes, light cannot pass through
                     if (startPos != Long.MAX_VALUE && blockstate.isSolid() && blockstate.func_215691_g() && blockstate1.isSolid() && blockstate1.func_215691_g()) {
                         return 15;
                     }

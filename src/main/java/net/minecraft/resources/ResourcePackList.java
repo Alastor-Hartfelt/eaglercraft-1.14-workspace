@@ -78,7 +78,6 @@ public class ResourcePackList<T extends ResourcePackInfo> implements AutoCloseab
       return this.enabled;
    }
 
-
    public T getPackInfo(String name) {
       return (T)(this.packNameToInfo.get(name));
    }

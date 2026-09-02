@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.lax1dude.eaglercraft.HString;
 import net.lax1dude.eaglercraft.IOUtils;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
@@ -35,7 +36,7 @@ public class Locale {
         this.properties.clear();
 
         for (String s : p_195811_2_) {
-            String s1 = String.format("lang/%s.json", s);
+            String s1 = HString.format("lang/%s.json", s);
 
             for (String s2 : p_195811_1_.getResourceNamespaces()) {
                 try {
@@ -69,7 +70,7 @@ public class Locale {
         JsonObject jsonobject = JSONUtils.getJsonObject(jsonelement, "strings");
 
         for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
-            String s = PATTERN.matcher(JSONUtils.getString(entry.getValue(), entry.getKey())).replaceAll("%$1s");
+            String s = PATTERN.matcher(JSONUtils.getString(entry.getValue(), entry.getKey())).replaceAll("%s");
             this.properties.put(entry.getKey(), s);
         }
 
@@ -84,7 +85,7 @@ public class Locale {
         String s = this.translateKeyPrivate(translateKey);
 
         try {
-            return String.format(s, parameters);
+            return HString.format(s, parameters);
         } catch (IllegalFormatException var5) {
             return "Format error: " + s;
         }

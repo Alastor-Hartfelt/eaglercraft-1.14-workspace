@@ -9,9 +9,6 @@ public class RenderHelper {
     private static final Vec3d LIGHT0_POS = (new Vec3d(0.20000000298023224D, 1.0D, -0.699999988079071D)).normalize();
     private static final Vec3d LIGHT1_POS = (new Vec3d(-0.20000000298023224D, 1.0D, 0.699999988079071D)).normalize();
 
-    /**
-     * Disables the OpenGL lighting properties enabled by enableStandardItemLighting
-     */
     public static void disableStandardItemLighting() {
         GlStateManager.disableLighting();
         GlStateManager.disableMCLight(0);
@@ -19,10 +16,6 @@ public class RenderHelper {
         GlStateManager.disableColorMaterial();
     }
 
-    /**
-     * Sets the OpenGL lighting properties to the values used when rendering blocks
-     * as items
-     */
     public static void enableStandardItemLighting() {
         GlStateManager.enableLighting();
         GlStateManager.enableMCLight(0, 0.6f, LIGHT0_POS.x, LIGHT0_POS.y, LIGHT0_POS.z, 0.0D);
@@ -31,10 +24,6 @@ public class RenderHelper {
         GlStateManager.enableColorMaterial();
     }
 
-    /**
-     * Sets OpenGL lighting for rendering blocks as items inside GUI screens (such
-     * as containers).
-     */
     public static void enableGUIStandardItemLighting() {
         GlStateManager.pushMatrix();
         GlStateManager.rotate(-30.0F, 0.0F, 1.0F, 0.0F);

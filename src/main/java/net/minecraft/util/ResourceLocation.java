@@ -42,7 +42,6 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
       return new ResourceLocation(decompose(resourceName, splitOn));
    }
 
-   
    public static ResourceLocation tryCreate(String string) {
       try {
          return new ResourceLocation(string);

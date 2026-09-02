@@ -40,7 +40,6 @@ public class GhostRecipe {
         return this.ingredients.size();
     }
 
-
     public IRecipe<?> getRecipe() {
         return this.recipe;
     }

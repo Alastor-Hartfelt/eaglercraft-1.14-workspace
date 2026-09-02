@@ -568,11 +568,7 @@ public class ServerWorld extends World {
          entityIn.prevRotationPitch = entityIn.rotationPitch;
          if (entityIn.addedToChunk) {
             ++entityIn.ticksExisted;
-            this.getProfiler().startSection(() -> {
-               return Registry.ENTITY_TYPE.getKey(entityIn.getType()).toString();
-            });
             entityIn.tick();
-            this.getProfiler().endSection();
          }
 
          this.chunkCheck(entityIn);
@@ -706,7 +702,6 @@ public class ServerWorld extends World {
 
    }
 
-
    public BlockPos getSpawnCoordinate() {
       return this.dimension.getSpawnCoordinate();
    }
@@ -769,7 +764,6 @@ public class ServerWorld extends World {
 
       return list;
    }
-
 
    public ServerPlayerEntity getRandomPlayer() {
       List<ServerPlayerEntity> list = this.getPlayers(LivingEntity::isAlive);
@@ -1116,16 +1110,13 @@ public class ServerWorld extends World {
       }
    }
 
-
    public Entity getEntityByID(int id) {
       return this.entitiesById.get(id);
    }
 
-
    public Entity getEntityByUuid(EaglercraftUUID p_217461_1_) {
       return this.entitiesByUuid.get(p_217461_1_);
    }
-
 
    public BlockPos findNearestStructure(String name, BlockPos pos, int radius, boolean p_211157_4_) {
       return this.getChunkProvider().getChunkGenerator().findNearestStructure(this, name, pos, radius, p_211157_4_);
@@ -1159,7 +1150,6 @@ public class ServerWorld extends World {
    public DimensionSavedDataManager getSavedData() {
       return this.getChunkProvider().getSavedData();
    }
-
 
    public MapData func_217406_a(String p_217406_1_) {
       return this.getServer().getWorld(DimensionType.OVERWORLD).getSavedData().get(() -> {
@@ -1260,7 +1250,6 @@ public class ServerWorld extends World {
    public RaidManager getRaids() {
       return this.raids;
    }
-
 
    public Raid findRaid(BlockPos pos) {
       return this.raids.findRaid(pos, 9216);

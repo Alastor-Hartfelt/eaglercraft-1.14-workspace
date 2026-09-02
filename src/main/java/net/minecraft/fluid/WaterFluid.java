@@ -54,7 +54,6 @@ public abstract class WaterFluid extends FlowingFluid {
 
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public IParticleData getDripParticleData() {
         return ParticleTypes.DRIPPING_WATER;

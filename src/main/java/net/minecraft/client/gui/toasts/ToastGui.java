@@ -41,7 +41,6 @@ public class ToastGui extends AbstractGui {
         }
     }
 
-
     public <T extends IToast> T getToast(Class<? extends T> p_192990_1_, Object p_192990_2_) {
         for (ToastGui.ToastInstance<?> toastinstance : this.visible) {
             if (toastinstance != null && p_192990_1_.isAssignableFrom(toastinstance.getToast().getClass()) && toastinstance.getToast().getType().equals(p_192990_2_)) {

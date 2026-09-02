@@ -18,6 +18,8 @@ package net.lax1dude.eaglercraft.opengl;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
+import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttribute;
+import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
 import net.lax1dude.eaglercraft.EagRuntime;
 import net.lax1dude.eaglercraft.internal.*;
 import net.lax1dude.eaglercraft.internal.buffer.ByteBuffer;
@@ -62,6 +64,7 @@ public class EaglercraftGPU {
     private static final int[] currentUniformBlockBindingOffset = new int[16];
     private static final int[] currentUniformBlockBindingSize = new int[16];
     static boolean emulatedVAOs = false;
+	static boolean multiDrawCapable = false;
     static SoftGLVertexState emulatedVAOState = new SoftGLVertexState();
     static IVertexArrayGL currentVertexArray = null;
     static final GLObjectRecycler<IVertexArrayGL> VAORecycler = new GLObjectRecycler<IVertexArrayGL>(256) {
@@ -274,6 +277,7 @@ public class EaglercraftGPU {
                 destroyGLArrayBuffer(dp.vertexBuffer);
                 dp.vertexBuffer = null;
             }
+            dp.bufferCapacity = 0;
             currentList = null;
             return;
         }
@@ -288,7 +292,13 @@ public class EaglercraftGPU {
 
         bindVAOGLArrayBufferNow(dp.vertexBuffer);
         displayListBuffer.flip();
-        _wglBufferData(GL_ARRAY_BUFFER, displayListBuffer, GL_STATIC_DRAW);
+        int uploadSize = displayListBuffer.remaining();
+        if (dp.bufferCapacity < uploadSize) {
+            _wglBufferData(GL_ARRAY_BUFFER, displayListBuffer, GL_STATIC_DRAW);
+            dp.bufferCapacity = uploadSize;
+        } else {
+            _wglBufferSubData(GL_ARRAY_BUFFER, 0, displayListBuffer);
+        }
         displayListBuffer.clear();
 
         FixedFunctionPipeline.setupDisplayList(dp);
@@ -327,7 +337,13 @@ public class EaglercraftGPU {
         }
 
         bindVAOGLArrayBufferNow(dp.vertexBuffer);
-        _wglBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+        int uploadSize = buffer.remaining();
+        if (dp.bufferCapacity < uploadSize) {
+            _wglBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+            dp.bufferCapacity = uploadSize;
+        } else {
+            _wglBufferSubData(GL_ARRAY_BUFFER, 0, buffer);
+        }
 
         dp.attribs = attrib;
         FixedFunctionPipeline.setupDisplayList(dp);
@@ -381,6 +397,7 @@ public class EaglercraftGPU {
             EaglercraftGPU.destroyGLArrayBuffer(dp.vertexBuffer);
             dp.vertexBuffer = null;
         }
+        dp.bufferCapacity = 0;
     }
 
     public static void glNormal3f(float x, float y, float z) {
@@ -641,6 +658,30 @@ public class EaglercraftGPU {
         }
         _wglDrawArrays(mode, first, count);
     }
+
+	public static void setupChunkRegionVertexArray(IVertexArrayGL vertexArray, IBufferGL vertexBuffer,
+												  GlVertexFormat<?> format) {
+		bindGLVertexArray(vertexArray);
+		bindVAOGLArrayBuffer(vertexBuffer);
+
+		GlVertexAttribute[] attributes = format.getAttributesArray();
+
+		for (int index = 0; index < attributes.length; ++index) {
+			GlVertexAttribute attribute = attributes[index];
+			enableVertexAttribArray(index);
+			vertexAttribPointer(index, attribute.getCount(), attribute.getFormat(), attribute.isNormalized(),
+					attribute.getStride(), attribute.getPointer());
+		}
+	}
+
+	public static void drawChunkRegion(IVertexArrayGL vertexArray, IntBuffer firsts, IntBuffer counts, int drawCount) {
+		if (drawCount <= 0) {
+			return;
+		}
+		FixedFunctionPipeline.setupRenderDisplayList(ATTRIB_TEXTURE | ATTRIB_COLOR | ATTRIB_LIGHTMAP).update();
+		bindGLVertexArray(vertexArray);
+		_wglMultiDrawElements(GL_TRIANGLES, counts, GL_UNSIGNED_INT, firsts, drawCount);
+	}
 
     public static void drawElements(int mode, int count, int type, int offset) {
         if (emulatedVAOs) {
@@ -1056,6 +1097,7 @@ public class EaglercraftGPU {
         emulatedVAOs = !vertexArrayCapable;
         fboRenderMipmapCapable = PlatformOpenGL.checkFBORenderMipmapCapable();
         instancingCapable = PlatformOpenGL.checkInstancingCapable();
+		multiDrawCapable = PlatformOpenGL.checkMultiDrawCapable();
         texStorageCapable = PlatformOpenGL.checkTexStorageCapable();
         textureLODCapable = PlatformOpenGL.checkTextureLODCapable();
         shader5Capable = PlatformOpenGL.checkOESGPUShader5Capable() || PlatformOpenGL.checkEXTGPUShader5Capable();
@@ -1118,6 +1160,7 @@ public class EaglercraftGPU {
         fboRenderMipmapCapable = false;
         vertexArrayCapable = false;
         instancingCapable = false;
+		multiDrawCapable = false;
         hasFramebufferHDR16FSupport = false;
         hasFramebufferHDR32FSupport = false;
         hasLinearHDR32FSupport = false;
@@ -1154,6 +1197,10 @@ public class EaglercraftGPU {
     public static boolean checkInstancingCapable() {
         return instancingCapable;
     }
+
+	public static boolean checkMultiDrawCapable() {
+		return multiDrawCapable;
+	}
 
     public static boolean checkTexStorageCapable() {
         return texStorageCapable;

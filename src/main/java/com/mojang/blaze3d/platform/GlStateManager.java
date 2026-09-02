@@ -45,7 +45,6 @@ public class GlStateManager {
     }
 
     public static void enableLight(int p_enableLight_0_) {
-        // net.lax1dude.eaglercraft.opengl.GlStateManager.enableMCLight(p_enableLight_0_);
     }
 
     public static void disableLight(int p_disableLight_0_) {

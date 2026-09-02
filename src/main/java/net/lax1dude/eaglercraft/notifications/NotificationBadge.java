@@ -3,7 +3,9 @@ package net.lax1dude.eaglercraft.notifications;
 import net.lax1dude.eaglercraft.EagRuntime;
 import net.lax1dude.eaglercraft.EaglercraftUUID;
 import net.lax1dude.eaglercraft.opengl.GlStateManager;
+import net.lax1dude.eaglercraft.profanity_filter.ProfanityFilter;
 import net.lax1dude.eaglercraft.socket.protocol.pkt.server.SPacketNotifBadgeShowV4EAG.EnumBadgePriority;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 
 public class NotificationBadge {
@@ -31,6 +33,7 @@ public class NotificationBadge {
     protected CachedNotifBadgeTexture currentCacheGLTexture = null;
     protected int currentCacheScaleFac = -1;
     protected boolean currentCacheXButton = false;
+    protected boolean currentCacheProfanityFilter = false;
     protected long hideAtMillis = -1l;
     protected boolean unreadFlag = true;
     protected boolean unreadFlagRender = true;
@@ -79,11 +82,13 @@ public class NotificationBadge {
     }
 
     protected CachedNotifBadgeTexture getGLTexture(ServerNotificationRenderer renderer, int scaleFactor, boolean showXButton) {
-        if (currentCacheGLTexture == null || currentCacheScaleFac != scaleFactor || currentCacheXButton != showXButton) {
+        boolean profanityFilter = Minecraft.getInstance().isEnableProfanityFilter();
+        if (currentCacheGLTexture == null || currentCacheScaleFac != scaleFactor || currentCacheXButton != showXButton || currentCacheProfanityFilter != profanityFilter) {
             deleteGLTexture();
             currentCacheGLTexture = renderer.renderBadge(this, scaleFactor, showXButton);
             currentCacheScaleFac = scaleFactor;
             currentCacheXButton = showXButton;
+            currentCacheProfanityFilter = profanityFilter;
         }
         return currentCacheGLTexture;
     }
@@ -115,15 +120,36 @@ public class NotificationBadge {
     }
 
     public ITextComponent getBodyProfanityFilter() {
-        return bodyComponent;
+        if (Minecraft.getInstance().isEnableProfanityFilter()) {
+            if (bodyComponentProfanityFilter == null && bodyComponent != null) {
+                bodyComponentProfanityFilter = ProfanityFilter.getInstance().profanityFilterChatComponent(bodyComponent);
+            }
+            return bodyComponentProfanityFilter;
+        } else {
+            return bodyComponent;
+        }
     }
 
     public ITextComponent getTitleProfanityFilter() {
-        return titleComponent;
+        if (Minecraft.getInstance().isEnableProfanityFilter()) {
+            if (titleComponentProfanityFilter == null && titleComponent != null) {
+                titleComponentProfanityFilter = ProfanityFilter.getInstance().profanityFilterChatComponent(titleComponent);
+            }
+            return titleComponentProfanityFilter;
+        } else {
+            return titleComponent;
+        }
     }
 
     public ITextComponent getSourceProfanityFilter() {
-        return sourceComponent;
+        if (Minecraft.getInstance().isEnableProfanityFilter()) {
+            if (sourceComponentProfanityFilter == null && sourceComponent != null) {
+                sourceComponentProfanityFilter = ProfanityFilter.getInstance().profanityFilterChatComponent(sourceComponent);
+            }
+            return sourceComponentProfanityFilter;
+        } else {
+            return sourceComponent;
+        }
     }
 
 }

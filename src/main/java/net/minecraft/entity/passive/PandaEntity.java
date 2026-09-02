@@ -206,7 +206,6 @@ public class PandaEntity extends AnimalEntity {
         this.setHiddenGene(PandaEntity.Type.byName(compound.getString("HiddenGene")));
     }
 
-
     public AgeableEntity createChild(AgeableEntity ageable) {
         PandaEntity pandaentity = EntityType.PANDA.create(this.world);
         if (ageable instanceof PandaEntity) {
@@ -482,7 +481,6 @@ public class PandaEntity extends AnimalEntity {
         return super.attackEntityFrom(source, amount);
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
         this.setMainGene(PandaEntity.Type.getRandomType(this.rand));
@@ -592,7 +590,6 @@ public class PandaEntity extends AnimalEntity {
         }
     }
 
-
     protected SoundEvent getAmbientSound() {
         if (this.isAggressive()) {
             return SoundEvents.ENTITY_PANDA_AGGRESSIVE_AMBIENT;
@@ -613,11 +610,9 @@ public class PandaEntity extends AnimalEntity {
         return this.isBreedingItem(p_213548_1_) || p_213548_1_.getItem() == Blocks.CAKE.asItem();
     }
 
-
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_PANDA_DEATH;
     }
-
 
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         return SoundEvents.ENTITY_PANDA_HURT;

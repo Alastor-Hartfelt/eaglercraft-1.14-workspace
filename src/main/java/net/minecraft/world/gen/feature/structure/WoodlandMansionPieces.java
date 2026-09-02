@@ -120,7 +120,6 @@ public class WoodlandMansionPieces {
          return (this.floorRooms[p_191114_4_].get(p_191114_2_, p_191114_3_) & '\uffff') == p_191114_5_;
       }
 
-
       public Direction get1x2RoomDirection(WoodlandMansionPieces.SimpleGrid p_191113_1_, int p_191113_2_, int p_191113_3_, int p_191113_4_, int p_191113_5_) {
          for(Direction direction : Direction.Plane.HORIZONTAL) {
             if (this.isRoomId(p_191113_1_, p_191113_2_ + direction.getXOffset(), p_191113_3_ + direction.getZOffset(), p_191113_4_, p_191113_5_)) {

@@ -128,7 +128,6 @@ public class PlayerAdvancements {
             jsonreader = new JsonReader(new InputStreamReader(this.progressFile.getInputStream(), StandardCharsets.UTF_8));
             jsonreader.setLenient(false);
             JsonObject jsonobject = Streams.parse(jsonreader).getAsJsonObject();
-            
             if (jsonobject.has("DataVersion")) {
                jsonobject.remove("DataVersion");
             }
@@ -188,7 +187,6 @@ public class PlayerAdvancements {
       }
 
       if ((this.progressFile.getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(this.progressFile.getParent()) : null) != null) {
-/* mkdirs removed (         (this.progressFile.getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(this.progressFile.getParent()) : null) ) */
       }
 
       JsonElement jsonelement = GSON.toJsonTree(map);

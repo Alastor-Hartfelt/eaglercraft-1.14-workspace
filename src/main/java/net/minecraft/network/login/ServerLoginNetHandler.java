@@ -165,7 +165,6 @@ public class ServerLoginNetHandler implements IServerLoginNetHandler {
 
                 }
 
-
                 private InetAddress getAddress() {
                     SocketAddress socketaddress = ServerLoginNetHandler.this.networkManager.getRemoteAddress();
                     return ServerLoginNetHandler.this.server.getPreventProxyConnections() && socketaddress instanceof InetSocketAddress ? ((InetSocketAddress) socketaddress).getAddress() : null;

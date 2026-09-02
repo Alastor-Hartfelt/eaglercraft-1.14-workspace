@@ -95,7 +95,6 @@ public class ServerData {
         return serverdata;
     }
 
-
     public String getBase64EncodedIconData() {
         return this.serverIcon;
     }
@@ -161,7 +160,6 @@ public class ServerData {
             logger.error(t);
         }
     }
-
 
     public void setIconPacket(byte[] pkt) {
         try {

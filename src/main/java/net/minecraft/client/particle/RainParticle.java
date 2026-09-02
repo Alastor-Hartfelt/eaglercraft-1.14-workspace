@@ -44,7 +44,7 @@ public class RainParticle extends SpriteTexturedParticle {
                 this.motionZ *= (double) 0.7F;
             }
 
-            BlockPos blockpos = new BlockPos(this.posX, this.posY, this.posZ);
+            BlockPos blockpos = this.getCurrentBlockPos();
             double d0 = Math.max(this.world.getBlockState(blockpos).getCollisionShape(this.world, blockpos).max(Direction.Axis.Y, this.posX - (double) blockpos.getX(), this.posZ - (double) blockpos.getZ()), (double) this.world.getFluidState(blockpos).func_215679_a(this.world, blockpos));
             if (d0 > 0.0D && this.posY < (double) blockpos.getY() + d0) {
                 this.setExpired();

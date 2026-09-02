@@ -8,9 +8,14 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.FunctionObject;
+import net.minecraft.command.ITimerCallback;
+import net.minecraft.command.TimedFunction;
+import net.minecraft.command.TimedFunctionTag;
 import net.minecraft.command.arguments.FunctionArgument;
 import net.minecraft.command.arguments.TimeArgument;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.Tag;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class ScheduleCommand {
@@ -29,6 +34,12 @@ public class ScheduleCommand {
             throw field_218913_a.create();
         } else {
             long i = p_218908_0_.getWorld().getGameTime() + (long) p_218908_2_;
+            ResourceLocation resourcelocation = p_218908_1_.map(FunctionObject::getId, Tag::getId);
+            ITimerCallback<MinecraftServer> itimercallback = p_218908_1_.map(
+                (p_218910_1_) -> new TimedFunction(resourcelocation),
+                (p_218909_1_) -> new TimedFunctionTag(resourcelocation)
+            );
+            p_218908_0_.getWorld().getWorldInfo().getScheduledEvents().scheduleSkipDuplicate("schedule:" + resourcelocation.toString(), i, itimercallback);
             return (int) Math.floorMod(i, 2147483647L);
         }
     }

@@ -12,7 +12,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class MerchantInventory implements IInventory {
    private final IMerchant merchant;
    private final NonNullList<ItemStack> slots = NonNullList.withSize(3, ItemStack.EMPTY);
-   
    private MerchantOffer field_214026_c;
    private int currentRecipeIndex;
    private int field_214027_e;
@@ -119,7 +118,6 @@ public class MerchantInventory implements IInventory {
       }
    }
 
-   
    public MerchantOffer func_214025_g() {
       return this.field_214026_c;
    }

@@ -64,7 +64,6 @@ public class TrueTypeGlyphProviderFactory implements IGlyphProviderFactory {
         return new TrueTypeGlyphProviderFactory(new ResourceLocation(JSONUtils.getString(p_211624_0_, "file")), JSONUtils.getFloat(p_211624_0_, "size", 11.0F), JSONUtils.getFloat(p_211624_0_, "oversample", 1.0F), f, f1, stringbuilder.toString());
     }
 
-
     public IGlyphProvider create(IResourceManager resourceManagerIn) {
         try (IResource iresource = resourceManagerIn.getResource(new ResourceLocation(this.file.getNamespace(), (new StringBuilder()).append("font/").append(this.file.getPath()).toString()))) {
             RANDOM.info("Loading font");

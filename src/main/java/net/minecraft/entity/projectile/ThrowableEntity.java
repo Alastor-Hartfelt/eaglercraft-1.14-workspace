@@ -209,7 +209,6 @@ public abstract class ThrowableEntity extends Entity implements IProjectile {
 
     }
 
-
     public LivingEntity getThrower() {
         if (this.owner == null && this.ownerId != null && this.world instanceof ServerWorld) {
             Entity entity = ((ServerWorld) this.world).getEntityByUuid(this.ownerId);

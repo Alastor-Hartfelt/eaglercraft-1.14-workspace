@@ -30,7 +30,6 @@ public class SeaGrassBlock extends BushBlock implements IGrowable, ILiquidContai
         return state.func_224755_d(worldIn, pos, Direction.UP) && state.getBlock() != Blocks.MAGMA_BLOCK;
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         IFluidState ifluidstate = context.getWorld().getFluidState(context.getPos());
         return ifluidstate.isTagged(FluidTags.WATER) && ifluidstate.getLevel() == 8 ? super.getStateForPlacement(context) : null;

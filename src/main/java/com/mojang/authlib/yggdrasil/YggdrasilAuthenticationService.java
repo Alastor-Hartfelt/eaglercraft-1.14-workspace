@@ -71,7 +71,6 @@ public class YggdrasilAuthenticationService extends HttpAuthenticationService {
         private GameProfileSerializer() {
         }
 
-        // $FF: synthetic method
         GameProfileSerializer(Object x0) {
             this();
         }

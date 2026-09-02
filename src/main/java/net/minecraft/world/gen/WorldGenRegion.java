@@ -92,7 +92,6 @@ public class WorldGenRegion implements IWorld {
       return this.getChunk(chunkX, chunkZ, ChunkStatus.EMPTY);
    }
 
-
    public IChunk getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull) {
       IChunk ichunk;
       if (this.chunkExists(x, z)) {
@@ -136,7 +135,6 @@ public class WorldGenRegion implements IWorld {
       return this.getChunk(pos).getFluidState(pos);
    }
 
-
    public PlayerEntity getClosestPlayer(double x, double y, double z, double distance, Predicate<Entity> predicate) {
       return null;
    }
@@ -175,7 +173,6 @@ public class WorldGenRegion implements IWorld {
          return this.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
       }
    }
-
 
    public TileEntity getTileEntity(BlockPos pos) {
       IChunk ichunk = this.getChunk(pos);

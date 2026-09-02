@@ -874,7 +874,6 @@ public class FortressPieces {
             }
         }
 
-
         protected StructurePiece getNextComponentNormal(FortressPieces.Start p_74963_1_, List<StructurePiece> p_74963_2_, Random p_74963_3_, int p_74963_4_, int p_74963_5_, boolean p_74963_6_) {
             Direction direction = this.getCoordBaseMode();
             if (direction != null) {
@@ -893,7 +892,6 @@ public class FortressPieces {
             return null;
         }
 
-
         protected StructurePiece getNextComponentX(FortressPieces.Start p_74961_1_, List<StructurePiece> p_74961_2_, Random p_74961_3_, int p_74961_4_, int p_74961_5_, boolean p_74961_6_) {
             Direction direction = this.getCoordBaseMode();
             if (direction != null) {
@@ -911,7 +909,6 @@ public class FortressPieces {
 
             return null;
         }
-
 
         protected StructurePiece getNextComponentZ(FortressPieces.Start p_74965_1_, List<StructurePiece> p_74965_2_, Random p_74965_3_, int p_74965_4_, int p_74965_5_, boolean p_74965_6_) {
             Direction direction = this.getCoordBaseMode();

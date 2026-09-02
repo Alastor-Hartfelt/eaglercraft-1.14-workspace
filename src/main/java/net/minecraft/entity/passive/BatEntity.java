@@ -48,7 +48,6 @@ public class BatEntity extends AmbientEntity {
       return super.getSoundPitch() * 0.95F;
    }
 
-
    public SoundEvent getAmbientSound() {
       return this.getIsBatHanging() && this.rand.nextInt(4) != 0 ? null : SoundEvents.ENTITY_BAT_AMBIENT;
    }

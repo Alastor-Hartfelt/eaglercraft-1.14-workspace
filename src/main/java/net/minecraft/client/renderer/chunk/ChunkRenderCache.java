@@ -22,7 +22,6 @@ public class ChunkRenderCache implements IEnviromentBlockReader {
     protected final Chunk[][] chunks;
     protected final World world;
 
-
     public static ChunkRenderCache generateCache(World worldIn, BlockPos from, BlockPos to, int padding) {
         int i = from.getX() - padding >> 4;
         int j = from.getZ() - padding >> 4;
@@ -100,11 +99,9 @@ public class ChunkRenderCache implements IEnviromentBlockReader {
         return this.chunks[i][j].getBiome(pos);
     }
 
-
     public TileEntity getTileEntity(BlockPos pos) {
         return this.getTileEntity(pos, Chunk.CreateEntityType.IMMEDIATE);
     }
-
 
     public TileEntity getTileEntity(BlockPos pos, Chunk.CreateEntityType creationType) {
         int i = (pos.getX() >> 4) - this.chunkStartX;

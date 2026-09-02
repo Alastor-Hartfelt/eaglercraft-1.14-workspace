@@ -3,9 +3,9 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
-		<meta name="description" content="EaglercraftX 1.14.4 WASM-GC test directory HTML page" />
+		<meta name="description" content="EaglercraftX 1.14 WASM-GC test directory HTML page" />
 		<meta name="keywords" content="eaglercraft, eaglercraftx, minecraft, 1.14, 1.14.4" />
-		<title>EaglercraftX 1.14.4 WASM-GC</title>
+		<title>EaglercraftX 1.14 WASM-GC</title>
 		<meta property="og:locale" content="en-US" />
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content="EaglercraftX 1.14.4 WASM-GC" />
@@ -25,7 +25,7 @@
 					splash.style.imageRendering = "pixelated";
 					splash.style.background = "center / contain no-repeat url(splash.png), 0px 0px / 1000000% 1000000% no-repeat url(splash.png) white";
 					document.body.appendChild(splash);
-				
+
 					console.log("Downloading assets.epk...");
 					var assetsEPK;
 					try {
@@ -37,7 +37,7 @@
 						return;
 					}
 					console.log("Downloaded " + assetsEPK.length + " byte file");
-					
+
 					const relayId = Math.floor(Math.random() * 3);
 					const eaglercraftXOpts = {
 						demoMode: false,
@@ -52,7 +52,7 @@
 							{ addr: "wss://relay.shhnowisnottheti.me/", comment: "ayunami relay #1", primary: relayId === 2 }
 						]
 					};
-					
+
 					window.__eaglercraftXLoaderContext = {
 						getEaglercraftXOpts: function() {
 							return eaglercraftXOpts;
@@ -107,7 +107,7 @@
 						var s = q.get("server");
 						if(s) eaglercraftXOpts.joinServer = s;
 					}
-					
+
 					const scriptElement = document.createElement("script");
 					scriptElement.type = "text/javascript";
 					scriptElement.src = "eagruntime.js";

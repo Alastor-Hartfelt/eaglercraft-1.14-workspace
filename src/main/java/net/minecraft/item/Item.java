@@ -3,6 +3,11 @@ package net.minecraft.item;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.BowItem;
+import net.minecraft.item.CrossbowItem;
+import net.minecraft.item.SwordItem;
+import net.minecraft.item.ToolItem;
 import net.lax1dude.eaglercraft.EaglercraftUUID;
 import net.lax1dude.eaglercraft.Random;
 import net.minecraft.block.Block;
@@ -91,7 +96,6 @@ public class Item implements IItemProvider {
 
     public void func_219972_a(World worldIn, LivingEntity livingEntityIn, ItemStack stack, int p_219972_4_) {
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public IItemPropertyGetter getPropertyGetter(ResourceLocation key) {
@@ -202,7 +206,6 @@ public class Item implements IItemProvider {
         return true;
     }
 
-
     public final Item getContainerItem() {
         return this.containerItem;
     }
@@ -301,7 +304,6 @@ public class Item implements IItemProvider {
         return itemgroup != null && (group == ItemGroup.SEARCH || group == itemgroup);
     }
 
-
     public final ItemGroup getGroup() {
         return this.group;
     }
@@ -330,7 +332,6 @@ public class Item implements IItemProvider {
     public boolean isFood() {
         return this.food != null;
     }
-
 
     public Food getFood() {
         return this.food;
@@ -383,4 +384,8 @@ public class Item implements IItemProvider {
             return this;
         }
     }
+
+	public boolean shouldUseOnTouchEagler(ItemStack stack) {
+		return stack.getItem().isFood() || stack.getItem() instanceof SwordItem || stack.getItem() instanceof AxeItem || stack.getItem() instanceof ToolItem || stack.getItem() instanceof BowItem || stack.getItem() instanceof CrossbowItem;
+	}
 }

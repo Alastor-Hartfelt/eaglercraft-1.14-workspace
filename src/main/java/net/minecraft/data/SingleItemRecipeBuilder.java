@@ -103,11 +103,9 @@ public class SingleItemRecipeBuilder {
             return this.serializer;
         }
 
-
         public JsonObject getAdvancementJson() {
             return this.field_218625_f.serialize();
         }
-
 
         public ResourceLocation getAdvancementID() {
             return this.field_218626_g;

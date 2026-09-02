@@ -51,7 +51,6 @@ public class SlabBlock extends Block implements IWaterLoggable {
         }
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockPos blockpos = context.getPos();
         BlockState blockstate = context.getWorld().getBlockState(blockpos);

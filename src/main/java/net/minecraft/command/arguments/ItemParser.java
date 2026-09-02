@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
@@ -45,7 +45,6 @@ public class ItemParser {
     public Item getItem() {
         return this.item;
     }
-
 
     public CompoundNBT getNbt() {
         return this.nbt;

@@ -61,7 +61,6 @@ public class WorldOptimizer {
     public void cancel() {
         this.active = false;
 
-
     }
 
     private void optimize() {

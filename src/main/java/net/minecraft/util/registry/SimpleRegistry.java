@@ -44,7 +44,6 @@ public class SimpleRegistry<T> extends MutableRegistry<T> {
       return this.register(this.nextFreeId, p_218381_1_, p_218381_2_);
    }
 
-   
    public ResourceLocation getKey(T value) {
       return this.registryObjects.inverse().get(value);
    }
@@ -53,7 +52,6 @@ public class SimpleRegistry<T> extends MutableRegistry<T> {
       return this.underlyingIntegerMap.getId(value);
    }
 
-   
    public T getByValue(int value) {
       return this.underlyingIntegerMap.getByValue(value);
    }
@@ -62,7 +60,6 @@ public class SimpleRegistry<T> extends MutableRegistry<T> {
       return this.underlyingIntegerMap.iterator();
    }
 
-   
    public T getOrDefault( ResourceLocation name) {
       return this.registryObjects.get(name);
    }
@@ -79,7 +76,6 @@ public class SimpleRegistry<T> extends MutableRegistry<T> {
       return this.registryObjects.isEmpty();
    }
 
-   
    public T getRandom(Random random) {
       if (this.values == null) {
          Collection<?> collection = this.registryObjects.values();

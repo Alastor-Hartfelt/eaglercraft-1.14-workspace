@@ -13,7 +13,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.lax1dude.eaglercraft.internal.vfs2.VFile2;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -153,11 +153,9 @@ public class ChunkManager extends net.lax1dude.eaglercraft.sp.server.EaglerChunk
         return this.lightManager;
     }
 
-
     protected ChunkHolder func_219220_a(long p_219220_1_) {
         return this.field_219251_e.get(p_219220_1_);
     }
-
 
     protected ChunkHolder func_219219_b(long chunkPosIn) {
         return this.field_219252_f.get(chunkPosIn);
@@ -251,7 +249,6 @@ public class ChunkManager extends net.lax1dude.eaglercraft.sp.server.EaglerChunk
             });
         }, this.mainThread);
     }
-
 
     private ChunkHolder func_219213_a(long p_219213_1_, int p_219213_3_, ChunkHolder p_219213_4_, int p_219213_5_) {
         if (p_219213_5_ > MAX_LOADED_LEVEL && p_219213_3_ > MAX_LOADED_LEVEL) {
@@ -752,7 +749,6 @@ public class ChunkManager extends net.lax1dude.eaglercraft.sp.server.EaglerChunk
         }
     }
 
-
     private CompoundNBT loadChunkData(ChunkPos pos) throws IOException {
         CompoundNBT compoundnbt = this.readChunk(pos);
         return compoundnbt == null ? null : this.updateChunkData(this.world.getDimension().getType(), this.field_219259_m, compoundnbt);
@@ -1127,11 +1123,9 @@ public class ChunkManager extends net.lax1dude.eaglercraft.sp.server.EaglerChunk
             return ChunkManager.this.field_219261_o.contains(p_219371_1_);
         }
 
-
         protected ChunkHolder func_219335_b(long p_219335_1_) {
             return ChunkManager.this.func_219220_a(p_219335_1_);
         }
-
 
         protected ChunkHolder func_219372_a(long p_219372_1_, int p_219372_3_, ChunkHolder p_219372_4_, int p_219372_5_) {
             return ChunkManager.this.func_219213_a(p_219372_1_, p_219372_3_, p_219372_4_, p_219372_5_);

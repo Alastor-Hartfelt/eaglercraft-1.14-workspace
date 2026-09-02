@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.lax1dude.eaglercraft.IOUtils;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
@@ -40,7 +40,6 @@ public class TagCollection<T> {
         this.preserveOrder = p_i50686_3_;
         this.itemTypeName = p_i50686_4_;
     }
-
 
     public Tag<T> get(ResourceLocation resourceLocationIn) {
         return this.tagMap.get(resourceLocationIn);

@@ -39,7 +39,6 @@ public class TallSeaGrassBlock extends ShearableDoublePlantBlock implements ILiq
         return new ItemStack(Blocks.SEAGRASS);
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = super.getStateForPlacement(context);
         if (blockstate != null) {

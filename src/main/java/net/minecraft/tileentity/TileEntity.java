@@ -30,7 +30,6 @@ public abstract class TileEntity {
       this.type = tileEntityTypeIn;
    }
 
-
    public World getWorld() {
       return this.world;
    }
@@ -63,7 +62,6 @@ public abstract class TileEntity {
          return compound;
       }
    }
-
 
    public static TileEntity create(CompoundNBT tag) {
       String s = tag.getString("id");
@@ -123,7 +121,6 @@ public abstract class TileEntity {
 
       return this.cachedBlockState;
    }
-
 
    public SUpdateTileEntityPacket getUpdatePacket() {
       return null;

@@ -24,7 +24,6 @@ public abstract class Enchantment {
 
    protected String name;
 
-
    @OnlyIn(Dist.CLIENT)
    public static Enchantment getEnchantmentByID(int id) {
       return Registry.ENCHANTMENT.getByValue(id);

@@ -9,7 +9,7 @@ import com.google.common.collect.Queues;
 import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.io.IOException;
+
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Queue;
 import net.lax1dude.eaglercraft.Random;
 import java.util.Set;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import net.minecraft.block.BlockRenderType;
@@ -69,7 +69,6 @@ public class ParticleManager implements IFutureReloadListener {
    private final Queue<Particle> queue = Queues.newArrayDeque();
    private final Map<ResourceLocation, ParticleManager.AnimatedSpriteImpl> sprites = Maps.newHashMap();
    private final AtlasTexture atlas = new AtlasTexture("textures/particle");
-   private long debugLastRenderLog;
 
    public ParticleManager(World worldIn, TextureManager rendererIn) {
       rendererIn.loadTickableTexture(AtlasTexture.LOCATION_PARTICLES_TEXTURE, this.atlas);
@@ -210,12 +209,10 @@ public class ParticleManager implements IFutureReloadListener {
          boolean flag = this.sprites.containsKey(particleId);
          if (list == null) {
             if (flag) {
-               // throw new IllegalStateException("Missing texture list for particle " + particleId);
                return;
             }
          } else {
             if (!flag) {
-               // throw new IllegalStateException("Redundant texture list for particle " + particleId);
                return;
             }
 
@@ -237,7 +234,6 @@ public class ParticleManager implements IFutureReloadListener {
       this.particleEmitters.add(new EmitterParticle(this.world, entityIn, dataIn, lifetimeIn));
    }
 
-
    public Particle addParticle(IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
       Particle particle = this.makeParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
       if (particle != null) {
@@ -247,7 +243,6 @@ public class ParticleManager implements IFutureReloadListener {
          return null;
       }
    }
-
 
    private <T extends IParticleData> Particle makeParticle(T particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
       IParticleFactory<T> iparticlefactory = (IParticleFactory<T>) this.factories.get(Registry.PARTICLE_TYPE.getId(particleData.getType()));
@@ -259,31 +254,33 @@ public class ParticleManager implements IFutureReloadListener {
    }
 
    public void tick() {
-      this.byType.forEach((p_215235_1_, p_215235_2_) -> {
-         if (p_215235_2_ == null) return;
-         this.world.getProfiler().startSection(p_215235_1_ == null ? "UNKNOWN" : p_215235_1_.toString());
-         this.tickParticleList(p_215235_2_);
+      for (Map.Entry<IParticleRenderType, Queue<Particle>> entry : this.byType.entrySet()) {
+         Queue<Particle> particles = entry.getValue();
+         if (particles == null) {
+            continue;
+         }
+         IParticleRenderType renderType = entry.getKey();
+         this.world.getProfiler().startSection(renderType == null ? "UNKNOWN" : renderType.toString());
+         this.tickParticleList(particles);
          this.world.getProfiler().endSection();
-      });
+      }
       if (!this.particleEmitters.isEmpty()) {
-         List<EmitterParticle> list = Lists.newArrayList();
+         Iterator<EmitterParticle> iterator = this.particleEmitters.iterator();
 
-         for(EmitterParticle emitterparticle : this.particleEmitters) {
+         while(iterator.hasNext()) {
+            EmitterParticle emitterparticle = iterator.next();
             emitterparticle.tick();
             if (!emitterparticle.isAlive()) {
-               list.add(emitterparticle);
+               iterator.remove();
             }
          }
-
-         this.particleEmitters.removeAll(list);
       }
 
       Particle particle;
       if (!this.queue.isEmpty()) {
          while((particle = this.queue.poll()) != null) {
             this.byType.computeIfAbsent(particle.getRenderType(), (p_215231_0_) -> {
-                int limit = net.minecraft.client.Minecraft.getInstance().gameSettings.reduceParticles ? 2048 : net.minecraft.client.Minecraft.getInstance().gameSettings.particleLimit;
-               return EvictingQueue.create(limit);
+               return EvictingQueue.create(16384);
             }).add(particle);
          }
       }
@@ -315,11 +312,6 @@ public class ParticleManager implements IFutureReloadListener {
    }
 
    public void renderParticles(ActiveRenderInfo p_215233_1_, float p_215233_2_) {
-      long debugNow = System.currentTimeMillis();
-      boolean debugLogRender = debugNow - this.debugLastRenderLog > 1000L;
-      if (debugLogRender) {
-         this.debugLastRenderLog = debugNow;
-      }
       float f = MathHelper.cos(p_215233_1_.getYaw() * ((float)Math.PI / 180F));
       float f1 = MathHelper.sin(p_215233_1_.getYaw() * ((float)Math.PI / 180F));
       float f2 = -f1 * MathHelper.sin(p_215233_1_.getPitch() * ((float)Math.PI / 180F));
@@ -328,23 +320,16 @@ public class ParticleManager implements IFutureReloadListener {
       Particle.interpPosX = p_215233_1_.getProjectedView().x;
       Particle.interpPosY = p_215233_1_.getProjectedView().y;
       Particle.interpPosZ = p_215233_1_.getProjectedView().z;
-
       for(IParticleRenderType iparticlerendertype : TYPES) {
-         Iterable<Particle> iterable = this.byType.get(iparticlerendertype);
-         if (iterable != null) {
+         Queue<Particle> particles = this.byType.get(iparticlerendertype);
+         if (particles != null) {
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();
             iparticlerendertype.beginRender(bufferbuilder, this.renderer);
-            int debugCount = 0;
-            int debugNullSprites = 0;
 
-            for(Particle particle : iterable) {
+            for(Particle particle : particles) {
                if (particle == null) continue;
-               ++debugCount;
-               if (particle instanceof SpriteTexturedParticle && ((SpriteTexturedParticle)particle).sprite == null) {
-                  ++debugNullSprites;
-               }
                try {
                   particle.renderParticle(bufferbuilder, p_215233_1_, p_215233_2_, f, f4, f1, f2, f3);
                } catch (Throwable throwable) {

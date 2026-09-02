@@ -20,6 +20,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class PistonTileEntityRenderer extends TileEntityRenderer<PistonTileEntity> {
     private final BlockRendererDispatcher blockRenderer = Minecraft.getInstance().getBlockRendererDispatcher();
+    private final Random random = new Random();
 
     public void render(PistonTileEntity tileEntityIn, double x, double y, double z, float partialTicks, int destroyStage) {
         BlockPos blockpos = tileEntityIn.getPos().offset(tileEntityIn.getMotionDirection().getOpposite());
@@ -66,6 +67,6 @@ public class PistonTileEntityRenderer extends TileEntityRenderer<PistonTileEntit
     }
 
     private boolean renderStateModel(BlockPos pos, BlockState state, BufferBuilder buffer, World p_188186_4_, boolean checkSides) {
-        return this.blockRenderer.getBlockModelRenderer().renderModel(p_188186_4_, this.blockRenderer.getModelForState(state), state, pos, buffer, checkSides, new Random(), state.getPositionRandom(pos));
+        return this.blockRenderer.getBlockModelRenderer().renderModel(p_188186_4_, this.blockRenderer.getModelForState(state), state, pos, buffer, checkSides, this.random, state.getPositionRandom(pos));
     }
 }

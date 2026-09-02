@@ -32,10 +32,12 @@ public class MathHelper {
     }
 
     public static float sqrt(float value) {
+        if (value < 0.0F) value = 0.0F;
         return (float) Math.sqrt((double) value);
     }
 
     public static float sqrt(double value) {
+        if (value < 0.0D) value = 0.0D;
         return (float) Math.sqrt(value);
     }
 

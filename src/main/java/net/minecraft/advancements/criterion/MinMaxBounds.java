@@ -26,11 +26,9 @@ public abstract class MinMaxBounds<T extends Number> {
         this.max = p_i49720_2_;
     }
 
-
     public T getMin() {
         return this.min;
     }
-
 
     public T getMax() {
         return this.max;
@@ -107,7 +105,6 @@ public abstract class MinMaxBounds<T extends Number> {
         }
     }
 
-
     private static <T extends Number> T readNumber(StringReader p_196975_0_, Function<String, T> p_196975_1_, Supplier<DynamicCommandExceptionType> p_196975_2_) throws CommandSyntaxException {
         int i = p_196975_0_.getCursor();
 
@@ -140,7 +137,6 @@ public abstract class MinMaxBounds<T extends Number> {
         }
     }
 
-
     private static <T> T optionallyFormat(T p_196972_0_, Function<T, T> p_196972_1_) {
         return (T) (p_196972_0_ == null ? null : p_196972_1_.apply(p_196972_0_));
     }
@@ -157,7 +153,6 @@ public abstract class MinMaxBounds<T extends Number> {
                 return new MinMaxBounds.FloatBound(p_211352_1_, p_211352_2_);
             }
         }
-
 
         private static Double square(Float p_211350_0_) {
             return p_211350_0_ == null ? null : p_211350_0_.doubleValue() * p_211350_0_.doubleValue();
@@ -226,7 +221,6 @@ public abstract class MinMaxBounds<T extends Number> {
                 return new MinMaxBounds.IntBound(p_211338_1_, p_211338_2_);
             }
         }
-
 
         private static Long square(Integer p_211343_0_) {
             return p_211343_0_ == null ? null : p_211343_0_.longValue() * p_211343_0_.longValue();

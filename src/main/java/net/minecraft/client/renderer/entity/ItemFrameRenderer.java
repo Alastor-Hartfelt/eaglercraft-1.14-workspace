@@ -76,7 +76,6 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrameEntity> {
         this.renderName(entity, x + (double) ((float) entity.getHorizontalFacing().getXOffset() * 0.3F), y - 0.25D, z + (double) ((float) entity.getHorizontalFacing().getZOffset() * 0.3F));
     }
 
-
     protected ResourceLocation getEntityTexture(ItemFrameEntity entity) {
         return null;
     }

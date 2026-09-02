@@ -46,6 +46,7 @@ public class SingleplayerServerController {
     private static String pendingWorldName;
     private static int pendingViewDistance;
     private static WorldSettings pendingSettings;
+    private static boolean serverAssetsSentToWorker = false;
     private static boolean callFailed = false;
     private static byte[] exportResponse = null;
 
@@ -56,6 +57,7 @@ public class SingleplayerServerController {
         if (statusState == IntegratedServerState.WORLD_WORKER_NOT_RUNNING) {
             exceptions.clear();
             issuesDetected.clear();
+            serverAssetsSentToWorker = false;
             statusState = IntegratedServerState.WORLD_WORKER_BOOTING;
             loggingState = true;
             callFailed = false;
@@ -184,7 +186,10 @@ public class SingleplayerServerController {
         }
         statusState = IntegratedServerState.WORLD_LOADING;
         worldStatusProgress = 0.0f;
-	sendIPCPacket(new IPCPacketMapAssets(getServerRequiredAssets()));
+        if (!ClientPlatformSingleplayer.isRunningSingleThreadMode() && !serverAssetsSentToWorker) {
+            sendIPCPacket(new IPCPacketMapAssets(getServerRequiredAssets()));
+            serverAssetsSentToWorker = true;
+        }
         sendIPCPacket(new IPCPacket00StartServer(mcDataDir, folderName, worldName, EaglerProfile.getName(), difficulty,
                 viewDistance, false));
     }
@@ -253,7 +258,7 @@ public class SingleplayerServerController {
                         if (statusState == IntegratedServerState.WORLD_WORKER_BOOTING) {
                             logger.warn("Recieved empty IPC packet from server while WORLD_WORKER_BOOTING, assuming boot signal (0xFF)");
                             logger.info("Integrated server signaled a successful boot");
-                            sendIPCPacket(new IPCPacket14StringList(IPCPacket14StringList.LOCALE, LanguageMap.dump()));
+                            sendLocaleToWorker();
                             statusState = IntegratedServerState.WORLD_NONE;
                             if (pendingLaunch) {
                                 pendingLaunch = false;
@@ -321,7 +326,7 @@ public class SingleplayerServerController {
                 switch (pkt.ack) {
                     case 0xFF:
                         logger.info("Integrated server signaled a successful boot");
-                        sendIPCPacket(new IPCPacket14StringList(IPCPacket14StringList.LOCALE, LanguageMap.dump()));
+                        sendLocaleToWorker();
                         statusState = IntegratedServerState.WORLD_NONE;
                         if (pendingLaunch) {
                             pendingLaunch = false;
@@ -368,6 +373,7 @@ public class SingleplayerServerController {
                         }
                         LANServerController.closeLAN();
                         localPlayerNetworkManager.isPlayerChannelOpen = false;
+                        serverAssetsSentToWorker = false;
                         statusState = IntegratedServerState.WORLD_WORKER_NOT_RUNNING;
                         callFailed = true;
                         break;
@@ -464,6 +470,12 @@ public class SingleplayerServerController {
         return filtered;
     }
 
+    private static void sendLocaleToWorker() {
+        if (!ClientPlatformSingleplayer.isRunningSingleThreadMode()) {
+            sendIPCPacket(new IPCPacket14StringList(IPCPacket14StringList.LOCALE, LanguageMap.dump()));
+        }
+    }
+
     public static void sendIPCPacket(IPCPacketBase ipc) {
         byte[] pkt;
         try {
@@ -519,13 +531,15 @@ public class SingleplayerServerController {
     }
 
     public static void killWorker() {
+        serverAssetsSentToWorker = false;
         statusState = IntegratedServerState.WORLD_WORKER_NOT_RUNNING;
         ClientPlatformSingleplayer.killWorker();
         LANServerController.closeLAN();
     }
 
     public static void updateLocale(List<String> dump) {
-        if (statusState != IntegratedServerState.WORLD_WORKER_NOT_RUNNING) {
+        if (statusState != IntegratedServerState.WORLD_WORKER_NOT_RUNNING
+                && !ClientPlatformSingleplayer.isRunningSingleThreadMode()) {
             sendIPCPacket(new IPCPacket14StringList(IPCPacket14StringList.LOCALE, dump));
         }
     }

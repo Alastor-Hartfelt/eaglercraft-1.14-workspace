@@ -14,7 +14,6 @@ import net.minecraft.world.IWorldReader;
 public class JigsawReplacementStructureProcessor extends StructureProcessor {
     public static final JigsawReplacementStructureProcessor INSTANCE = new JigsawReplacementStructureProcessor();
 
-
     public Template.BlockInfo process(IWorldReader p_215194_1_, BlockPos p_215194_2_, Template.BlockInfo p_215194_3_, Template.BlockInfo p_215194_4_, PlacementSettings p_215194_5_) {
         Block block = p_215194_4_.state.getBlock();
         if (block != Blocks.JIGSAW) {

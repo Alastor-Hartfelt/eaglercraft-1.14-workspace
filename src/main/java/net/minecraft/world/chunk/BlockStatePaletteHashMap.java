@@ -43,7 +43,6 @@ public class BlockStatePaletteHashMap<T> implements IBlockStatePalette<T> {
         return this.statePaletteMap.getId(p_222626_1_) != -1;
     }
 
-
     public T get(int indexKey) {
         return this.statePaletteMap.getByValue(indexKey);
     }

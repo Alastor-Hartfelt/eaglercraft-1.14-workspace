@@ -29,11 +29,9 @@ public class ChunkPrimerWrapper extends ChunkPrimer {
         this.chunk = p_i49948_1_;
     }
 
-
     public TileEntity getTileEntity(BlockPos pos) {
         return this.chunk.getTileEntity(pos);
     }
-
 
     public BlockState getBlockState(BlockPos pos) {
         return this.chunk.getBlockState(pos);
@@ -46,7 +44,6 @@ public class ChunkPrimerWrapper extends ChunkPrimer {
     public int getMaxLightLevel() {
         return this.chunk.getMaxLightLevel();
     }
-
 
     public BlockState setBlockState(BlockPos pos, BlockState state, boolean isMoving) {
         return null;
@@ -64,7 +61,6 @@ public class ChunkPrimerWrapper extends ChunkPrimer {
     public ChunkSection[] getSections() {
         return this.chunk.getSections();
     }
-
 
     public WorldLightManager getWorldLightManager() {
         return this.chunk.getWorldLightManager();
@@ -91,7 +87,6 @@ public class ChunkPrimerWrapper extends ChunkPrimer {
 
     public void setLastSaveTime(long saveTime) {
     }
-
 
     public StructureStart getStructureStart(String stucture) {
         return this.chunk.getStructureStart(stucture);
@@ -145,11 +140,9 @@ public class ChunkPrimerWrapper extends ChunkPrimer {
     public void addTileEntity(CompoundNBT nbt) {
     }
 
-
     public CompoundNBT getDeferredTileEntity(BlockPos pos) {
         return this.chunk.getDeferredTileEntity(pos);
     }
-
 
     public CompoundNBT func_223134_j(BlockPos p_223134_1_) {
         return this.chunk.func_223134_j(p_223134_1_);

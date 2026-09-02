@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.tileentity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -32,7 +33,9 @@ public class BeaconTileEntityRenderer extends TileEntityRenderer<BeaconTileEntit
             i += beacontileentity$beamsegment.getHeight();
         }
 
-        GlStateManager.enableFog();
+        if (Minecraft.getInstance().gameSettings.fog) {
+            GlStateManager.enableFog();
+        }
     }
 
     private static void func_217652_a(double p_217652_0_, double p_217652_2_, double p_217652_4_, double p_217652_6_, long p_217652_8_, int p_217652_10_, int p_217652_11_, float[] p_217652_12_) {

@@ -54,7 +54,6 @@ public class CraftResultInventory implements IInventory, IRecipeHolder {
         this.recipeUsed = recipe;
     }
 
-
     public IRecipe<?> getRecipeUsed() {
         return this.recipeUsed;
     }

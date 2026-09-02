@@ -42,7 +42,6 @@ public class EntityFlagsPredicate {
       }
    }
 
-
    private static Boolean getBoolean(JsonObject p_217977_0_, String p_217977_1_) {
       return p_217977_0_.has(p_217977_1_) ? JSONUtils.getBoolean(p_217977_0_, p_217977_1_) : null;
    }

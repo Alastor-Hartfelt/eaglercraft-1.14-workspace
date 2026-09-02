@@ -46,6 +46,9 @@ public class FirstPersonRenderer {
     private float prevEquippedProgressOffHand;
     private final EntityRendererManager renderManager;
     private final ItemRenderer itemRenderer;
+    private final BlockPos.MutableBlockPos lightmapPos = new BlockPos.MutableBlockPos();
+    private final BlockPos.MutableBlockPos overlayPos = new BlockPos.MutableBlockPos();
+    private final BlockPos.MutableBlockPos overlaySamplePos = new BlockPos.MutableBlockPos();
 
     public FirstPersonRenderer(Minecraft mcIn) {
         this.mc = mcIn;
@@ -86,7 +89,8 @@ public class FirstPersonRenderer {
 
     private void setLightmap() {
         AbstractClientPlayerEntity abstractclientplayerentity = this.mc.player;
-        int i = this.mc.world.getCombinedLight(new BlockPos(abstractclientplayerentity.posX, abstractclientplayerentity.posY + (double) abstractclientplayerentity.getEyeHeight(), abstractclientplayerentity.posZ), 0);
+        int i = this.mc.world.getCombinedLight(this.lightmapPos.setPos(abstractclientplayerentity.posX,
+                abstractclientplayerentity.posY + (double) abstractclientplayerentity.getEyeHeight(), abstractclientplayerentity.posZ), 0);
         float f = (float) (i & '\uffff');
         float f1 = (float) (i >> 16);
         GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, f, f1);
@@ -460,14 +464,14 @@ public class FirstPersonRenderer {
     public void renderOverlays(float partialTicks) {
         GlStateManager.disableAlphaTest();
         if (this.mc.player.isEntityInsideOpaqueBlock()) {
-            BlockState blockstate = this.mc.world.getBlockState(new BlockPos(this.mc.player));
+            BlockState blockstate = this.mc.world.getBlockState(this.overlayPos.setPos(this.mc.player));
             PlayerEntity playerentity = this.mc.player;
 
             for (int i = 0; i < 8; ++i) {
                 double d0 = playerentity.posX + (double) (((float) ((i >> 0) % 2) - 0.5F) * playerentity.getWidth() * 0.8F);
                 double d1 = playerentity.posY + (double) (((float) ((i >> 1) % 2) - 0.5F) * 0.1F);
                 double d2 = playerentity.posZ + (double) (((float) ((i >> 2) % 2) - 0.5F) * playerentity.getWidth() * 0.8F);
-                BlockPos blockpos = new BlockPos(d0, d1 + (double) playerentity.getEyeHeight(), d2);
+                BlockPos blockpos = this.overlaySamplePos.setPos(d0, d1 + (double) playerentity.getEyeHeight(), d2);
                 BlockState blockstate1 = this.mc.world.getBlockState(blockpos);
                 if (blockstate1.causesSuffocation(this.mc.world, blockpos)) {
                     blockstate = blockstate1;
@@ -493,6 +497,7 @@ public class FirstPersonRenderer {
     }
 
     private void renderSuffocationOverlay(TextureAtlasSprite sprite) {
+        sprite.markActive();
         this.mc.getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();

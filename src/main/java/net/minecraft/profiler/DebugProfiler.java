@@ -25,39 +25,25 @@ public class DebugProfiler implements IProfiler {
    }
 
    public void startTick() {
-//      this.field_219903_c.field_219940_a.startTick();
-//      this.field_219904_d.field_219940_a.startTick();
    }
 
    public void endTick() {
-//      this.field_219903_c.field_219940_a.endTick();
-//      this.field_219904_d.field_219940_a.endTick();
    }
 
    public void startSection(String name) {
-//      this.field_219903_c.field_219940_a.startSection(name);
-//      this.field_219904_d.field_219940_a.startSection(name);
    }
 
    public void startSection(Supplier<String> nameSupplier) {
-//      this.field_219903_c.field_219940_a.startSection(nameSupplier);
-//      this.field_219904_d.field_219940_a.startSection(nameSupplier);
    }
 
    public void endSection() {
-//      this.field_219903_c.field_219940_a.endSection();
-//      this.field_219904_d.field_219940_a.endSection();
    }
 
    public void endStartSection(String name) {
-//      this.field_219903_c.field_219940_a.endStartSection(name);
-//      this.field_219904_d.field_219940_a.endStartSection(name);
    }
 
    @OnlyIn(Dist.CLIENT)
    public void endStartSection(Supplier<String> nameSupplier) {
-//      this.field_219903_c.field_219940_a.endStartSection(nameSupplier);
-//      this.field_219904_d.field_219940_a.endStartSection(nameSupplier);
    }
 
    class DebugResultEntryImpl implements DebugProfiler.IDebugResultEntry {
@@ -82,9 +68,6 @@ public class DebugProfiler implements IProfiler {
       }
 
       public void func_219939_d() {
-//         if (this.field_219940_a == EmptyProfiler.INSTANCE) {
-//            this.field_219940_a = new Profiler(Util.nanoTime(), DebugProfiler.this.tickCounter);
-//         }
 
       }
    }

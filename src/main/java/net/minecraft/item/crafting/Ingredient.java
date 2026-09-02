@@ -136,8 +136,6 @@ public final class Ingredient implements Predicate<ItemStack> {
             if (resolvedStacks.length > 0 || this.acceptedItems.length == 0) {
                 this.matchingStacks = resolvedStacks;
             } else {
-                // Do not cache if empty but we have accepted items (tags probably haven't loaded yet)
-                // Just return early, matchingStacks remains null.
                 return;
             }
         }

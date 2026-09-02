@@ -98,7 +98,6 @@ public class FunctionObject {
          return this.function;
       }
 
-
       public ResourceLocation getId() {
          return this.function.map((p_218040_0_) -> {
             return p_218040_0_.id;

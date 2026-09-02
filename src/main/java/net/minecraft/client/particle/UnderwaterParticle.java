@@ -31,7 +31,7 @@ public class UnderwaterParticle extends SpriteTexturedParticle {
             this.setExpired();
         } else {
             this.move(this.motionX, this.motionY, this.motionZ);
-            if (!this.world.getFluidState(new BlockPos(this.posX, this.posY, this.posZ)).isTagged(FluidTags.WATER)) {
+            if (!this.world.getFluidState(this.getCurrentBlockPos()).isTagged(FluidTags.WATER)) {
                 this.setExpired();
             }
 

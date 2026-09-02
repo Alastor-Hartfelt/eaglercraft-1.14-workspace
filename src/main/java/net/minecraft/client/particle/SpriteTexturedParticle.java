@@ -13,6 +13,9 @@ public abstract class SpriteTexturedParticle extends TexturedParticle {
 
     @Override
     public void renderParticle(BufferBuilder buffer, ActiveRenderInfo entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+        if (this.sprite != null) {
+            this.sprite.markActive();
+        }
         super.renderParticle(buffer, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
     }
 

@@ -10,7 +10,6 @@ import net.minecraft.world.World;
 public interface IRecipeHolder {
    void setRecipeUsed( IRecipe<?> recipe);
 
-
    IRecipe<?> getRecipeUsed();
 
    default void onCrafting(PlayerEntity player) {

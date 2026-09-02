@@ -116,7 +116,6 @@ public class ParrotEntity extends ShoulderRidingEntity implements IFlyingAnimal 
       this.moveController = new FlyingMovementController(this);
    }
 
-
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason,  ILivingEntityData spawnDataIn,  CompoundNBT dataTag) {
       this.setVariant(this.rand.nextInt(5));
       return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
@@ -274,7 +273,6 @@ public class ParrotEntity extends ShoulderRidingEntity implements IFlyingAnimal 
       return false;
    }
 
-
    public AgeableEntity createChild(AgeableEntity ageable) {
       return null;
    }
@@ -289,7 +287,6 @@ public class ParrotEntity extends ShoulderRidingEntity implements IFlyingAnimal 
    public boolean attackEntityAsMob(Entity entityIn) {
       return entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), 3.0F);
    }
-
 
    public SoundEvent getAmbientSound() {
       return getAmbientSound(this.rand);

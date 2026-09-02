@@ -63,7 +63,6 @@ public interface IEntityReader {
       }
    }
 
-
    default PlayerEntity getClosestPlayer(double x, double y, double z, double distance,  Predicate<Entity> predicate) {
       double d0 = -1.0D;
       PlayerEntity playerentity = null;
@@ -81,17 +80,14 @@ public interface IEntityReader {
       return playerentity;
    }
 
-
    default PlayerEntity getClosestPlayer(Entity p_217362_1_, double distance) {
       return this.getClosestPlayer(p_217362_1_.posX, p_217362_1_.posY, p_217362_1_.posZ, distance, false);
    }
-
 
    default PlayerEntity getClosestPlayer(double x, double y, double z, double distance, boolean creativePlayers) {
       Predicate<Entity> predicate = creativePlayers ? EntityPredicates.CAN_AI_TARGET : EntityPredicates.NOT_SPECTATING;
       return this.getClosestPlayer(x, y, z, distance, predicate);
    }
-
 
    default PlayerEntity getClosestPlayer(double p_217365_1_, double p_217365_3_, double p_217365_5_) {
       double d0 = -1.0D;
@@ -123,31 +119,25 @@ public interface IEntityReader {
       return false;
    }
 
-
    default PlayerEntity getClosestPlayer(EntityPredicate p_217370_1_, LivingEntity p_217370_2_) {
       return this.getClosestEntity(this.getPlayers(), p_217370_1_, p_217370_2_, p_217370_2_.posX, p_217370_2_.posY, p_217370_2_.posZ);
    }
-
 
    default PlayerEntity getClosestPlayer(EntityPredicate p_217372_1_, LivingEntity p_217372_2_, double p_217372_3_, double p_217372_5_, double p_217372_7_) {
       return this.getClosestEntity(this.getPlayers(), p_217372_1_, p_217372_2_, p_217372_3_, p_217372_5_, p_217372_7_);
    }
 
-
    default PlayerEntity getClosestPlayer(EntityPredicate p_217359_1_, double p_217359_2_, double p_217359_4_, double p_217359_6_) {
       return this.getClosestEntity(this.getPlayers(), p_217359_1_, (LivingEntity)null, p_217359_2_, p_217359_4_, p_217359_6_);
    }
-
 
    default <T extends LivingEntity> T getClosestEntityWithinAABB(Class<? extends T> p_217360_1_, EntityPredicate p_217360_2_,  LivingEntity p_217360_3_, double p_217360_4_, double p_217360_6_, double p_217360_8_, AxisAlignedBB p_217360_10_) {
       return this.getClosestEntity(this.getEntitiesWithinAABB(p_217360_1_, p_217360_10_, (Predicate<T>)null), p_217360_2_, p_217360_3_, p_217360_4_, p_217360_6_, p_217360_8_);
    }
 
-
    default <T extends LivingEntity> T func_225318_b(Class<? extends T> p_225318_1_, EntityPredicate p_225318_2_,  LivingEntity p_225318_3_, double p_225318_4_, double p_225318_6_, double p_225318_8_, AxisAlignedBB p_225318_10_) {
       return this.getClosestEntity(this.func_225316_b(p_225318_1_, p_225318_10_, (Predicate<T>)null), p_225318_2_, p_225318_3_, p_225318_4_, p_225318_6_, p_225318_8_);
    }
-
 
    default <T extends LivingEntity> T getClosestEntity(List<? extends T> p_217361_1_, EntityPredicate p_217361_2_,  LivingEntity p_217361_3_, double p_217361_4_, double p_217361_6_, double p_217361_8_) {
       double d0 = -1.0D;
@@ -190,7 +180,6 @@ public interface IEntityReader {
 
       return list1;
    }
-
 
    default PlayerEntity getPlayerByUuid(EaglercraftUUID uniqueIdIn) {
       for(int i = 0; i < this.getPlayers().size(); ++i) {

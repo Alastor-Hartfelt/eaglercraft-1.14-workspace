@@ -87,7 +87,6 @@ public class GossipManager {
 
     public void func_220916_a(EaglercraftUUID p_220916_1_, GossipType p_220916_2_, int p_220916_3_) {
 
-
     }
 
     public <T> Dynamic<T> func_220914_a(DynamicOps<T> p_220914_1_) {

@@ -57,7 +57,6 @@ public class Splashes extends ReloadListener<List<String>> {
         this.possibleSplashes.addAll(splashList);
     }
 
-
     public String getSplashText() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());

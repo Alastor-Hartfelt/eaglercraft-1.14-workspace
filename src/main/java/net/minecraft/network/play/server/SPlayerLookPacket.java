@@ -76,7 +76,6 @@ public class SPlayerLookPacket implements IPacket<IClientPlayNetHandler> {
       return this.sourceAnchor;
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public Vec3d getTargetPosition(World p_200531_1_) {
       if (this.isEntity) {

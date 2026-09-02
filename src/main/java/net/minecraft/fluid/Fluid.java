@@ -60,7 +60,6 @@ public abstract class Fluid {
     protected void randomTick(World p_207186_1_, BlockPos pos, IFluidState state, Random random) {
     }
 
-
     @OnlyIn(Dist.CLIENT)
     protected IParticleData getDripParticleData() {
         return null;

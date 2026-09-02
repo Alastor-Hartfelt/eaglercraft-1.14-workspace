@@ -261,7 +261,6 @@ public class ZombieVillagerEntity extends ZombieEntity implements IVillagerDataH
       this.field_223728_bB = p_223727_1_;
    }
 
-
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason,  ILivingEntityData spawnDataIn,  CompoundNBT dataTag) {
       this.func_213792_a(this.getVillagerData().withType(IVillagerType.byBiome(worldIn.getBiome(new BlockPos(this)))));
       return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);

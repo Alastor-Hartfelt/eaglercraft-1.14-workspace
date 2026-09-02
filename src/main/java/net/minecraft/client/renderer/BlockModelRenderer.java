@@ -1,8 +1,11 @@
 package net.minecraft.client.renderer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import java.util.Arrays;
+import it.unimi.dsi.fastutil.longs.Long2LongLinkedOpenHashMap;
 import net.lax1dude.eaglercraft.Random;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
+import me.jellysquid.mods.sodium.client.model.light.cache.ArrayLightDataCache;
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -28,6 +31,7 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 public class BlockModelRenderer {
     private final BlockColors blockColors;
+    private final XoRoShiRoRandom modelBrightnessRandom = new XoRoShiRoRandom();
     private static final ThreadLocal<BlockModelRenderer.Cache> CACHE_COMBINED_LIGHT = new ThreadLocal<BlockModelRenderer.Cache>() {
         @Override
         protected BlockModelRenderer.Cache initialValue() {
@@ -45,11 +49,6 @@ public class BlockModelRenderer {
         boolean flag = false;
         try {
             flag = Minecraft.isAmbientOcclusionEnabled() && p_217631_3_.getLightValue() == 0 && p_217631_2_.isAmbientOcclusion();
-        } catch (Throwable t) {
-            throw new RuntimeException("Error computing AO flag: p_217631_2_=" + p_217631_2_.getClass().getName(), t);
-        }
-
-        try {
             this.renderContext.cachedTintIndex = -1;
             this.renderContext.cachedTintColor = -1;
             return flag ? this.renderModelSmooth(p_217631_1_, p_217631_2_, p_217631_3_, p_217631_4_, p_217631_5_, p_217631_6_, p_217631_7_, p_217631_8_) : this.renderModelFlat(p_217631_1_, p_217631_2_, p_217631_3_, p_217631_4_, p_217631_5_, p_217631_6_, p_217631_7_, p_217631_8_);
@@ -68,6 +67,7 @@ public class BlockModelRenderer {
         float[] afloat = ctx.quadBounds;
         BitSet bitset = ctx.boundsFlags;
         AmbientOcclusionFace blockmodelrenderer$ambientocclusionface = ctx.ambientOcclusionFace;
+        blockmodelrenderer$ambientocclusionface.reset(p_217634_4_);
 
         for (Direction direction : FACINGS) {
             p_217634_7_.setSeed(p_217634_8_);
@@ -124,9 +124,14 @@ public class BlockModelRenderer {
 
         for (int j = p_217630_5_.size(); i < j; ++i) {
             BakedQuad bakedquad = p_217630_5_.get(i);
-            this.fillQuadBounds(p_217630_1_, p_217630_2_, p_217630_3_, bakedquad.getVertexData(), bakedquad.getFace(), p_217630_6_, p_217630_7_);
+            bakedquad.getSprite().markActive();
+            if (bakedquad.getFlags() == ModelQuadFlags.IS_ALIGNED) {
+                p_217630_7_.set(0, true);
+                p_217630_7_.set(1, false);
+            } else {
+                this.fillQuadBounds(p_217630_1_, p_217630_2_, p_217630_3_, bakedquad.getVertexData(), bakedquad.getFace(), p_217630_6_, p_217630_7_);
+            }
             p_217630_8_.updateVertexBrightness(p_217630_1_, p_217630_2_, p_217630_3_, bakedquad.getFace(), p_217630_6_, p_217630_7_);
-            
             if (bakedquad.hasTintIndex()) {
                 int tintIndex = bakedquad.getTintIndex();
                 int k = ctx.cachedTintColor;
@@ -238,9 +243,16 @@ public class BlockModelRenderer {
 
         for (int j = p_217636_7_.size(); i < j; ++i) {
             BakedQuad bakedquad = p_217636_7_.get(i);
+            bakedquad.getSprite().markActive();
             if (p_217636_5_) {
-                this.fillQuadBounds(p_217636_1_, p_217636_2_, p_217636_3_, bakedquad.getVertexData(), bakedquad.getFace(), (float[]) null, p_217636_8_);
-                BlockPos blockpos = p_217636_8_.get(0) ? p_217636_3_.offset(bakedquad.getFace()) : p_217636_3_;
+                BlockPos blockpos;
+                if (ModelQuadFlags.contains(bakedquad.getFlags(), ModelQuadFlags.IS_ALIGNED)) {
+                    blockpos = ctx.blockPos.setPos(p_217636_3_).move(bakedquad.getFace());
+                } else {
+                    this.fillQuadBounds(p_217636_1_, p_217636_2_, p_217636_3_, bakedquad.getVertexData(), bakedquad.getFace(), (float[]) null, p_217636_8_);
+                    blockpos = p_217636_8_.get(0)
+                            ? ctx.blockPos.setPos(p_217636_3_).move(bakedquad.getFace()) : p_217636_3_;
+                }
                 p_217636_4_ = p_217636_2_.getPackedLightmapCoords(p_217636_1_, blockpos);
             }
 
@@ -276,16 +288,19 @@ public class BlockModelRenderer {
     }
 
     public void renderModelBrightnessColor(BlockState state, IBakedModel modelIn, float brightness, float red, float green, float blue) {
-        Random random = new Random();
-        long i = 42L;
+        XoRoShiRoRandom random = this.modelBrightnessRandom;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.ITEM);
 
         for (Direction direction : FACINGS) {
-            random.setSeed(42L);
-            this.renderModelBrightnessColorQuads(brightness, red, green, blue, modelIn.getQuads(state, direction, random));
+            this.appendModelBrightnessColorQuads(bufferbuilder, brightness, red, green, blue,
+                    modelIn.getQuads(state, direction, random.setSeedAndReturn(42L)));
         }
 
-        random.setSeed(42L);
-        this.renderModelBrightnessColorQuads(brightness, red, green, blue, modelIn.getQuads(state, (Direction) null, random));
+        this.appendModelBrightnessColorQuads(bufferbuilder, brightness, red, green, blue,
+                modelIn.getQuads(state, (Direction) null, random.setSeedAndReturn(42L)));
+        tessellator.draw();
     }
 
     public void renderModelBrightness(IBakedModel model, BlockState state, float brightness, boolean glDisabled) {
@@ -301,14 +316,12 @@ public class BlockModelRenderer {
         this.renderModelBrightnessColor(state, model, brightness, f, f1, f2);
     }
 
-    private void renderModelBrightnessColorQuads(float brightness, float red, float green, float blue, List<BakedQuad> listQuads) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
+    private void appendModelBrightnessColorQuads(BufferBuilder bufferbuilder, float brightness, float red, float green, float blue, List<BakedQuad> listQuads) {
         int i = 0;
 
         for (int j = listQuads.size(); i < j; ++i) {
             BakedQuad bakedquad = listQuads.get(i);
-            bufferbuilder.begin(7, DefaultVertexFormats.ITEM);
+            bakedquad.getSprite().markActive();
             bufferbuilder.addVertexData(bakedquad.getVertexData());
             if (bakedquad.hasTintIndex()) {
                 bufferbuilder.putColorRGB_F4(red * brightness, green * brightness, blue * brightness);
@@ -318,9 +331,12 @@ public class BlockModelRenderer {
 
             Vec3i vec3i = bakedquad.getFace().getDirectionVec();
             bufferbuilder.putNormal((float) vec3i.getX(), (float) vec3i.getY(), (float) vec3i.getZ());
-            tessellator.draw();
         }
 
+    }
+
+    public static void enableCache(BlockPos origin) {
+        CACHE_COMBINED_LIGHT.get().func_222895_a(origin);
     }
 
     public static void enableCache() {
@@ -362,6 +378,13 @@ public class BlockModelRenderer {
         public AmbientOcclusionFace() {
             for (int i = 0; i < 12; i++) {
                 cachedFaceData[i] = new AoFaceData();
+            }
+        }
+
+        private void reset(BlockPos pos) {
+            this.cachedPos = pos.toLong();
+            for (int i = 0; i < 12; ++i) {
+                this.cachedFaceData[i].hasData = false;
             }
         }
 
@@ -502,7 +525,6 @@ public class BlockModelRenderer {
                 this.vertexColorMultiplier[trans.vert1] = faceData.f9 * f17 + faceData.f10 * f18 + faceData.f11 * f19 + faceData.f12 * f20;
                 this.vertexColorMultiplier[trans.vert2] = faceData.f9 * f21 + faceData.f10 * f22 + faceData.f11 * f23 + faceData.f12 * f24;
                 this.vertexColorMultiplier[trans.vert3] = faceData.f9 * f25 + faceData.f10 * f26 + faceData.f11 * f27 + faceData.f12 * f28;
-                
                 this.vertexBrightness[trans.vert0] = this.getVertexBrightness(faceData.i2, faceData.j2, faceData.k2, faceData.l2, f13, f14, f15, f16);
                 this.vertexBrightness[trans.vert1] = this.getVertexBrightness(faceData.i2, faceData.j2, faceData.k2, faceData.l2, f17, f18, f19, f20);
                 this.vertexBrightness[trans.vert2] = this.getVertexBrightness(faceData.i2, faceData.j2, faceData.k2, faceData.l2, f21, f22, f23, f24);
@@ -543,48 +565,38 @@ public class BlockModelRenderer {
         }
     }
 
-    // Sodium-style direct-mapped cache: 32x32x32 = 32768 entries with bitwise index
-    // Zero object allocations, zero hash collisions, pure O(1) lookups
     @OnlyIn(Dist.CLIENT)
     static class Cache {
-        private static final int CACHE_SIZE = 32768; // 32 * 32 * 32
-        private static final int INVALID_LIGHT = Integer.MAX_VALUE;
-
         private boolean enabled;
-        private final int[] lightCache = new int[CACHE_SIZE];
-        private final float[] aoCache = new float[CACHE_SIZE];
-        private final long[] posCache = new long[CACHE_SIZE]; // position validation tags
+        private boolean useArray;
+        private final ArrayLightDataCache cache = new ArrayLightDataCache();
+        private final Long2LongLinkedOpenHashMap fallback = new Long2LongLinkedOpenHashMap(64, 0.50F);
 
         private Cache() {
         }
 
-        private static int getCacheIndex(int x, int y, int z) {
-            return ((x & 31) << 10) | ((y & 31) << 5) | (z & 31);
+        public void func_222895_a() {
+            this.fallback.clear();
+            this.useArray = false;
+            this.enabled = true;
         }
 
-        public void func_222895_a() {
+        public void func_222895_a(BlockPos origin) {
+            this.cache.reset(origin);
+            this.useArray = true;
             this.enabled = true;
-            Arrays.fill(this.lightCache, INVALID_LIGHT);
-            Arrays.fill(this.aoCache, Float.NaN);
-            Arrays.fill(this.posCache, Long.MIN_VALUE);
         }
 
         public void func_222897_b() {
             this.enabled = false;
+            if (!this.useArray) {
+                this.fallback.clear();
+            }
         }
 
         public int func_222893_a(BlockState p_222893_1_, IEnviromentBlockReader p_222893_2_, BlockPos p_222893_3_) {
             if (this.enabled) {
-                int idx = getCacheIndex(p_222893_3_.getX(), p_222893_3_.getY(), p_222893_3_.getZ());
-                long posKey = p_222893_3_.toLong();
-                if (this.posCache[idx] == posKey && this.lightCache[idx] != INVALID_LIGHT) {
-                    return this.lightCache[idx];
-                }
-
-                int result = p_222893_1_.getPackedLightmapCoords(p_222893_2_, p_222893_3_);
-                this.posCache[idx] = posKey;
-                this.lightCache[idx] = result;
-                return result;
+                return (int)(this.get(p_222893_1_, p_222893_2_, p_222893_3_) >>> 32);
             }
 
             return p_222893_1_.getPackedLightmapCoords(p_222893_2_, p_222893_3_);
@@ -592,19 +604,25 @@ public class BlockModelRenderer {
 
         public float func_222896_b(BlockState p_222896_1_, IEnviromentBlockReader p_222896_2_, BlockPos p_222896_3_) {
             if (this.enabled) {
-                int idx = getCacheIndex(p_222896_3_.getX(), p_222896_3_.getY(), p_222896_3_.getZ());
-                long posKey = p_222896_3_.toLong();
-                if (this.posCache[idx] == posKey && !Float.isNaN(this.aoCache[idx])) {
-                    return this.aoCache[idx];
-                }
-
-                float result = p_222896_1_.func_215703_d(p_222896_2_, p_222896_3_);
-                this.posCache[idx] = posKey;
-                this.aoCache[idx] = result;
-                return result;
+                return Float.intBitsToFloat((int)this.get(p_222896_1_, p_222896_2_, p_222896_3_));
             }
 
             return p_222896_1_.func_215703_d(p_222896_2_, p_222896_3_);
+        }
+
+        private long get(BlockState state, IEnviromentBlockReader world, BlockPos pos) {
+            if (this.useArray) {
+                return this.cache.get(state, world, pos);
+            }
+
+            long key = pos.toLong();
+            long word = this.fallback.get(key);
+            if (word == 0L) {
+                int light = state.getPackedLightmapCoords(world, pos);
+                int ambientOcclusion = Float.floatToRawIntBits(state.func_215703_d(world, pos));
+                this.fallback.put(key, word = (long) light << 32 | (long) ambientOcclusion & 4294967295L);
+            }
+            return word;
         }
     }
 

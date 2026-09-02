@@ -15,6 +15,7 @@ public abstract class AbstractChunkRenderContainer {
     private double viewEntityX;
     private double viewEntityY;
     private double viewEntityZ;
+    private int renderListRevision;
     protected final List<ChunkRender> renderChunks = Lists.newArrayListWithCapacity(2048);
     protected boolean initialized;
 
@@ -37,6 +38,26 @@ public abstract class AbstractChunkRenderContainer {
 
     public int getRenderChunksSize() {
         return this.renderChunks.size();
+    }
+
+    public void setRenderListRevision(int renderListRevision) {
+        this.renderListRevision = renderListRevision;
+    }
+
+    protected int getRenderListRevision() {
+        return this.renderListRevision;
+    }
+
+    protected double getViewEntityX() {
+        return this.viewEntityX;
+    }
+
+    protected double getViewEntityY() {
+        return this.viewEntityY;
+    }
+
+    protected double getViewEntityZ() {
+        return this.viewEntityZ;
     }
 
     public abstract void renderChunkLayer(BlockRenderLayer layer);

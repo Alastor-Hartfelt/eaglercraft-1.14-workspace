@@ -35,6 +35,7 @@ public class FogRenderer {
     private long waterFogUpdateTime = -1L;
     private final GameRenderer entityRenderer;
     private final Minecraft mc;
+    private final BlockPos.MutableBlockPos biomePos = new BlockPos.MutableBlockPos();
 
     public FogRenderer(GameRenderer entityRendererIn) {
         this.entityRenderer = entityRendererIn;
@@ -78,8 +79,9 @@ public class FogRenderer {
             this.blue = (float) ((double) this.blue * d0);
         }
 
-        if (this.entityRenderer.getBossColorModifier(p_217619_2_) > 0.0F) {
-            float f = this.entityRenderer.getBossColorModifier(p_217619_2_);
+        float bossColorModifier = this.entityRenderer.getBossColorModifier(p_217619_2_);
+        if (bossColorModifier > 0.0F) {
+            float f = bossColorModifier;
             this.red = this.red * (1.0F - f) + this.red * 0.7F * f;
             this.green = this.green * (1.0F - f) + this.green * 0.6F * f;
             this.blue = this.blue * (1.0F - f) + this.blue * 0.6F * f;
@@ -136,8 +138,7 @@ public class FogRenderer {
         this.blue = (float) vec3d1.z;
         if (this.mc.gameSettings.renderDistanceChunks >= 4) {
             double d0 = MathHelper.sin(p_217620_2_.getCelestialAngleRadians(p_217620_3_)) > 0.0F ? -1.0D : 1.0D;
-            Vec3d vec3d2 = new Vec3d(d0, 0.0D, 0.0D);
-            float f5 = (float) p_217620_1_.getLookDirection().dotProduct(vec3d2);
+            float f5 = (float)(p_217620_1_.getLookDirection().x * d0);
             if (f5 < 0.0F) {
                 f5 = 0.0F;
             }
@@ -177,7 +178,7 @@ public class FogRenderer {
 
     private void func_217621_a(ActiveRenderInfo p_217621_1_, IWorldReader p_217621_2_) {
         long i = Util.milliTime();
-        int j = p_217621_2_.getBiome(new BlockPos(p_217621_1_.getProjectedView())).getWaterFogColor();
+        int j = p_217621_2_.getBiome(p_217621_1_.getBlockPos()).getWaterFogColor();
         if (this.waterFogUpdateTime < 0L) {
             this.lastWaterFogColor = j;
             this.waterFogColor = j;
@@ -209,6 +210,12 @@ public class FogRenderer {
         this.applyFog(false);
         GlStateManager.normal3f(0.0F, -1.0F, 0.0F);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        if (!this.mc.gameSettings.fog) {
+            GlStateManager.enableColorMaterial();
+            GlStateManager.disableFog();
+            GlStateManager.colorMaterial(1028, 4608);
+            return;
+        }
         IFluidState ifluidstate = p_217618_1_.getFluidState();
         if (p_217618_1_.getRenderViewEntity() instanceof LivingEntity && ((LivingEntity) p_217618_1_.getRenderViewEntity()).isPotionActive(Effects.BLINDNESS)) {
             float f2 = 5.0F;
@@ -233,7 +240,7 @@ public class FogRenderer {
                 if (p_217618_1_.getRenderViewEntity() instanceof ClientPlayerEntity) {
                     ClientPlayerEntity clientplayerentity = (ClientPlayerEntity) p_217618_1_.getRenderViewEntity();
                     float f = 0.05F - clientplayerentity.getWaterBrightness() * clientplayerentity.getWaterBrightness() * 0.03F;
-                    Biome biome = clientplayerentity.world.getBiome(new BlockPos(clientplayerentity));
+                    Biome biome = clientplayerentity.world.getBiome(this.biomePos.setPos(clientplayerentity));
                     if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
                         f += 0.005F;
                     }

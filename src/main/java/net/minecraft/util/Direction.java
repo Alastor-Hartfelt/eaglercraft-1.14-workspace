@@ -230,7 +230,6 @@ public enum Direction implements IStringSerializable {
       return this.axis;
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public static Direction byName( String name) {
       return name == null ? null : NAME_LOOKUP.get(name.toLowerCase(Locale.ROOT));
@@ -243,7 +242,6 @@ public enum Direction implements IStringSerializable {
    public static Direction byHorizontalIndex(int horizontalIndexIn) {
       return BY_HORIZONTAL_INDEX[MathHelper.abs(horizontalIndexIn % BY_HORIZONTAL_INDEX.length)];
    }
-
 
    public static Direction func_218383_a(int p_218383_0_, int p_218383_1_, int p_218383_2_) {
       return field_218387_r.get(BlockPos.pack(p_218383_0_, p_218383_1_, p_218383_2_));
@@ -351,7 +349,6 @@ public enum Direction implements IStringSerializable {
       private Axis(String nameIn) {
          this.name = nameIn;
       }
-
 
       @OnlyIn(Dist.CLIENT)
       public static Direction.Axis byName(String name) {

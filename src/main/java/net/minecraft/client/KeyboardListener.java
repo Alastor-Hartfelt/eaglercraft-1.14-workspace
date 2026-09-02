@@ -318,7 +318,7 @@ public class KeyboardListener {
 
                 boolean flag1 = false;
                 if (this.mc.currentScreen == null) {
-                    if (key == 256 || key == 96) {
+                    if (key == 256 || this.mc.gameSettings.keyBindClose.matchesKey(key, scanCode)) {
                         boolean flag2 = InputMappings.isKeyDown(292);
                         this.mc.displayInGameMenu(flag2);
                     }
@@ -374,7 +374,6 @@ public class KeyboardListener {
     public void enableRepeatEvents(boolean p_197967_1_) {
         this.repeatEventsEnabled = p_197967_1_;
     }
-
 
     public String getClipboardString() {
         return EagRuntime.getClipboard();

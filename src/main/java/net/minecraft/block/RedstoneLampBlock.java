@@ -23,7 +23,6 @@ public class RedstoneLampBlock extends Block {
       super.onBlockAdded(state, worldIn, pos, oldState, isMoving);
    }
 
-   
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       return this.getDefaultState().with(LIT, Boolean.valueOf(context.getWorld().isBlockPowered(context.getPos())));
    }

@@ -1,6 +1,5 @@
 package net.minecraft.util.datafix;
 
-
 public enum DefaultTypeReferences {
    LEVEL(TypeReferences.LEVEL),
    PLAYER(TypeReferences.PLAYER),

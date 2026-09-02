@@ -328,7 +328,6 @@ public class DrownedEntity extends ZombieEntity implements IRangedAttackMob {
          this.field_204730_a.getNavigator().tryMoveToXYZ(this.field_204731_b, this.field_204732_c, this.field_204733_d, this.field_204734_e);
       }
 
-      
       private Vec3d func_204729_f() {
          Random random = this.field_204730_a.getRNG();
          BlockPos blockpos = new BlockPos(this.field_204730_a.posX, this.field_204730_a.getBoundingBox().minY, this.field_204730_a.posZ);

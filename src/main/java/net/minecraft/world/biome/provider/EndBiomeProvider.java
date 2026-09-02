@@ -77,7 +77,6 @@ public class EndBiomeProvider extends BiomeProvider {
         return Sets.newHashSet(this.getBiomeBlock(i, j, i1, j1));
     }
 
-
     public BlockPos findBiomePosition(int x, int z, int range, List<Biome> biomes, Random random) {
         int i = x - range >> 2;
         int j = z - range >> 2;

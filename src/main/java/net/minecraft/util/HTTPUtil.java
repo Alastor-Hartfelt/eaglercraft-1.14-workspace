@@ -1,21 +1,17 @@
 package net.minecraft.util;
 
-
 import java.io.DataOutputStream;
 import net.lax1dude.eaglercraft.internal.vfs2.VFile2;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import net.eymenwsmc.CompletableFuture;
-import java.util.concurrent.Executors;
+import net.eymenwsmc.java.CompletableFuture;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -73,7 +69,6 @@ public class HTTPUtil {
 
                   LOGGER.warn("Deleting {} as it does not match what we currently have ({} vs our {}).", saveFile, i, j);
                } else if ((saveFile.getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(saveFile.getParent()) : null) != null) {
-/* mkdirs removed (                  (saveFile.getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(saveFile.getParent()) : null) ) */
                }
 
                outputstream = new DataOutputStream(saveFile.getOutputStream());

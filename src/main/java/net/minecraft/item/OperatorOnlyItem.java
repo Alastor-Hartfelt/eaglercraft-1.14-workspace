@@ -9,7 +9,6 @@ public class OperatorOnlyItem extends BlockItem {
         super(blockIn, builder);
     }
 
-
     protected BlockState getStateForPlacement(BlockItemUseContext context) {
         PlayerEntity playerentity = context.getPlayer();
         return playerentity != null && !playerentity.canUseCommandBlock() ? null : super.getStateForPlacement(context);

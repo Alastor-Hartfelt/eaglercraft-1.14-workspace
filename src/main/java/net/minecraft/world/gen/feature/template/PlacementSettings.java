@@ -126,7 +126,6 @@ public class PlacementSettings {
         return this.ignoreEntities;
     }
 
-
     public MutableBoundingBox getBoundingBox() {
         if (this.boundingBox == null && this.chunk != null) {
             this.setBoundingBoxFromChunk();
@@ -165,7 +164,6 @@ public class PlacementSettings {
             return p_204764_1_.get(this.field_204766_l);
         }
     }
-
 
     private MutableBoundingBox getBoundingBoxFromChunk(ChunkPos pos) {
         if (pos == null) {

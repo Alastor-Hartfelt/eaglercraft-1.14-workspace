@@ -599,8 +599,13 @@ public class GlStateManager {
     }
 
     public static void deleteTexture(int texture) {
+        ITextureGL textureObject = EaglercraftGPU.mapTexturesGL.get(texture);
+        if (textureObject == null) {
+            return;
+        }
         unbindTextureIfCached(texture);
-        _wglDeleteTextures(EaglercraftGPU.mapTexturesGL.free(texture));
+        EaglercraftGPU.mapTexturesGL.free(texture);
+        _wglDeleteTextures(textureObject);
     }
 
     static void unbindTextureIfCached(int texture) {
@@ -822,7 +827,7 @@ public class GlStateManager {
                 _i = activeTexture;
                 _j = textureMatrixStackPointer[_i];
                 mat = textureMatrixStack[_i][_j];
-                textureMatrixStackAccessSerial[_i][_j] = ++textureCoordsAccessSerial[_i];
+                textureMatrixStackAccessSerial[_i][_j] = ++textureMatrixAccessSerial[_i];
                 break;
             default:
                 throw new IllegalStateException();

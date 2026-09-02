@@ -23,7 +23,6 @@ public class RuleStructureProcessor extends StructureProcessor {
         this(p_i51321_1_.get("rules").asList(RuleEntry::deserialize));
     }
 
-
     public Template.BlockInfo process(IWorldReader p_215194_1_, BlockPos p_215194_2_, Template.BlockInfo p_215194_3_, Template.BlockInfo p_215194_4_, PlacementSettings p_215194_5_) {
         Random random = new Random(MathHelper.getPositionRandom(p_215194_4_.pos));
         BlockState blockstate = p_215194_1_.getBlockState(p_215194_4_.pos);

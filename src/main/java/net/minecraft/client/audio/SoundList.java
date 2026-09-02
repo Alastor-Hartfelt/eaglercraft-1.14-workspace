@@ -25,7 +25,6 @@ public class SoundList {
         return this.replaceExisting;
     }
 
-
     public String getSubtitle() {
         return this.subtitle;
     }

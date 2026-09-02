@@ -34,7 +34,6 @@ public class MoveToSkylightTask extends Task<LivingEntity> {
       return !worldIn.isSkyLightMax(new BlockPos(owner.posX, owner.getBoundingBox().minY, owner.posZ));
    }
 
-
    private Vec3d func_220493_b(ServerWorld p_220493_1_, LivingEntity p_220493_2_) {
       Random random = p_220493_2_.getRNG();
       BlockPos blockpos = new BlockPos(p_220493_2_.posX, p_220493_2_.getBoundingBox().minY, p_220493_2_.posZ);

@@ -51,17 +51,16 @@ public class BannerTileEntityRenderer extends TileEntityRenderer<BannerTileEntit
         ResourceLocation resourcelocation = this.getBannerResourceLocation(tileEntityIn);
         if (resourcelocation != null) {
             this.bindTexture(resourcelocation);
+            Util.dontMakeTheTextureBlurry();
             GlStateManager.pushMatrix();
             GlStateManager.scalef(0.6666667F, -0.6666667F, -0.6666667F);
             this.bannerModel.renderBanner();
-            Util.dontMakeTheTextureBlurry();
             GlStateManager.popMatrix();
         }
 
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.popMatrix();
     }
-
 
     private ResourceLocation getBannerResourceLocation(BannerTileEntity bannerObj) {
         return BannerTextures.BANNER_DESIGNS.getResourceLocation(bannerObj.getPatternResourceLocation(), bannerObj.getPatternList(), bannerObj.getColorList());

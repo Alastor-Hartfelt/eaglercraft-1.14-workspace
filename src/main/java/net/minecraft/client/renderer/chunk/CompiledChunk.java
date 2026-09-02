@@ -2,12 +2,14 @@ package net.minecraft.client.renderer.chunk;
 
 import com.google.common.collect.Lists;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
@@ -29,7 +31,8 @@ public class CompiledChunk {
     private final boolean[] layersStarted = new boolean[BlockRenderLayer.values().length];
     private boolean empty = true;
     private final List<TileEntity> tileEntities = Lists.newArrayList();
-    private SetVisibility setVisibility = new SetVisibility();
+    private final List<TextureAtlasSprite> animatedSprites = new ArrayList<>(4);
+    private final SetVisibility setVisibility = new SetVisibility();
     private BufferBuilder.State state;
 
     public boolean isEmpty() {
@@ -61,12 +64,22 @@ public class CompiledChunk {
         this.tileEntities.add(tileEntityIn);
     }
 
+    public List<TextureAtlasSprite> getAnimatedSprites() {
+        return this.animatedSprites;
+    }
+
+    public void markAnimatedSpritesActive() {
+        for (int i = 0, len = this.animatedSprites.size(); i < len; ++i) {
+            this.animatedSprites.get(i).markActive();
+        }
+    }
+
     public boolean isVisible(Direction facing, Direction facing2) {
         return this.setVisibility.isVisible(facing, facing2);
     }
 
-    public void setVisibility(SetVisibility visibility) {
-        this.setVisibility = visibility;
+    public SetVisibility getVisibility() {
+        return this.setVisibility;
     }
 
     public BufferBuilder.State getState() {
@@ -84,7 +97,8 @@ public class CompiledChunk {
             this.layersStarted[i] = false;
         }
         this.tileEntities.clear();
-        this.setVisibility = new SetVisibility();
+        this.animatedSprites.clear();
+        this.setVisibility.setAllVisible(false);
         this.state = null;
     }
 }

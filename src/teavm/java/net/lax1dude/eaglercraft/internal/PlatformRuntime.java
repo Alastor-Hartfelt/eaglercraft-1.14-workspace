@@ -58,6 +58,7 @@ import net.lax1dude.eaglercraft.internal.teavm.ES6ShimStatus;
 import net.lax1dude.eaglercraft.internal.teavm.EarlyLoadScreen;
 import net.lax1dude.eaglercraft.internal.teavm.EnumES6ShimStatus;
 import net.lax1dude.eaglercraft.internal.teavm.EnumES6Shims;
+import net.lax1dude.eaglercraft.internal.teavm.FixWebMDurationJS;
 import net.lax1dude.eaglercraft.internal.teavm.ImmediateContinue;
 import net.lax1dude.eaglercraft.internal.teavm.MessageChannel;
 import net.lax1dude.eaglercraft.internal.teavm.TeaVMBlobURLManager;

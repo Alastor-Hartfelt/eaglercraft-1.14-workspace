@@ -25,7 +25,6 @@ public class CartographyTableBlock extends Block {
         return true;
     }
 
-
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
         return new SimpleNamedContainerProvider((p_220267_2_, p_220267_3_, p_220267_4_) -> {
             return new CartographyContainer(p_220267_2_, p_220267_3_, IWorldPosCallable.of(worldIn, pos));

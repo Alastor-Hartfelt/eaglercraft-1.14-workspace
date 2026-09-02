@@ -126,7 +126,6 @@ public abstract class LockableLootTileEntity extends LockableTileEntity {
         return super.canOpen(p_213904_1_) && (this.lootTable == null || !p_213904_1_.isSpectator());
     }
 
-
     public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
         if (this.canOpen(p_createMenu_3_)) {
             this.fillWithLoot(p_createMenu_2_.player);

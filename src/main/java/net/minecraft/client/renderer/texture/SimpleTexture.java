@@ -86,7 +86,6 @@ public class SimpleTexture extends Texture {
             }
         }
 
-
         public TextureMetadataSection func_217798_a() {
             return this.field_217802_a;
         }

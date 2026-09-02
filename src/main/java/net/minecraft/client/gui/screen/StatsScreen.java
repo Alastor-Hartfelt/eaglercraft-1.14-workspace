@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityType;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.play.client.CClientStatusPacket;
@@ -32,6 +31,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
@@ -75,14 +76,6 @@ public class StatsScreen extends Screen implements IProgressMeter {
         this.addButton(new Button(this.width / 2 - 100, this.height - 28, 200, 20, I18n.format("gui.done"), (p_213113_1_) -> {
             this.mc.displayGuiScreen(this.parentScreen);
         }));
-        if (this.itemStats.children().isEmpty()) {
-            button.active = false;
-        }
-
-        if (this.mobStats.children().isEmpty()) {
-            button1.active = false;
-        }
-
     }
 
     public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
@@ -111,7 +104,6 @@ public class StatsScreen extends Screen implements IProgressMeter {
     public boolean isPauseScreen() {
         return !this.doesGuiPauseGame;
     }
-
 
     public ExtendedList<?> func_213116_d() {
         return this.displaySlot;
@@ -232,6 +224,7 @@ public class StatsScreen extends Screen implements IProgressMeter {
         private final int[] field_195112_D = new int[]{3, 4, 1, 2, 5, 6};
         protected int field_195115_x = -1;
         protected final List<Item> field_195116_y;
+        private final Map<Item, Block> blockItems = new IdentityHashMap<>();
         protected final java.util.Comparator<Item> field_195117_z = new StatsScreen.StatsList.Comparator();
 
         protected StatType<?> field_195110_A;
@@ -260,6 +253,10 @@ public class StatsScreen extends Screen implements IProgressMeter {
             }
 
             for (Block block : Registry.BLOCK) {
+                Item blockItem = block.asItem();
+                if (blockItem != Items.AIR) {
+                    this.blockItems.put(blockItem, block);
+                }
                 boolean flag1 = false;
 
                 for (StatType<Block> stattype1 : this.field_195113_v) {
@@ -269,7 +266,7 @@ public class StatsScreen extends Screen implements IProgressMeter {
                 }
 
                 if (flag1) {
-                    set.add(block.asItem());
+                    set.add(blockItem);
                 }
             }
 
@@ -403,7 +400,21 @@ public class StatsScreen extends Screen implements IProgressMeter {
                 this.field_195111_B = 0;
             }
 
-            this.field_195116_y.sort(this.field_195117_z);
+            this.sortItems();
+        }
+
+        private void sortItems() {
+            for (int i = 1; i < this.field_195116_y.size(); ++i) {
+                Item item = this.field_195116_y.get(i);
+                int j = i - 1;
+
+                while (j >= 0 && this.field_195117_z.compare(this.field_195116_y.get(j), item) > 0) {
+                    this.field_195116_y.set(j + 1, this.field_195116_y.get(j));
+                    --j;
+                }
+
+                this.field_195116_y.set(j + 1, item);
+            }
         }
 
         @OnlyIn(Dist.CLIENT)
@@ -419,8 +430,10 @@ public class StatsScreen extends Screen implements IProgressMeter {
                     j = 0;
                 } else if (StatsList.this.field_195113_v.contains(StatsList.this.field_195110_A)) {
                     StatType<Block> stattype = (StatType<Block>) StatsList.this.field_195110_A;
-                    i = p_compare_1_ instanceof BlockItem ? StatsScreen.this.stats.getValue(stattype, ((BlockItem) p_compare_1_).getBlock()) : -1;
-                    j = p_compare_2_ instanceof BlockItem ? StatsScreen.this.stats.getValue(stattype, ((BlockItem) p_compare_2_).getBlock()) : -1;
+                    Block block1 = StatsList.this.blockItems.get(p_compare_1_);
+                    Block block2 = StatsList.this.blockItems.get(p_compare_2_);
+                    i = block1 != null ? StatsScreen.this.stats.getValue(stattype, block1) : -1;
+                    j = block2 != null ? StatsScreen.this.stats.getValue(stattype, block2) : -1;
                 } else {
                     StatType<Item> stattype1 = (StatType<Item>) StatsList.this.field_195110_A;
                     i = StatsScreen.this.stats.getValue(stattype1, p_compare_1_);
@@ -442,8 +455,9 @@ public class StatsScreen extends Screen implements IProgressMeter {
 
                 for (int i = 0; i < StatsScreen.this.itemStats.field_195113_v.size(); ++i) {
                     Stat<Block> stat;
-                    if (item instanceof BlockItem) {
-                        stat = StatsScreen.this.itemStats.field_195113_v.get(i).get(((BlockItem) item).getBlock());
+                    Block block = StatsScreen.this.itemStats.blockItems.get(item);
+                    if (block != null) {
+                        stat = StatsScreen.this.itemStats.field_195113_v.get(i).get(block);
                     } else {
                         stat = null;
                     }

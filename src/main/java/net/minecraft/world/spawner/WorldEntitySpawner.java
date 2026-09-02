@@ -148,7 +148,6 @@ public final class WorldEntitySpawner {
         }
     }
 
-
     private static Biome.SpawnListEntry func_222264_a(ChunkGenerator<?> p_222264_0_, EntityClassification p_222264_1_, Random p_222264_2_, BlockPos p_222264_3_) {
         List<Biome.SpawnListEntry> list = p_222264_0_.getPossibleCreatures(p_222264_1_, p_222264_3_);
         return list.isEmpty() ? null : WeightedRandom.getRandomItem(p_222264_2_, list);

@@ -50,7 +50,6 @@ public class WallTorchBlock extends TorchBlock {
         return blockstate.func_224755_d(worldIn, blockpos, direction);
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = this.getDefaultState();
         IWorldReader iworldreader = context.getWorld();

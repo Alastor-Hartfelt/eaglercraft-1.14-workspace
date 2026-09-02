@@ -18,7 +18,6 @@ public class IntegrityProcessor extends StructureProcessor {
       this(p_i51333_1_.get("integrity").asFloat(1.0F));
    }
 
-
    public Template.BlockInfo process(IWorldReader p_215194_1_, BlockPos p_215194_2_, Template.BlockInfo p_215194_3_, Template.BlockInfo p_215194_4_, PlacementSettings p_215194_5_) {
       Random random = p_215194_5_.getRandom(p_215194_4_.pos);
       return !(this.integrity >= 1.0F) && !(random.nextFloat() <= this.integrity) ? null : p_215194_4_;

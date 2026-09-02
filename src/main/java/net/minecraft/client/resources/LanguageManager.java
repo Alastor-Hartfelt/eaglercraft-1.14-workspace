@@ -77,7 +77,6 @@ public class LanguageManager implements IResourceManagerReloadListener {
         String s = this.languageMap.containsKey(this.currentLanguage) ? this.currentLanguage : "en_us";
         Language language = this.languageMap.get(s);
         if (language == null) {
-            // Create a fallback language if none exists
             language = new Language("en_us", "US", "English", false);
             this.languageMap.put("en_us", language);
         }

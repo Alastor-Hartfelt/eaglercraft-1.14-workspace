@@ -69,7 +69,6 @@ public class Session {
          this.sessionType = sessionTypeIn;
       }
 
-
       public static Session.Type setSessionType(String sessionTypeIn) {
          return SESSION_TYPES.get(sessionTypeIn.toLowerCase(Locale.ROOT));
       }

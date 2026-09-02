@@ -88,7 +88,6 @@ public class TraderLlamaEntity extends LlamaEntity {
         return this.getLeashed() && !this.isLeashedToTrader();
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         ILivingEntityData ilivingentitydata = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
         if (reason == SpawnReason.EVENT) {

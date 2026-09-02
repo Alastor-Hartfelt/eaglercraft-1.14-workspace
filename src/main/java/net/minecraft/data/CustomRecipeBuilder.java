@@ -31,7 +31,6 @@ public class CustomRecipeBuilder {
                 return new ResourceLocation(id);
             }
 
-
             public JsonObject getAdvancementJson() {
                 return null;
             }

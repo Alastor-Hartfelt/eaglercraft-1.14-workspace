@@ -40,7 +40,6 @@ public class CaveSpiderEntity extends SpiderEntity {
         }
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         return spawnDataIn;
     }

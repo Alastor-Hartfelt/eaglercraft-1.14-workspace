@@ -271,7 +271,6 @@ public class VineBlock extends Block {
         }
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         BlockState blockstate = context.getWorld().getBlockState(context.getPos());
         boolean flag = blockstate.getBlock() == this;

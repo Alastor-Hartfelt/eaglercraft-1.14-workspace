@@ -47,7 +47,6 @@ public class ItemUseContext {
       return this.item;
    }
 
-
    public PlayerEntity getPlayer() {
       return this.player;
    }

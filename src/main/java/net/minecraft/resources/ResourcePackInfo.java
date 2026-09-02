@@ -27,7 +27,6 @@ public class ResourcePackInfo implements AutoCloseable {
     private final boolean alwaysEnabled;
     private final boolean orderLocked;
 
-
     public static <T extends ResourcePackInfo> T createResourcePack(String nameIn, boolean p_195793_1_, Supplier<IResourcePack> p_195793_2_, ResourcePackInfo.IFactory<T> factory, ResourcePackInfo.Priority p_195793_4_) {
         try (IResourcePack iresourcepack = p_195793_2_.get()) {
             PackMetadataSection packmetadatasection = iresourcepack.getMetadata(PackMetadataSection.SERIALIZER);

@@ -32,7 +32,6 @@ public class JigsawBlock extends DirectionalBlock implements ITileEntityProvider
       return this.getDefaultState().with(FACING, context.getFace());
    }
 
-
    public TileEntity createNewTileEntity(IBlockReader worldIn) {
       return new JigsawTileEntity();
    }

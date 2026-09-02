@@ -194,7 +194,6 @@ public class NBTDynamicOps implements DynamicOps<INBT> {
         return new IntArrayNBT(p_createIntList_1_.toArray());
     }
 
-
     public INBT createLongList(LongStream p_createLongList_1_) {
         return new LongArrayNBT(p_createLongList_1_.toArray());
     }

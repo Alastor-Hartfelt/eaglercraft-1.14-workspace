@@ -83,7 +83,11 @@ public class GuiScreenEditProfile extends Screen {
             safeProfile();
             this.mc.gameSettings.saveOptions();
             NetworkHandler.sendSkinUpdate();
-            this.mc.displayGuiScreen(parent);
+            if (!this.mc.gameSettings.hideDefaultUsernameWarning && EaglerProfile.isDefaultUsername(EaglerProfile.getName())) {
+                this.mc.displayGuiScreen(new GuiScreenDefaultUsernameNote(this, parent));
+            } else {
+                this.mc.displayGuiScreen(parent);
+            }
         }));
         addButton(new Button(width / 2 - 21, height / 6 + 110, 71, 20, I18n.format("editProfile.addSkin"), (btn) -> {
             EagRuntime.displayFileChooser("image/png", "png");
@@ -453,6 +457,7 @@ public class GuiScreenEditProfile extends Screen {
                 if (mx > 1 && my > 1 && mx < (w * 3 / 4) + 7 && my < 12) {
                     safeProfile();
                     this.mc.gameSettings.saveOptions();
+                    this.mc.displayGuiScreen(new GuiScreenImportExportProfile(this));
                     return true;
                 }
             }

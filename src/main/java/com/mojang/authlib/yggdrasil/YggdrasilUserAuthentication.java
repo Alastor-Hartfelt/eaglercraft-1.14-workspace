@@ -124,7 +124,6 @@ public class YggdrasilUserAuthentication extends HttpUserAuthentication {
                     throw new AuthenticationException("Server requested we change our client token. Don't know how to handle this!");
                 } else {
 
-
                     if (response.getUser() != null && response.getUser().getId() != null) {
                         this.setUserid(response.getUser().getId());
                     } else {
@@ -206,9 +205,6 @@ public class YggdrasilUserAuthentication extends HttpUserAuthentication {
         return result;
     }
 
-    /**
-     * @deprecated
-     */
     @Deprecated
     public String getSessionToken() {
         return this.isLoggedIn() && this.getSelectedProfile() != null && this.canPlayOnline() ? String.format("token:%s:%s", this.getAuthenticatedToken(), this.getSelectedProfile().getId()) : null;

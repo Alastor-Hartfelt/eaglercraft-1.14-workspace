@@ -18,8 +18,8 @@ public class ServerList {
    private final Minecraft mc;
    private final List<ServerData> servers = Lists.newArrayList();
 
-   private static final String WTUFF = "§a§lTUFFNET";
-   private static final String TUFFIP = "wss://tuff.ws";
+   private static final String WTUFF = "§c§lTUFFNET";
+   private static final String TUFFIP = "wss://tuffest.org";
 
    public ServerList(Minecraft mcIn) {
       this.mc = mcIn;

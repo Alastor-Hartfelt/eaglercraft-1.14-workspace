@@ -53,7 +53,6 @@ public class VillagerData {
         return p_221131_1_.createMap(ImmutableMap.of(p_221131_1_.createString("type"), p_221131_1_.createString(Registry.VILLAGER_TYPE.getKey(this.type).toString()), p_221131_1_.createString("profession"), p_221131_1_.createString(Registry.VILLAGER_PROFESSION.getKey(this.profession).toString()), p_221131_1_.createString("level"), p_221131_1_.createInt(this.level)));
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public static int func_221133_b(int p_221133_0_) {
         return func_221128_d(p_221133_0_) ? field_221136_a[p_221133_0_ - 1] : 0;

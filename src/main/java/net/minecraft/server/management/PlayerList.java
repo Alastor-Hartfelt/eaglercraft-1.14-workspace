@@ -252,7 +252,6 @@ public abstract class PlayerList {
         });
     }
 
-
     public CompoundNBT readPlayerDataFromFile(ServerPlayerEntity playerIn) {
         CompoundNBT compoundnbt = this.server.getWorld(DimensionType.OVERWORLD).getWorldInfo().getPlayerNBTTagCompound();
         CompoundNBT compoundnbt1;
@@ -315,7 +314,6 @@ public abstract class PlayerList {
 
         this.sendPacketToAllPlayers(new SPlayerListItemPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER, playerIn));
     }
-
 
     public ITextComponent canPlayerLogin(SocketAddress p_206258_1_, GameProfile p_206258_2_) {
         if (this.bannedPlayers.isBanned(p_206258_2_)) {
@@ -548,7 +546,6 @@ public abstract class PlayerList {
         return this.ops.hasEntry(profile) || this.server.func_213199_b(profile) && this.server.getWorld(DimensionType.OVERWORLD).getWorldInfo().areCommandsAllowed() || this.commandsAllowedForAll;
     }
 
-
     public ServerPlayerEntity getPlayerByUsername(String username) {
         for (ServerPlayerEntity serverplayerentity : this.players) {
             if (serverplayerentity.getGameProfile().getName().equalsIgnoreCase(username)) {
@@ -746,7 +743,6 @@ public abstract class PlayerList {
     public List<ServerPlayerEntity> getPlayers() {
         return this.players;
     }
-
 
     public ServerPlayerEntity getPlayerByUUID(EaglercraftUUID playerUUID) {
         return this.uuidToPlayerMap.get(playerUUID);

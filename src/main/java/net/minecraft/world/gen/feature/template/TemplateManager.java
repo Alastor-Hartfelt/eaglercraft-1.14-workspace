@@ -44,7 +44,6 @@ public class TemplateManager implements IResourceManagerReloadListener {
         return template;
     }
 
-
     public Template getTemplate(ResourceLocation p_200219_1_) {
         return this.templates.computeIfAbsent(p_200219_1_, (p_209204_1_) -> {
             Template template = this.loadTemplateFile(p_209204_1_);
@@ -55,7 +54,6 @@ public class TemplateManager implements IResourceManagerReloadListener {
     public void onResourceManagerReload(IResourceManager resourceManager) {
         this.templates.clear();
     }
-
 
     private Template loadTemplateResource(ResourceLocation p_209201_1_) {
         ResourceLocation resourcelocation = new ResourceLocation(p_209201_1_.getNamespace(), "structures/" + p_209201_1_.getPath() + ".nbt");
@@ -70,7 +68,6 @@ public class TemplateManager implements IResourceManagerReloadListener {
             return null;
         }
     }
-
 
     private Template loadTemplateFile(ResourceLocation locationIn) {
         if (!this.pathGenerated.dirExists()) {

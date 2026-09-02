@@ -218,7 +218,6 @@ public class ReadBookScreen extends Screen {
         }
     }
 
-
     public ITextComponent func_214154_c(double p_214154_1_, double p_214154_3_) {
         if (this.field_214170_e == null) {
             return null;

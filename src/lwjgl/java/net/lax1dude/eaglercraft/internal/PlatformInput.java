@@ -308,6 +308,10 @@ public class PlatformInput {
 
 	private static long syncTimer = 0l;
 
+	public static void pollEvents() {
+		glfwPollEvents();
+	}
+
 	public static void update(int limitFps) {
 		glfwPollEvents();
 		if (vsync != glfwVSyncState) {
@@ -614,6 +618,10 @@ public class PlatformInput {
 
 	public static boolean touchNext() {
 		return false;
+	}
+
+	public static EnumTouchEvent touchGetEventType() {
+		return null;
 	}
 
 	public static int touchGetEventTouchPointCount() {

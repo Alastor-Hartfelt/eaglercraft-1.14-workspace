@@ -16,7 +16,6 @@ public class CodRenderer extends MobRenderer<CodEntity, CodModel<CodEntity>> {
         super(p_i48864_1_, new CodModel<>(), 0.3F);
     }
 
-
     protected ResourceLocation getEntityTexture(CodEntity entity) {
         return COD_LOCATION;
     }

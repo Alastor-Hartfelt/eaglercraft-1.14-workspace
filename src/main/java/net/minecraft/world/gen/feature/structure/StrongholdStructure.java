@@ -65,7 +65,6 @@ public class StrongholdStructure extends Structure<NoFeatureConfig> {
         return 8;
     }
 
-
     public BlockPos findNearest(World worldIn, ChunkGenerator<? extends GenerationSettings> chunkGenerator, BlockPos pos, int radius, boolean p_211405_5_) {
         if (!chunkGenerator.getBiomeProvider().hasStructure(this)) {
             return null;

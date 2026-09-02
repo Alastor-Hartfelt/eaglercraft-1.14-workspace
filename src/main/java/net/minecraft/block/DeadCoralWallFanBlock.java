@@ -57,7 +57,6 @@ public class DeadCoralWallFanBlock extends CoralFanBlock {
       return blockstate.func_224755_d(worldIn, blockpos, direction);
    }
 
-
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       BlockState blockstate = super.getStateForPlacement(context);
       IWorldReader iworldreader = context.getWorld();

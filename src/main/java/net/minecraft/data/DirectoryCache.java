@@ -53,11 +53,9 @@ public class DirectoryCache {
             return;
         }
 
-
         writer.close();
         LOGGER.debug("Caching: cache hits: {}, created: {} removed: {}", this.hits, this.createdFiles.size() - this.hits, this.staleFiles.size());
     }
-
 
     public String getPreviousHash(Path fileIn) {
         return this.staleFiles.get(fileIn);

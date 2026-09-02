@@ -22,7 +22,6 @@ public class TurtleRenderer extends MobRenderer<TurtleEntity, TurtleModel<Turtle
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }
 
-
     protected ResourceLocation getEntityTexture(TurtleEntity entity) {
         return field_203091_a;
     }

@@ -1,6 +1,5 @@
 package net.minecraft.entity.ai.attributes;
 
-
 public abstract class Attribute implements IAttribute {
    private final IAttribute parent;
    private final String translationKey;
@@ -32,7 +31,6 @@ public abstract class Attribute implements IAttribute {
       this.shouldWatch = shouldWatchIn;
       return this;
    }
-
 
    public IAttribute getParent() {
       return this.parent;

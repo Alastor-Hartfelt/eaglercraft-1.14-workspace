@@ -13,7 +13,6 @@ import org.lwjgl.opengl.Display;
 import java.io.InputStream;
 import java.util.function.BiConsumer;
 
-
 @OnlyIn(Dist.CLIENT)
 public final class MainWindow implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -44,14 +43,12 @@ public final class MainWindow implements AutoCloseable {
         this.setRenderPhase("Pre startup");
         this.mc = p_i51170_1_;
 
-
         this.lastFullscreen = this.fullscreen = p_i51170_3_.fullscreen;
         this.prevWindowWidth = this.width = p_i51170_3_.width > 0 ? p_i51170_3_.width : 1;
         this.prevWindowHeight = this.height = p_i51170_3_.height > 0 ? p_i51170_3_.height : 1;
     }
 
     public static void checkGlfwError(BiConsumer<Integer, String> p_211162_0_) {
-
 
     }
 
@@ -68,7 +65,6 @@ public final class MainWindow implements AutoCloseable {
     public void setWindowIcon(InputStream p_216529_1_, InputStream p_216529_2_) {
 
     }
-
 
     public void setRenderPhase(String renderPhaseIn) {
         this.renderPhase = renderPhaseIn;
@@ -136,9 +132,7 @@ public final class MainWindow implements AutoCloseable {
     public void waitFramerateLimit() {
         double d0 = this.frameEndTime + 1.0D / (double) this.getLimitFramerate();
 
-
     }
-
 
     public void update() {
         if (this.fullscreen && this.videoModeChanged) {
@@ -201,7 +195,6 @@ public final class MainWindow implements AutoCloseable {
         this.scaledHeight = (double) this.framebufferHeight / scaleFactor > (double) j ? j + 1 : j;
     }
 
-
     public boolean isFullscreen() {
         return this.fullscreen;
     }
@@ -215,7 +208,6 @@ public final class MainWindow implements AutoCloseable {
         int fh = net.lax1dude.eaglercraft.Display.getHeight();
         return fh > 0 ? fh : this.height;
     }
-
 
     public int getWidth() {
         int w = net.lax1dude.eaglercraft.Display.getWidth();
@@ -246,7 +238,6 @@ public final class MainWindow implements AutoCloseable {
     public double getGuiScaleFactor() {
         return this.guiScaleFactor;
     }
-
 
     public void func_224798_d(boolean p_224798_1_) {
     }

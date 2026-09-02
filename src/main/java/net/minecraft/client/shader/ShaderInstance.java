@@ -270,7 +270,6 @@ public class ShaderInstance implements IShaderManager, AutoCloseable {
         this.field_216558_n = true;
     }
 
-
     public ShaderUniform func_216539_a(String p_216539_1_) {
         return this.field_216554_j.get(p_216539_1_);
     }
@@ -285,7 +284,6 @@ public class ShaderInstance implements IShaderManager, AutoCloseable {
 
         for (int j = 0; i < this.field_216550_f.size(); ++j) {
             String s = this.field_216550_f.get(i);
-
 
             ++i;
         }

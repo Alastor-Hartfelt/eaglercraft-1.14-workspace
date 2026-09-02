@@ -19,8 +19,9 @@ public class EndRodParticle extends SimpleAnimatedParticle {
     }
 
     public void move(double x, double y, double z) {
-        this.setBoundingBox(this.getBoundingBox().offset(x, y, z));
-        this.resetPositionToBB();
+        this.posX += x;
+        this.posY += y;
+        this.posZ += z;
     }
 
     @OnlyIn(Dist.CLIENT)

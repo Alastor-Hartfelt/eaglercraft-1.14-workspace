@@ -14,11 +14,9 @@ public class IndirectEntityDamageSource extends EntityDamageSource {
         this.indirectEntity = indirectEntityIn;
     }
 
-
     public Entity getImmediateSource() {
         return this.damageSourceEntity;
     }
-
 
     public Entity getTrueSource() {
         return this.indirectEntity;

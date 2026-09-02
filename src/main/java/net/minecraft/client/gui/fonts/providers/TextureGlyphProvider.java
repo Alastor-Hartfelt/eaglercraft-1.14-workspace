@@ -34,7 +34,6 @@ public class TextureGlyphProvider implements IGlyphProvider {
         this.texture.close();
     }
 
-
     public IGlyphInfo func_212248_a(char p_212248_1_) {
         if (p_212248_1_ >= 0 && p_212248_1_ < this.glyphInfos.size()) {
             return this.glyphInfos.get(p_212248_1_);
@@ -85,7 +84,6 @@ public class TextureGlyphProvider implements IGlyphProvider {
                 }
             }
         }
-
 
         public IGlyphProvider create(IResourceManager resourceManagerIn) {
             try (IResource iresource = resourceManagerIn.getResource(this.file)) {

@@ -41,7 +41,7 @@ public class CurrentDownParticle extends SpriteTexturedParticle {
             this.motionX *= 0.07D;
             this.motionZ *= 0.07D;
             this.move(this.motionX, this.motionY, this.motionZ);
-            if (!this.world.getFluidState(new BlockPos(this.posX, this.posY, this.posZ)).isTagged(FluidTags.WATER) || this.onGround) {
+            if (!this.world.getFluidState(this.getCurrentBlockPos()).isTagged(FluidTags.WATER) || this.onGround) {
                 this.setExpired();
             }
 

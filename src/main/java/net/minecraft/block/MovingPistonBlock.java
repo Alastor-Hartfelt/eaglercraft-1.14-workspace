@@ -38,7 +38,6 @@ public class MovingPistonBlock extends ContainerBlock {
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(TYPE, PistonType.DEFAULT));
     }
 
-
     public TileEntity createNewTileEntity(IBlockReader worldIn) {
         return null;
     }
@@ -100,7 +99,6 @@ public class MovingPistonBlock extends ContainerBlock {
         PistonTileEntity pistontileentity = this.func_220170_a(worldIn, pos);
         return pistontileentity != null ? pistontileentity.getCollisionShape(worldIn, pos) : VoxelShapes.empty();
     }
-
 
     private PistonTileEntity func_220170_a(IBlockReader p_220170_1_, BlockPos p_220170_2_) {
         TileEntity tileentity = p_220170_1_.getTileEntity(p_220170_2_);

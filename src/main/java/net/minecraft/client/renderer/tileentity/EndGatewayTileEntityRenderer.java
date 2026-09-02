@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.tileentity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.DyeColor;
 import net.minecraft.tileentity.EndGatewayTileEntity;
 import net.minecraft.tileentity.EndPortalTileEntity;
@@ -29,7 +30,9 @@ public class EndGatewayTileEntityRenderer extends EndPortalTileEntityRenderer {
         }
 
         super.render(tileEntityIn, x, y, z, partialTicks, destroyStage);
-        GlStateManager.enableFog();
+        if (Minecraft.getInstance().gameSettings.fog) {
+            GlStateManager.enableFog();
+        }
     }
 
     protected int getPasses(double p_191286_1_) {

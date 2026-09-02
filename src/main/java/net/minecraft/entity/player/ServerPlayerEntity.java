@@ -504,7 +504,6 @@ public class ServerPlayerEntity extends PlayerEntity implements IContainerListen
         return this.server.isPVPEnabled();
     }
 
-
     public Entity changeDimension(DimensionType destination) {
         this.invulnerableDimensionChange = true;
         DimensionType dimensiontype = this.dimension;
@@ -649,7 +648,12 @@ public class ServerPlayerEntity extends PlayerEntity implements IContainerListen
     }
 
     public Either<PlayerEntity.SleepResult, Unit> trySleep(BlockPos at) {
-        return null;
+        Either<PlayerEntity.SleepResult, Unit> result = super.trySleep(at);
+        if (result.isRight()) {
+            this.addStat(Stats.CUSTOM.get(Stats.SLEEP_IN_BED));
+            CriteriaTriggers.SLEPT_IN_BED.trigger(this);
+        }
+        return result;
     }
 
     public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
@@ -1130,7 +1134,6 @@ public class ServerPlayerEntity extends PlayerEntity implements IContainerListen
     public long getLastActiveTime() {
         return this.playerLastActiveTime;
     }
-
 
     public ITextComponent getTabListDisplayName() {
         return null;

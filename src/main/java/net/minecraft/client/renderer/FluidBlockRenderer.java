@@ -28,6 +28,8 @@ public class FluidBlockRenderer {
     private final TextureAtlasSprite[] atlasSpritesLava = new TextureAtlasSprite[2];
     private final TextureAtlasSprite[] atlasSpritesWater = new TextureAtlasSprite[2];
     private TextureAtlasSprite atlasSpriteWaterOverlay;
+    private final BlockPos.MutableBlockPos scratchPos = new BlockPos.MutableBlockPos();
+    private final BlockPos.MutableBlockPos scratchPosUp = new BlockPos.MutableBlockPos();
 
     protected void initAtlasSprites() {
         AtlasTexture atlastexture = Minecraft.getInstance().getTextureMap();
@@ -38,14 +40,14 @@ public class FluidBlockRenderer {
         this.atlasSpriteWaterOverlay = atlastexture.getSprite(ModelBakery.LOCATION_WATER_OVERLAY);
     }
 
-    private static boolean isAdjacentFluidSameAs(IBlockReader worldIn, BlockPos pos, Direction side, IFluidState state) {
-        BlockPos blockpos = pos.offset(side);
+    private boolean isAdjacentFluidSameAs(IBlockReader worldIn, BlockPos pos, Direction side, IFluidState state) {
+        BlockPos blockpos = this.scratchPos.setPos(pos).move(side);
         IFluidState ifluidstate = worldIn.getFluidState(blockpos);
         return ifluidstate.getFluid().isEquivalentTo(state.getFluid());
     }
 
-    private static boolean func_209556_a(IBlockReader reader, BlockPos pos, Direction face, float heightIn) {
-        BlockPos blockpos = pos.offset(face);
+    private boolean func_209556_a(IBlockReader reader, BlockPos pos, Direction face, float heightIn) {
+        BlockPos blockpos = this.scratchPos.setPos(pos).move(face);
         BlockState blockstate = reader.getBlockState(blockpos);
         if (blockstate.isSolid()) {
             VoxelShape voxelshape1 = blockstate.getRenderShape(reader, blockpos);
@@ -80,15 +82,18 @@ public class FluidBlockRenderer {
         if (!flag1 && !flag2 && !flag6 && !flag5 && !flag3 && !flag4) {
             return false;
         } else {
+            atextureatlassprite[0].markActive();
+            atextureatlassprite[1].markActive();
             boolean flag7 = false;
             float f3 = 0.5F;
             float f4 = 1.0F;
             float f5 = 0.8F;
             float f6 = 0.6F;
-            float f7 = this.getFluidHeight(reader, pos, fluidStateIn.getFluid());
-            float f8 = this.getFluidHeight(reader, pos.south(), fluidStateIn.getFluid());
-            float f9 = this.getFluidHeight(reader, pos.east().south(), fluidStateIn.getFluid());
-            float f10 = this.getFluidHeight(reader, pos.east(), fluidStateIn.getFluid());
+            Fluid fluid = fluidStateIn.getFluid();
+            float f7 = this.getFluidHeight(reader, pos, 0, 0, fluid);
+            float f8 = this.getFluidHeight(reader, pos, 0, 1, fluid);
+            float f9 = this.getFluidHeight(reader, pos, 1, 1, fluid);
+            float f10 = this.getFluidHeight(reader, pos, 1, 0, fluid);
             double d0 = (double) pos.getX();
             double d1 = (double) pos.getY();
             double d2 = (double) pos.getZ();
@@ -160,7 +165,7 @@ public class FluidBlockRenderer {
                     (float)d0 + 1.0F, (float)d1 + f10, (float)d2, f15, f19,
                     f24, f25, f26, j
                 );
-                if (fluidStateIn.shouldRenderSides(reader, pos.up())) {
+                if (fluidStateIn.shouldRenderSides(reader, this.scratchPos.setPos(pos).move(Direction.UP))) {
                     bufferBuilderIn.addFluidQuad(
                         (float)d0, (float)d1 + f7, (float)d2, f12, f16,
                         (float)d0 + 1.0F, (float)d1 + f10, (float)d2, f15, f19,
@@ -176,7 +181,7 @@ public class FluidBlockRenderer {
                 float f32 = atextureatlassprite[0].getMaxU();
                 float f34 = atextureatlassprite[0].getMinV();
                 float f36 = atextureatlassprite[0].getMaxV();
-                int i2 = this.getCombinedLightUpMax(reader, pos.down());
+                int i2 = this.getCombinedLightUpMax(reader, this.scratchPos.setPos(pos).move(Direction.DOWN));
                 int j2 = i2 >> 16 & '\uffff';
                 int k2 = i2 & '\uffff';
                 float f37 = 0.5F * f;
@@ -241,7 +246,7 @@ public class FluidBlockRenderer {
 
                 if (flag8 && !func_209556_a(reader, pos, direction, Math.max(f33, f35))) {
                     flag7 = true;
-                    BlockPos blockpos = pos.offset(direction);
+                    BlockPos blockpos = this.scratchPos.setPos(pos).move(direction);
                     TextureAtlasSprite textureatlassprite2 = atextureatlassprite[1];
                     if (!flag) {
                         Block block = reader.getBlockState(blockpos).getBlock();
@@ -287,7 +292,7 @@ public class FluidBlockRenderer {
 
     private int getCombinedLightUpMax(IEnviromentBlockReader reader, BlockPos pos) {
         int i = reader.getCombinedLight(pos, 0);
-        int j = reader.getCombinedLight(pos.up(), 0);
+        int j = reader.getCombinedLight(this.scratchPosUp.setPos(pos).move(Direction.UP), 0);
         int k = i & 255;
         int l = j & 255;
         int i1 = i >> 16 & 255;
@@ -295,13 +300,17 @@ public class FluidBlockRenderer {
         return (k > l ? k : l) | (i1 > j1 ? i1 : j1) << 16;
     }
 
-    private float getFluidHeight(IBlockReader reader, BlockPos pos, Fluid fluidIn) {
+    private float getFluidHeight(IBlockReader reader, BlockPos pos, int xOffset, int zOffset, Fluid fluidIn) {
         int i = 0;
         float f = 0.0F;
+        int baseX = pos.getX() + xOffset;
+        int baseY = pos.getY();
+        int baseZ = pos.getZ() + zOffset;
 
         for (int j = 0; j < 4; ++j) {
-            BlockPos blockpos = pos.add(-(j & 1), 0, -(j >> 1 & 1));
-            if (reader.getFluidState(blockpos.up()).getFluid().isEquivalentTo(fluidIn)) {
+            BlockPos blockpos = this.scratchPos.setPos(baseX - (j & 1), baseY, baseZ - (j >> 1 & 1));
+            this.scratchPosUp.setPos(blockpos).move(Direction.UP);
+            if (reader.getFluidState(this.scratchPosUp).getFluid().isEquivalentTo(fluidIn)) {
                 return 1.0F;
             }
 

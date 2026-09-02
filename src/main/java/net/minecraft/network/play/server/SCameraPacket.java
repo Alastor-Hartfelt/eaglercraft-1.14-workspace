@@ -31,7 +31,6 @@ public class SCameraPacket implements IPacket<IClientPlayNetHandler> {
       handler.handleCamera(this);
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public Entity getEntity(World worldIn) {
       return worldIn.getEntityByID(this.entityId);

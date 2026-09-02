@@ -54,7 +54,6 @@ public class Either<L, R> {
         return isLeft ? Optional.of(left) : Optional.empty();
     }
 
-
     public boolean isSuccess() {
         return isRight();
     }
@@ -70,7 +69,6 @@ public class Either<L, R> {
     public boolean ifRight(Object o) {
         return isRight();
     }
-
 
     public boolean ifLeft(Object o) {
         return isLeft;

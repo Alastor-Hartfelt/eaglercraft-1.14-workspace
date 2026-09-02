@@ -118,7 +118,6 @@ public class AdvancementList {
         return this.advancements.values();
     }
 
-
     public Advancement getAdvancement(ResourceLocation id) {
         return this.advancements.get(id);
     }

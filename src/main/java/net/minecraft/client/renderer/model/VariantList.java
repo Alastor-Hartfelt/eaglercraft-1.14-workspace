@@ -52,7 +52,6 @@ public class VariantList implements IUnbakedModel {
         }).collect(Collectors.toSet());
     }
 
-
     public IBakedModel bake(ModelBakery p_217641_1_, Function<ResourceLocation, TextureAtlasSprite> p_217641_2_, ISprite p_217641_3_) {
         if (this.getVariantList().isEmpty()) {
             return null;

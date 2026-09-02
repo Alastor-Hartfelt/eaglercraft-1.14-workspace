@@ -101,7 +101,9 @@ public class StructureTileEntityRenderer extends TileEntityRenderer<StructureBlo
                GlStateManager.enableTexture();
                GlStateManager.enableDepthTest();
                GlStateManager.depthMask(true);
-               GlStateManager.enableFog();
+               if (Minecraft.getInstance().gameSettings.fog) {
+                  GlStateManager.enableFog();
+               }
             }
          }
       }

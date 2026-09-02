@@ -55,12 +55,10 @@ uniform mat4 u_sunShadowMatrixLOD24f;
 #define SUN_SHADOW_MAP_FRAC 0.3333333
 #endif
 #ifdef COMPILE_SUN_SHADOW_SMOOTH
-const vec2 POISSON_DISK[7] = vec2[](
-vec2(-0.077, 0.995), vec2(0.998, 0.015),
-vec2(-0.116, -0.987), vec2(-0.916, 0.359),
-vec2(-0.697, -0.511), vec2(0.740, -0.612),
-vec2(0.675, 0.682));
-#define SMOOTH_SHADOW_SAMPLES (1.0 / 8.0)
+const vec2 POISSON_DISK[4] = vec2[](
+vec2(-0.707, -0.707), vec2(0.707, -0.707),
+vec2(-0.707, 0.707), vec2(0.707, 0.707));
+#define SMOOTH_SHADOW_SAMPLES (1.0 / 5.0)
 #define SMOOTH_SHADOW_RADIUS 0.000488
 #define SMOOTH_SHADOW_POISSON_SAMPLE(idx, tex, lod, vec3Pos, accum, tmpVec2)\
 	tmpVec2 = vec3Pos.xy + POISSON_DISK[idx] * SMOOTH_SHADOW_RADIUS;\
@@ -112,9 +110,6 @@ void main() {
 			SMOOTH_SHADOW_POISSON_SAMPLE(1, u_sunShadowDepthTexture, 0.0, shadowSpacePosition.xyz, shadowSample, tmpVec2)
 			SMOOTH_SHADOW_POISSON_SAMPLE(2, u_sunShadowDepthTexture, 0.0, shadowSpacePosition.xyz, shadowSample, tmpVec2)
 			SMOOTH_SHADOW_POISSON_SAMPLE(3, u_sunShadowDepthTexture, 0.0, shadowSpacePosition.xyz, shadowSample, tmpVec2)
-			SMOOTH_SHADOW_POISSON_SAMPLE(4, u_sunShadowDepthTexture, 0.0, shadowSpacePosition.xyz, shadowSample, tmpVec2)
-			SMOOTH_SHADOW_POISSON_SAMPLE(5, u_sunShadowDepthTexture, 0.0, shadowSpacePosition.xyz, shadowSample, tmpVec2)
-			SMOOTH_SHADOW_POISSON_SAMPLE(6, u_sunShadowDepthTexture, 0.0, shadowSpacePosition.xyz, shadowSample, tmpVec2)
 			shadowSample *= SMOOTH_SHADOW_SAMPLES;
 #endif
 #ifdef COMPILE_COLORED_SHADOW

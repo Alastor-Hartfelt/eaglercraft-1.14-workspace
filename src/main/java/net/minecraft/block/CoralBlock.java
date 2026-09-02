@@ -44,7 +44,6 @@ public class CoralBlock extends Block {
         return false;
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         if (!this.canLive(context.getWorld(), context.getPos())) {
             context.getWorld().getPendingBlockTicks().scheduleTick(context.getPos(), this, 60 + context.getWorld().getRandom().nextInt(40));

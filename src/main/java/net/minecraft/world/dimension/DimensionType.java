@@ -60,16 +60,13 @@ public class DimensionType implements IDynamicSerializable {
         return getKey(this).toString();
     }
 
-
     public static DimensionType getById(int id) {
         return Registry.DIMENSION_TYPE.getByValue(id - -1);
     }
 
-
     public static DimensionType byName(ResourceLocation nameIn) {
         return Registry.DIMENSION_TYPE.getOrDefault(nameIn);
     }
-
 
     public static ResourceLocation getKey(DimensionType dim) {
         return Registry.DIMENSION_TYPE.getKey(dim);
@@ -82,6 +79,5 @@ public class DimensionType implements IDynamicSerializable {
     public <T> T serialize(DynamicOps<T> p_218175_1_) {
         return p_218175_1_.createString(Registry.DIMENSION_TYPE.getKey(this).toString());
     }
-
 
 }

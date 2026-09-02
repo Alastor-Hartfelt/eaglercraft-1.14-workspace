@@ -32,11 +32,6 @@ public class RecipeManager extends JsonReloadListener {
     private Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> recipes = ImmutableMap.of();
     private boolean someRecipesErrored;
 
-    /**
-     * Optional fallback loader for platforms where recipes may not arrive via
-     * network packets (e.g. WASM-GC worker isolation). Register before
-     * connecting to populate the client RecipeManager from local assets.
-     */
     private static Supplier<Collection<IRecipe<?>>> recipeFallback = null;
 
     public static void setRecipeFallback(Supplier<Collection<IRecipe<?>>> loader) {

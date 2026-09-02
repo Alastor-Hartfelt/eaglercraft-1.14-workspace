@@ -120,7 +120,6 @@ public abstract class AbstractHorseEntity extends AnimalEntity implements IInven
         return this.getHorseWatchableBoolean(2);
     }
 
-
     public EaglercraftUUID getOwnerUniqueId() {
         return this.dataManager.get(OWNER_UNIQUE_ID).orElse((EaglercraftUUID) null);
     }
@@ -268,11 +267,9 @@ public abstract class AbstractHorseEntity extends AnimalEntity implements IInven
         return this.getAttribute(JUMP_STRENGTH).getValue();
     }
 
-
     protected SoundEvent getDeathSound() {
         return null;
     }
-
 
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         if (this.rand.nextInt(3) == 0) {
@@ -281,7 +278,6 @@ public abstract class AbstractHorseEntity extends AnimalEntity implements IInven
 
         return null;
     }
-
 
     protected SoundEvent getAmbientSound() {
         if (this.rand.nextInt(10) == 0 && !this.isMovementBlocked()) {
@@ -298,7 +294,6 @@ public abstract class AbstractHorseEntity extends AnimalEntity implements IInven
     public boolean isHorseSaddled() {
         return this.getHorseWatchableBoolean(4);
     }
-
 
     protected SoundEvent getAngrySound() {
         this.makeHorseRear();
@@ -757,7 +752,6 @@ public abstract class AbstractHorseEntity extends AnimalEntity implements IInven
         return !this.isBeingRidden() && !this.isPassenger() && this.isTame() && !this.isChild() && this.getHealth() >= this.getMaxHealth() && this.isInLove();
     }
 
-
     public AgeableEntity createChild(AgeableEntity ageable) {
         return null;
     }
@@ -917,11 +911,9 @@ public abstract class AbstractHorseEntity extends AnimalEntity implements IInven
         }
     }
 
-
     public Entity getControllingPassenger() {
         return this.getPassengers().isEmpty() ? null : this.getPassengers().get(0);
     }
-
 
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);

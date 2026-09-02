@@ -45,7 +45,6 @@ public class MapItemRenderer implements AutoCloseable {
       return mapitemrenderer$instance;
    }
 
-
    public MapItemRenderer.Instance getMapInstanceIfExists(String p_191205_1_) {
       return this.loadedMaps.get(p_191205_1_);
    }
@@ -57,7 +56,6 @@ public class MapItemRenderer implements AutoCloseable {
 
       this.loadedMaps.clear();
    }
-
 
    public MapData getData( MapItemRenderer.Instance p_191207_1_) {
       return p_191207_1_ != null ? p_191207_1_.mapData : null;

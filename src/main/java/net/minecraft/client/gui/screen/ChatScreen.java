@@ -16,7 +16,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -54,6 +54,7 @@ public class ChatScreen extends Screen {
     private ChatScreen.SuggestionsList suggestions;
     private boolean hasEdits;
     private boolean field_212338_z;
+    private net.lax1dude.eaglercraft.notifications.GuiButtonNotifBell notifBellButton;
 
     public ChatScreen(String defaultText) {
         super(NarratorChatListener.field_216868_a);
@@ -70,6 +71,11 @@ public class ChatScreen extends Screen {
         this.inputField.setTextFormatter(this::formatMessage);
         this.inputField.func_212954_a(this::func_212997_a);
         this.children.add(this.inputField);
+        if (!this.mc.isSingleplayer()) {
+            this.addButton(notifBellButton = new net.lax1dude.eaglercraft.notifications.GuiButtonNotifBell(70, this.width - 122, 3, (btn) -> {
+                this.mc.displayGuiScreen(new net.lax1dude.eaglercraft.notifications.GuiScreenNotifications(this));
+            }));
+        }
         this.addButton(new net.minecraft.client.gui.widget.button.Button(this.width - 100, 3, 97, 20, I18n.format("eaglercraft.chat.exit"), (p_213025_1_) -> {
             this.mc.displayGuiScreen((Screen) null);
         }));
@@ -96,6 +102,9 @@ public class ChatScreen extends Screen {
 
     public void tick() {
         this.inputField.tick();
+        if (this.notifBellButton != null && this.mc.player != null) {
+            this.notifBellButton.setUnread(this.mc.player.connection.getNotifManager().getUnread());
+        }
     }
 
     private void func_212997_a(String p_212997_1_) {
@@ -115,7 +124,7 @@ public class ChatScreen extends Screen {
 
             if (super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
                 return true;
-            } else if (p_keyPressed_1_ == 256) {
+            } else if (Screen.isCloseKey(p_keyPressed_1_, p_keyPressed_2_)) {
                 this.mc.displayGuiScreen((Screen) null);
                 return true;
             } else if (p_keyPressed_1_ != 257 && p_keyPressed_1_ != 335) {
@@ -314,6 +323,9 @@ public class ChatScreen extends Screen {
     }
 
     public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
+        if (this.mc.notifRenderer != null && this.mc.notifRenderer.handleClicked(this, (int) p_mouseClicked_1_, (int) p_mouseClicked_3_)) {
+            return true;
+        }
         if (this.suggestions != null && this.suggestions.mouseClicked((int) p_mouseClicked_1_, (int) p_mouseClicked_3_, p_mouseClicked_5_)) {
             return true;
         } else {
@@ -408,7 +420,6 @@ public class ChatScreen extends Screen {
         }
 
     }
-
 
     private static String calculateSuggestionSuffix(String p_208602_0_, String p_208602_1_) {
         return p_208602_1_.startsWith(p_208602_0_) ? p_208602_1_.substring(p_208602_0_.length()) : null;

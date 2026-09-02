@@ -50,7 +50,6 @@ public class DyingPhase extends Phase {
         return 3.0F;
     }
 
-
     public Vec3d getTargetLocation() {
         return this.targetLocation;
     }

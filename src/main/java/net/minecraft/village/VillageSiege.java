@@ -105,7 +105,6 @@ public class VillageSiege {
         }
     }
 
-
     private Vec3d func_225476_a(ServerWorld p_225476_1_, BlockPos p_225476_2_) {
         for (int i = 0; i < 10; ++i) {
             int j = p_225476_2_.getX() + p_225476_1_.rand.nextInt(16) - 8;

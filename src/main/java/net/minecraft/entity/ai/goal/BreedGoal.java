@@ -61,7 +61,6 @@ public class BreedGoal extends Goal {
 
    }
 
-
    private AnimalEntity getNearbyMate() {
       List<AnimalEntity> list = this.world.getTargettableEntitiesWithinAABB(this.mateClass, field_220689_d, this.animal, this.animal.getBoundingBox().grow(8.0D));
       double d0 = Double.MAX_VALUE;

@@ -30,7 +30,6 @@ public enum GossipType {
       this.field_220935_k = p_i50307_7_;
    }
 
-
    public static GossipType func_220929_a(String p_220929_0_) {
       return field_220936_l.get(p_220929_0_);
    }

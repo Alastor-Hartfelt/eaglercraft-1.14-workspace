@@ -169,7 +169,6 @@ public abstract class AbstractRaiderEntity extends PatrollerEntity {
         this.raid = p_213652_1_;
     }
 
-
     public Raid getRaid() {
         return this.raid;
     }
@@ -269,7 +268,6 @@ public abstract class AbstractRaiderEntity extends PatrollerEntity {
 
         return super.attackEntityFrom(source, amount);
     }
-
 
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         this.func_213644_t(this.getType() != EntityType.WITCH || reason != SpawnReason.NATURAL);

@@ -54,7 +54,6 @@ public class WorldSelectionScreen extends Screen {
         }, this.selectionList);
         this.children.add(this.field_212352_g);
         this.children.add(this.selectionList);
-        
         this.selectButton = this.addButton(new Button(this.width / 2 - 154, this.height - 52, 150, 20, I18n.format("selectWorld.select"), (p_214325_1_) -> {
             this.selectionList.func_214376_a().ifPresent(WorldSelectionList.Entry::func_214438_a);
         }));
@@ -102,7 +101,6 @@ public class WorldSelectionScreen extends Screen {
         boolean hover = p_render_1_ > 1 && p_render_2_ > 1 && p_render_1_ < (w * 3 / 4) + 7 &&p_render_2_ < 12;
         drawString(mc.fontRenderer, TextFormatting.UNDERLINE + text, 5, 5, hover ? 0xFFEEEE22 : 0xFFCCCCCC);
 
-
     }
 
     @Override
@@ -128,7 +126,6 @@ public class WorldSelectionScreen extends Screen {
         this.deleteButton.active = p_214324_1_;
         this.renameButton.active = p_214324_1_;
         this.backupButton.active = p_214324_1_;
-        // this.copyButton.active = p_214324_1_; // removed, replaced with backup button
     }
 
     public void removed() {

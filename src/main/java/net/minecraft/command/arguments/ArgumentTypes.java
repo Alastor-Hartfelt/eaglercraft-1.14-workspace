@@ -76,11 +76,9 @@ public class ArgumentTypes {
       register("time", TimeArgument.class, new ArgumentSerializer<>(TimeArgument::func_218091_a));
    }
 
-
    private static ArgumentTypes.Entry<?> get(ResourceLocation id) {
       return ID_TYPE_MAP.get(id);
    }
-
 
    private static ArgumentTypes.Entry<?> get(ArgumentType<?> type) {
       return CLASS_TYPE_MAP.get(type.getClass().getName());
@@ -96,7 +94,6 @@ public class ArgumentTypes {
          entry.serializer.write(type, buffer);
       }
    }
-
 
    public static ArgumentType<?> deserialize(PacketBuffer buffer) {
       ResourceLocation resourcelocation = buffer.readResourceLocation();

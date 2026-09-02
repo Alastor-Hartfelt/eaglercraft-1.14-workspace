@@ -72,7 +72,6 @@ public class Multipart implements IUnbakedModel {
         }).collect(Collectors.toSet());
     }
 
-
     public IBakedModel bake(ModelBakery p_217641_1_, Function<ResourceLocation, TextureAtlasSprite> p_217641_2_, ISprite p_217641_3_) {
         MultipartBakedModel.Builder multipartbakedmodel$builder = new MultipartBakedModel.Builder();
 

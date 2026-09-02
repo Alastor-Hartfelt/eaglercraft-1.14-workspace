@@ -67,7 +67,6 @@ public abstract class AbstractList<E extends AbstractList.AbstractListEntry<E>> 
         return 220;
     }
 
-
     public E getSelected() {
         return this.selected;
     }
@@ -75,7 +74,6 @@ public abstract class AbstractList<E extends AbstractList.AbstractListEntry<E>> 
     public void setSelected(E p_setSelected_1_) {
         this.selected = p_setSelected_1_;
     }
-
 
     public E getFocused() {
         return (E) (super.getFocused());
@@ -110,7 +108,6 @@ public abstract class AbstractList<E extends AbstractList.AbstractListEntry<E>> 
     protected boolean isSelectedItem(int p_isSelectedItem_1_) {
         return Objects.equals(this.getSelected(), this.children().get(p_isSelectedItem_1_));
     }
-
 
     protected final E getEntryAtPosition(double p_getEntryAtPosition_1_, double p_getEntryAtPosition_3_) {
         int i = this.getRowWidth() / 2;

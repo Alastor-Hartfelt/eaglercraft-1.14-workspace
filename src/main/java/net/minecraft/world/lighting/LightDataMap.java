@@ -26,7 +26,6 @@ public abstract class LightDataMap<M extends LightDataMap<M>> {
         return this.arrays.containsKey(sectionPosIn);
     }
 
-
     public NibbleArray getArray(long sectionPosIn) {
         if (this.useCaching) {
             for (int i = 0; i < 2; ++i) {
@@ -53,7 +52,6 @@ public abstract class LightDataMap<M extends LightDataMap<M>> {
             return nibblearray;
         }
     }
-
 
     public NibbleArray removeArray(long sectionPosIn) {
         return this.arrays.remove(sectionPosIn);

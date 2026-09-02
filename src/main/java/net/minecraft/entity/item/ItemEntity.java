@@ -288,7 +288,6 @@ public class ItemEntity extends Entity {
       return false;
    }
 
-
    public Entity changeDimension(DimensionType destination) {
       Entity entity = super.changeDimension(destination);
       if (!this.world.isRemote && entity instanceof ItemEntity) {
@@ -306,7 +305,6 @@ public class ItemEntity extends Entity {
       this.getDataManager().set(ITEM, stack);
    }
 
-
    public EaglercraftUUID getOwnerId() {
       return this.owner;
    }
@@ -314,7 +312,6 @@ public class ItemEntity extends Entity {
    public void setOwnerId( EaglercraftUUID p_200217_1_) {
       this.owner = p_200217_1_;
    }
-
 
    public EaglercraftUUID getThrowerId() {
       return this.thrower;

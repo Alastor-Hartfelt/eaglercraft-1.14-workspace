@@ -22,7 +22,6 @@ public class VirtualAssetsPack extends VanillaPack {
       this.field_195785_b = p_i48115_1_;
    }
 
-
    protected InputStream getInputStreamVanilla(ResourcePackType type, ResourceLocation location) {
       if (type == ResourcePackType.CLIENT_RESOURCES) {
          VFile2 file1 = this.field_195785_b.getFile(location);
@@ -44,7 +43,6 @@ public class VirtualAssetsPack extends VanillaPack {
 
       return super.resourceExists(type, location);
    }
-
 
    protected InputStream getInputStreamVanilla(String pathIn) {
       VFile2 file1 = this.field_195785_b.getFile(pathIn);

@@ -63,7 +63,7 @@ public class NewChatGui extends AbstractGui {
                                 int j2 = 0;
                                 int k2 = -i1 * 9;
                                 fill(-2, k2 - 9, 0 + k + 4, k2, i2 << 24);
-                                String s = chatline.getChatComponent().getFormattedText();
+                                String s = chatline.getChatComponentProfanityFilter().getFormattedText();
                                 GlStateManager.enableBlend();
                                 this.mc.fontRenderer.drawStringWithShadow(s, 0.0F, (float) (k2 - 8), 16777215 + (l1 << 24));
                                 GlStateManager.disableAlphaTest();
@@ -193,7 +193,6 @@ public class NewChatGui extends AbstractGui {
         }
 
     }
-
 
     public ITextComponent getTextComponent(double p_194817_1_, double p_194817_3_) {
         if (!this.getChatOpen()) {

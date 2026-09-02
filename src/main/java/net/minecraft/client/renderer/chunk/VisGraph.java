@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ public class VisGraph {
     private static final int DY = (int) Math.pow(16.0D, 2.0D);
     private static final Direction[] DIRECTIONS = Direction.values();
     private final long[] bitSet = new long[64];
+    private final int[] floodFillQueue = new int[4096];
     private static final int[] INDEX_OF_EDGES = Util.make(new int[1352], (p_209264_0_) -> {
         int i = 0;
         int j = 15;
@@ -36,6 +38,13 @@ public class VisGraph {
     private SetVisibility cachedVisibility = null;
     private boolean dirty = false;
 
+    public void reset() {
+        Arrays.fill(this.bitSet, 0L);
+        this.empty = 4096;
+        this.cachedVisibility = null;
+        this.dirty = false;
+    }
+
     public void setOpaqueCube(BlockPos pos) {
         int index = getIndex(pos);
         this.bitSet[index >> 6] |= (1L << index);
@@ -52,10 +61,14 @@ public class VisGraph {
     }
 
     public SetVisibility computeVisibility() {
+        return this.computeVisibility(new SetVisibility());
+    }
+
+    public SetVisibility computeVisibility(SetVisibility setvisibility) {
         if (!this.dirty && this.cachedVisibility != null) {
             return this.cachedVisibility;
         }
-        SetVisibility setvisibility = new SetVisibility();
+        setvisibility.setAllVisible(false);
         if (4096 - this.empty < 256) {
             setvisibility.setAllVisible(true);
         } else if (this.empty == 0) {
@@ -63,7 +76,7 @@ public class VisGraph {
         } else {
             for (int i : INDEX_OF_EDGES) {
                 if ((this.bitSet[i >> 6] & (1L << i)) == 0) {
-                    setvisibility.setManyVisible(this.floodFill(i));
+                    setvisibility.setManyVisible(this.floodFillMask(i));
                 }
             }
         }
@@ -78,8 +91,19 @@ public class VisGraph {
     }
 
     private Set<Direction> floodFill(int pos) {
+        int facingMask = this.floodFillMask(pos);
         Set<Direction> set = EnumSet.noneOf(Direction.class);
-        int[] queue = new int[4096];
+        for (int i = 0; i < DIRECTIONS.length; ++i) {
+            if ((facingMask & 1 << i) != 0) {
+                set.add(DIRECTIONS[i]);
+            }
+        }
+        return set;
+    }
+
+    private int floodFillMask(int pos) {
+        int facingMask = 0;
+        int[] queue = this.floodFillQueue;
         int head = 0;
         int tail = 0;
         queue[tail++] = pos;
@@ -87,7 +111,7 @@ public class VisGraph {
 
         while (head < tail) {
             int i = queue[head++];
-            this.addEdges(i, set);
+            facingMask |= this.getEdgeMask(i);
 
             for (Direction direction : DIRECTIONS) {
                 int j = this.getNeighborIndexAtFace(i, direction);
@@ -98,31 +122,32 @@ public class VisGraph {
             }
         }
 
-        return set;
+        return facingMask;
     }
 
-    private void addEdges(int pos, Set<Direction> setFacings) {
+    private int getEdgeMask(int pos) {
+        int facingMask = 0;
         int i = pos >> 0 & 15;
         if (i == 0) {
-            setFacings.add(Direction.WEST);
+            facingMask |= 1 << Direction.WEST.ordinal();
         } else if (i == 15) {
-            setFacings.add(Direction.EAST);
+            facingMask |= 1 << Direction.EAST.ordinal();
         }
 
         int j = pos >> 8 & 15;
         if (j == 0) {
-            setFacings.add(Direction.DOWN);
+            facingMask |= 1 << Direction.DOWN.ordinal();
         } else if (j == 15) {
-            setFacings.add(Direction.UP);
+            facingMask |= 1 << Direction.UP.ordinal();
         }
 
         int k = pos >> 4 & 15;
         if (k == 0) {
-            setFacings.add(Direction.NORTH);
+            facingMask |= 1 << Direction.NORTH.ordinal();
         } else if (k == 15) {
-            setFacings.add(Direction.SOUTH);
+            facingMask |= 1 << Direction.SOUTH.ordinal();
         }
-
+        return facingMask;
     }
 
     private int getNeighborIndexAtFace(int pos, Direction facing) {

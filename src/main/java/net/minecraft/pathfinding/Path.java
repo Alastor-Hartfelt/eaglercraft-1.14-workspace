@@ -38,7 +38,6 @@ public class Path {
         return this.currentPathIndex >= this.field_75884_a.size();
     }
 
-
     public PathPoint getFinalPathPoint() {
         return !this.field_75884_a.isEmpty() ? this.field_75884_a.get(this.field_75884_a.size() - 1) : null;
     }

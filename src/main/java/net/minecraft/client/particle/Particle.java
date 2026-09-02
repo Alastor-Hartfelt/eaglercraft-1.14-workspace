@@ -14,11 +14,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.util.stream.Stream;
-
 @OnlyIn(Dist.CLIENT)
 public abstract class Particle {
     private static final AxisAlignedBB EMPTY_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
+    private static final BlockPos.MutableBlockPos BRIGHTNESS_POS = new BlockPos.MutableBlockPos();
     protected final World world;
     protected double prevPosX;
     protected double prevPosY;
@@ -35,7 +34,7 @@ public abstract class Particle {
     protected boolean isExpired;
     protected float width = 0.6F;
     protected float height = 1.8F;
-    protected final Random rand = new Random();
+    protected static final Random rand = new Random();
     protected int age;
     protected int maxAge;
     protected float particleGravity;
@@ -155,11 +154,17 @@ public abstract class Particle {
     }
 
     public void move(double x, double y, double z) {
+        if (!this.canCollide) {
+            this.posX += x;
+            this.posY += y;
+            this.posZ += z;
+            return;
+        }
         double d0 = x;
         double d1 = y;
         double origZ = z;
-        if (this.canCollide && (x != 0.0D || y != 0.0D || z != 0.0D)) {
-            Vec3d vec3d = Entity.func_223307_a((Entity) null, new Vec3d(x, y, z), this.getBoundingBox(), this.world, ISelectionContext.dummy(), new ReuseableStream<>(Stream.empty()));
+        if (x != 0.0D || y != 0.0D || z != 0.0D) {
+            Vec3d vec3d = Entity.func_223307_a((Entity) null, new Vec3d(x, y, z), this.getBoundingBox(), this.world, ISelectionContext.dummy(), ReuseableStream.empty());
             x = vec3d.x;
             y = vec3d.y;
             z = vec3d.z;
@@ -189,8 +194,12 @@ public abstract class Particle {
     }
 
     protected int getBrightnessForRender(float partialTick) {
-        BlockPos blockpos = new BlockPos(this.posX, this.posY, this.posZ);
+        BlockPos blockpos = this.getCurrentBlockPos();
         return this.world.isBlockLoaded(blockpos) ? this.world.getCombinedLight(blockpos, 0) : 0;
+    }
+
+    protected BlockPos.MutableBlockPos getCurrentBlockPos() {
+        return BRIGHTNESS_POS.setPos(this.posX, this.posY, this.posZ);
     }
 
     public boolean isAlive() {

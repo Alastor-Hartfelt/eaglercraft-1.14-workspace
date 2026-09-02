@@ -66,7 +66,6 @@ public class CommandBlockTileEntity extends TileEntity {
       this.setAuto(compound.getBoolean("auto"));
    }
 
-
    public SUpdateTileEntityPacket getUpdatePacket() {
       if (this.isSendToClient()) {
          this.setSendToClient(false);

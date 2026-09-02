@@ -43,20 +43,10 @@ public class ServerStatisticsManager extends StatisticsManager {
     public ServerStatisticsManager(MinecraftServer serverIn, VFile2 statsFileIn) {
         this.server = serverIn;
         this.statsFile = statsFileIn;
-//      if (statsFileIn.exists()) {
-//         try {
-//            this.parseLocal(serverIn.getDataFixer(), FileUtils.readFileToString(statsFileIn));
-//         } catch (IOException ioexception) {
-//            LOGGER.error("Couldn't read statistics file {}", statsFileIn, ioexception);
-//         } catch (JsonParseException jsonparseexception) {
-//            LOGGER.error("Couldn't parse statistics file {}", statsFileIn, jsonparseexception);
-//         }
-//      }
 
     }
 
     public void saveStatFile() {
-
 
     }
 

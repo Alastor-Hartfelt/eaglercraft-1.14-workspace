@@ -5,7 +5,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class FocusableGui extends AbstractGui implements INestedGuiEventHandler {
-   
    private IGuiEventListener focused;
    private boolean isDragging;
 
@@ -17,7 +16,6 @@ public abstract class FocusableGui extends AbstractGui implements INestedGuiEven
       this.isDragging = p_setDragging_1_;
    }
 
-   
    public IGuiEventListener getFocused() {
       return this.focused;
    }

@@ -1218,7 +1218,6 @@ public class StrongholdPieces {
          }
       }
 
-
       protected StructurePiece getNextComponentNormal(StrongholdPieces.Stairs2 p_74986_1_, List<StructurePiece> p_74986_2_, Random p_74986_3_, int p_74986_4_, int p_74986_5_) {
          Direction direction = this.getCoordBaseMode();
          if (direction != null) {
@@ -1237,7 +1236,6 @@ public class StrongholdPieces {
          return null;
       }
 
-
       protected StructurePiece getNextComponentX(StrongholdPieces.Stairs2 p_74989_1_, List<StructurePiece> p_74989_2_, Random p_74989_3_, int p_74989_4_, int p_74989_5_) {
          Direction direction = this.getCoordBaseMode();
          if (direction != null) {
@@ -1255,7 +1253,6 @@ public class StrongholdPieces {
 
          return null;
       }
-
 
       protected StructurePiece getNextComponentZ(StrongholdPieces.Stairs2 p_74987_1_, List<StructurePiece> p_74987_2_, Random p_74987_3_, int p_74987_4_, int p_74987_5_) {
          Direction direction = this.getCoordBaseMode();

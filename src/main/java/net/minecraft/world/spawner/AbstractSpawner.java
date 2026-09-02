@@ -34,7 +34,6 @@ public abstract class AbstractSpawner {
     private int activatingRangeFromPlayer = 16;
     private int spawnRange = 4;
 
-
     private ResourceLocation getEntityId() {
         String s = this.spawnData.getNbt().getString("id");
 

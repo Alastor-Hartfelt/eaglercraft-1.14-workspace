@@ -111,7 +111,6 @@ public abstract class AbstractSkeletonEntity extends MonsterEntity implements IR
         this.setItemStackToSlot(EquipmentSlotType.MAINHAND, new ItemStack(Items.BOW));
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
         this.setEquipmentBasedOnDifficulty(difficultyIn);

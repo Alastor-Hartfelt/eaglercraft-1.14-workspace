@@ -26,7 +26,6 @@ public class NarratorChatListener implements IChatListener {
 
    public void func_216864_a(String p_216864_1_) {
 
-
    }
 
    private static NarratorStatus func_223131_d() {
@@ -38,7 +37,6 @@ public class NarratorChatListener implements IChatListener {
    }
 
    public void func_216865_a(NarratorStatus p_216865_1_) {
-
 
    }
 

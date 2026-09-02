@@ -119,7 +119,6 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
       return advancementprogress;
    }
 
-
    public CriterionProgress getCriterionProgress(String criterionIn) {
       return this.criteria.get(criterionIn);
    }
@@ -134,7 +133,6 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
          return f1 / f;
       }
    }
-
 
    @OnlyIn(Dist.CLIENT)
    public String getProgressText() {
@@ -197,7 +195,6 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
 
       return list;
    }
-
 
    public Date getFirstProgressDate() {
       Date date = null;

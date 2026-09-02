@@ -25,7 +25,7 @@ public class EntitySelectionContext implements ISelectionContext {
 
    @Deprecated
    protected EntitySelectionContext(Entity entityIn) {
-      this(entityIn.isSneaking(), entityIn.getBoundingBox().minY, entityIn instanceof LivingEntity ? ((LivingEntity)entityIn).getHeldItemMainhand().getItem() : Items.AIR);
+      this(entityIn.isSneaking(), entityIn.getBoundingBox().minY, LivingEntity.class.isAssignableFrom(entityIn.getClass()) ? ((LivingEntity)entityIn).getHeldItemMainhand().getItem() : Items.AIR);
    }
 
    public boolean hasItem(Item itemIn) {

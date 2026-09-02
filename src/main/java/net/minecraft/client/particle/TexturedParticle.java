@@ -30,26 +30,46 @@ public abstract class TexturedParticle extends Particle {
         float f6 = (float) (MathHelper.lerp((double) partialTicks, this.prevPosY, this.posY) - interpPosY);
         float f7 = (float) (MathHelper.lerp((double) partialTicks, this.prevPosZ, this.posZ) - interpPosZ);
         int i = this.getBrightnessForRender(partialTicks);
-        int j = i >> 16 & '\uffff';
-        int k = i & '\uffff';
-        Vec3d[] avec3d = new Vec3d[]{new Vec3d((double) (-rotationX * f - rotationXY * f), (double) (-rotationZ * f), (double) (-rotationYZ * f - rotationXZ * f)), new Vec3d((double) (-rotationX * f + rotationXY * f), (double) (rotationZ * f), (double) (-rotationYZ * f + rotationXZ * f)), new Vec3d((double) (rotationX * f + rotationXY * f), (double) (rotationZ * f), (double) (rotationYZ * f + rotationXZ * f)), new Vec3d((double) (rotationX * f - rotationXY * f), (double) (-rotationZ * f), (double) (rotationYZ * f - rotationXZ * f))};
-        if (this.particleAngle != 0.0F) {
-            float f8 = MathHelper.lerp(partialTicks, this.prevParticleAngle, this.particleAngle);
-            float f9 = MathHelper.cos(f8 * 0.5F);
-            float f10 = (float) ((double) MathHelper.sin(f8 * 0.5F) * entityIn.getLookDirection().x);
-            float f11 = (float) ((double) MathHelper.sin(f8 * 0.5F) * entityIn.getLookDirection().y);
-            float f12 = (float) ((double) MathHelper.sin(f8 * 0.5F) * entityIn.getLookDirection().z);
-            Vec3d vec3d = new Vec3d((double) f10, (double) f11, (double) f12);
-
-            for (int l = 0; l < 4; ++l) {
-                avec3d[l] = vec3d.scale(2.0D * avec3d[l].dotProduct(vec3d)).add(avec3d[l].scale((double) (f9 * f9) - vec3d.dotProduct(vec3d))).add(vec3d.crossProduct(avec3d[l]).scale((double) (2.0F * f9)));
-            }
+        if (this.particleAngle == 0.0F) {
+            buffer.addParticleVertex(f5 + (-rotationX * f - rotationXY * f), f6 + (-rotationZ * f),
+                    f7 + (-rotationYZ * f - rotationXZ * f), f2, f4,
+                    this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha, i);
+            buffer.addParticleVertex(f5 + (-rotationX * f + rotationXY * f), f6 + (rotationZ * f),
+                    f7 + (-rotationYZ * f + rotationXZ * f), f2, f3,
+                    this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha, i);
+            buffer.addParticleVertex(f5 + (rotationX * f + rotationXY * f), f6 + (rotationZ * f),
+                    f7 + (rotationYZ * f + rotationXZ * f), f1, f3,
+                    this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha, i);
+            buffer.addParticleVertex(f5 + (rotationX * f - rotationXY * f), f6 + (-rotationZ * f),
+                    f7 + (rotationYZ * f - rotationXZ * f), f1, f4,
+                    this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha, i);
+            return;
         }
+        float angle = MathHelper.lerp(partialTicks, this.prevParticleAngle, this.particleAngle);
+        float qw = MathHelper.cos(angle * 0.5F);
+        float sin = MathHelper.sin(angle * 0.5F);
+        Vec3d look = entityIn.getLookDirection();
+        float qx = sin * (float) look.x;
+        float qy = sin * (float) look.y;
+        float qz = sin * (float) look.z;
+        float vectorScale = qw * qw - qx * qx - qy * qy - qz * qz;
+        float twiceW = 2.0F * qw;
 
-        buffer.pos((double) f5 + avec3d[0].x, (double) f6 + avec3d[0].y, (double) f7 + avec3d[0].z).tex((double) f2, (double) f4).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-        buffer.pos((double) f5 + avec3d[1].x, (double) f6 + avec3d[1].y, (double) f7 + avec3d[1].z).tex((double) f2, (double) f3).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-        buffer.pos((double) f5 + avec3d[2].x, (double) f6 + avec3d[2].y, (double) f7 + avec3d[2].z).tex((double) f1, (double) f3).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-        buffer.pos((double) f5 + avec3d[3].x, (double) f6 + avec3d[3].y, (double) f7 + avec3d[3].z).tex((double) f1, (double) f4).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
+        this.renderRotatedVertex(buffer, -rotationX * f - rotationXY * f, -rotationZ * f, -rotationYZ * f - rotationXZ * f, f5, f6, f7, f2, f4, qx, qy, qz, vectorScale, twiceW, i);
+        this.renderRotatedVertex(buffer, -rotationX * f + rotationXY * f, rotationZ * f, -rotationYZ * f + rotationXZ * f, f5, f6, f7, f2, f3, qx, qy, qz, vectorScale, twiceW, i);
+        this.renderRotatedVertex(buffer, rotationX * f + rotationXY * f, rotationZ * f, rotationYZ * f + rotationXZ * f, f5, f6, f7, f1, f3, qx, qy, qz, vectorScale, twiceW, i);
+        this.renderRotatedVertex(buffer, rotationX * f - rotationXY * f, -rotationZ * f, rotationYZ * f - rotationXZ * f, f5, f6, f7, f1, f4, qx, qy, qz, vectorScale, twiceW, i);
+    }
+
+    private void renderRotatedVertex(BufferBuilder buffer, float x, float y, float z, float centerX, float centerY,
+                                     float centerZ, float u, float v, float qx, float qy, float qz,
+                                     float vectorScale, float twiceW, int light) {
+        float twiceDot = 2.0F * (qx * x + qy * y + qz * z);
+        float rotatedX = twiceDot * qx + vectorScale * x + twiceW * (qy * z - qz * y);
+        float rotatedY = twiceDot * qy + vectorScale * y + twiceW * (qz * x - qx * z);
+        float rotatedZ = twiceDot * qz + vectorScale * z + twiceW * (qx * y - qy * x);
+        buffer.addParticleVertex(centerX + rotatedX, centerY + rotatedY, centerZ + rotatedZ, u, v,
+                this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha, light);
     }
 
     public float getScale(float p_217561_1_) {

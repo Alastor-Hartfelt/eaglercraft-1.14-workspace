@@ -3,17 +3,19 @@ package net.minecraft.client.gui.screen;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.eymenwsmc.CompletableFuture;
-import net.eymenwsmc.CreditsScreen;
+import net.eymenwsmc.java.CompletableFuture;
+import net.eymenwsmc.gui.CreditsScreen;
 import net.eymenwsmc.Util;
 import net.eymenwsmc.gui.UpdateOverlay;
 import net.eymenwsmc.network.NetworkHandler;
 import net.eymenwsmc.socials.GuiSocialInfoScreen;
 import net.eymenwsmc.socials.GuiSocialLoginScreen;
 import net.lax1dude.eaglercraft.*;
+import net.lax1dude.eaglercraft.internal.EnumCursorType;
 import net.lax1dude.eaglercraft.profile.GuiScreenEditProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.AccessibilityScreen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.ImageButton;
@@ -48,6 +50,7 @@ public class MainMenuScreen extends Screen {
     public static final RenderSkyboxCube PANORAMA_RESOURCES = new RenderSkyboxCube(new ResourceLocation("textures/gui/title/background/panorama"));
     private static final ResourceLocation PANORAMA_OVERLAY_TEXTURES = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
     private static final ResourceLocation ACCESSIBILITY_TEXTURES = new ResourceLocation("textures/gui/friends.png");
+    private static final ResourceLocation ACCESSIBILITY_TEXTURES1 = new ResourceLocation("textures/gui/accessibility.png");
     private final boolean showTitleWronglySpelled;
     private static final ResourceLocation SPLASH_TEXTS = new ResourceLocation("texts/splashes.txt");
     private EaglercraftRandom random = new EaglercraftRandom();
@@ -64,7 +67,6 @@ public class MainMenuScreen extends Screen {
     private final boolean showFadeInAnimation;
     private long firstRenderTime;
 
-    // === Update system ===
     private boolean updateAvailable = false;
     private String updateDownloadUrl = null;
     private UpdateOverlay updateOverlay;
@@ -84,23 +86,18 @@ public class MainMenuScreen extends Screen {
 
     }
 
-
-
     public void tick() {
-        NetworkHandler.tick(); // Process incoming WebSocket messages (version check, etc.)
+        NetworkHandler.tick();
 
         if (!updateCheckRequested) {
             if (NetworkHandler.isConnected()) {
-                // Already connected — request version info now
                 NetworkHandler.requestVersionCheck();
                 updateCheckRequested = true;
             } else if (!NetworkHandler.isConnecting) {
-                // Not connected yet — start connecting so we can check version
                 NetworkHandler.connect();
             }
         }
 
-        // Sync overlay state from version info
         if (NetworkHandler.versionCheckDone) {
             boolean hasUpdate = Util.checkForUpdates();
             updateAvailable = hasUpdate;
@@ -157,7 +154,6 @@ public class MainMenuScreen extends Screen {
             IOUtils.closeQuietly((Closeable) iresource);
         }
 
-
         this.widthCopyright = this.font.getStringWidth("Copyright Mojang AB. Do not distribute!");
         this.widthCopyrightRest = this.width - this.widthCopyright - 2;
         int i = 24;
@@ -202,15 +198,17 @@ public class MainMenuScreen extends Screen {
                     int iconX = this.x + 2;
                     int iconY = this.y + 2;
 
-
                     this.blit(iconX, iconY, 0, 0, 16, 16, 16, 16);
 
-                    //tooltip you eagler
                     if (this.isHovered()) {
                         MainMenuScreen.this.renderTooltip(I18n.format("Friends"), mouseX, mouseY);
                     }
                 }
             });
+        }else {
+            this.addButton(new ImageButton(this.width / 2 + 104, j + 72 + 12, 20, 20, 0, 0, 20, ACCESSIBILITY_TEXTURES1, 32, 64, (p_213088_1_) -> {
+                this.mc.displayGuiScreen(new AccessibilityScreen(this, this.mc.gameSettings));
+            }, I18n.format("narrator.button.accessibility")));
         }
         if (this.openGLWarning1 != null) {
             this.openGLWarning1.init(j);
@@ -231,7 +229,7 @@ public class MainMenuScreen extends Screen {
         this.addButton(new Button(this.width / 2 - 100, yIn + rowHeightIn * 1, 200, 20, I18n.format("menu.multiplayer"), (p_213086_1_) -> {
             this.mc.displayGuiScreen(new MultiplayerScreen(this));
         }));
-        this.addButton(new Button(this.width / 2 - 100, yIn + rowHeightIn * 2, 200, 20, I18n.format("Credits"), (p_213095_1_) -> {
+        this.addButton(new Button(this.width / 2 - 100, yIn + rowHeightIn * 2, 200, 20, I18n.format("Fork On Github"), (p_213095_1_) -> {
             this.forkOnGithub();
         }));
     }
@@ -257,7 +255,7 @@ public class MainMenuScreen extends Screen {
     }
 
     private void forkOnGithub() {
-        this.mc.displayGuiScreen(new CreditsScreen());
+        EagRuntime.openLink("https://github.com/Eagler-Versions/eaglercraft-1.14-workspace");
     }
 
     public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
@@ -318,6 +316,27 @@ public class MainMenuScreen extends Screen {
                 s = s + ("release".equalsIgnoreCase(this.mc.getVersionType()) ? "" : "/" + this.mc.getVersionType());
             }
 
+            String lbl = "CREDITS.txt";
+            int w = font.getStringWidth(lbl) * 3 / 4;
+
+            int startX = this.width - w - 4;
+            int endX = this.width;
+            int startY = 0;
+            int endY = 10;
+            boolean isHovered = p_render_1_ >= startX && p_render_1_ <= endX && p_render_2_ >= startY && p_render_2_ <= endY;
+
+            if (isHovered) {
+                Mouse.showCursor(EnumCursorType.HAND);
+                fill(startX, startY, endX, endY, 0x55000099);
+            } else {
+                fill(startX, startY, endX, endY, 0x55200000);
+            }
+            GlStateManager.pushMatrix();
+            GlStateManager.translated((this.width - w - 2), 2.0f, 0.0f);
+            GlStateManager.scalef(0.75f, 0.75f, 0.75f);
+            drawString(font, lbl, 0, 0, 16777215);
+            GlStateManager.popMatrix();
+
             this.drawString(this.font, s1, 2, this.height - 10, 16777215 | l);
             this.drawString(this.font, s, 2, this.height - 20, 16777215 | l);
             this.drawString(this.font, "Copyright Mojang AB. Do not distribute!", this.widthCopyrightRest, this.height - 10, 16777215 | l);
@@ -333,7 +352,6 @@ public class MainMenuScreen extends Screen {
                 widget.setAlpha(f1);
             }
 
-            // Render update overlay if available
             if (this.updateOverlay != null) {
                 this.updateOverlay.render(p_render_1_, p_render_2_, p_render_3_);
             }
@@ -344,6 +362,14 @@ public class MainMenuScreen extends Screen {
     }
 
     public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
+        String lbl = "CREDITS.txt";
+        int w = font.getStringWidth(lbl) * 3 / 4;
+        if (p_mouseClicked_1_ >= (this.width - w - 4) && p_mouseClicked_1_ <= this.width && p_mouseClicked_3_ >= 0 && p_mouseClicked_3_ <= 10) {
+            String resStr = EagRuntime.getResourceString("/assets/eagler/CREDITS.txt");
+            if (resStr != null) {
+                this.mc.displayGuiScreen(new CreditsScreen());
+            }
+        }
         if (super.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_)) {
             return true;
         } else if (this.openGLWarning1 != null && this.openGLWarning1.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_)) {
@@ -354,6 +380,7 @@ public class MainMenuScreen extends Screen {
 
             return false;
         }
+
     }
 
     public void removed() {

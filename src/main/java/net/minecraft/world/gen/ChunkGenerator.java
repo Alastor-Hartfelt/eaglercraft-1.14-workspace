@@ -83,7 +83,6 @@ public abstract class ChunkGenerator<C extends GenerationSettings> {
 
     }
 
-
     public BlockPos findNearestStructure(World worldIn, String name, BlockPos pos, int radius, boolean p_211403_5_) {
         Structure<?> structure = Feature.STRUCTURES.get(name.toLowerCase(Locale.ROOT));
         return structure != null ? structure.findNearest(worldIn, this, pos, radius, p_211403_5_) : null;
@@ -128,7 +127,6 @@ public abstract class ChunkGenerator<C extends GenerationSettings> {
     public boolean hasStructure(Biome biomeIn, Structure<? extends IFeatureConfig> structureIn) {
         return biomeIn.hasStructure(structureIn);
     }
-
 
     public <C extends IFeatureConfig> C getStructureConfig(Biome biomeIn, Structure<C> structureIn) {
         return biomeIn.getStructureConfig(structureIn);

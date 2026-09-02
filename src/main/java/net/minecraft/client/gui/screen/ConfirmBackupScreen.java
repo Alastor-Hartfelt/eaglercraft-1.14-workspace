@@ -74,7 +74,7 @@ public class ConfirmBackupScreen extends Screen {
     }
 
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (p_keyPressed_1_ == 256) {
+        if (Screen.isCloseKey(p_keyPressed_1_, p_keyPressed_2_)) {
             this.mc.displayGuiScreen(this.parentScreen);
             return true;
         } else {

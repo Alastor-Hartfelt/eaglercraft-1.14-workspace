@@ -130,7 +130,6 @@ public class AdvancementTabGui extends AbstractGui {
         return this.type.func_198891_a(p_195627_1_, p_195627_2_, this.index, p_195627_3_, p_195627_5_);
     }
 
-
     public static AdvancementTabGui create(Minecraft p_193936_0_, AdvancementsScreen p_193936_1_, int p_193936_2_, Advancement p_193936_3_) {
         if (p_193936_3_.getDisplay() == null) {
             return null;
@@ -181,7 +180,6 @@ public class AdvancementTabGui extends AbstractGui {
         }
 
     }
-
 
     public AdvancementEntryGui getAdvancementGui(Advancement p_191794_1_) {
         return this.guis.get(p_191794_1_);

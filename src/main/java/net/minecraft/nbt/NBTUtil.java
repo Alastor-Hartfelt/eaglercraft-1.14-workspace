@@ -27,7 +27,6 @@ import java.util.Optional;
 public final class NBTUtil {
     private static final Logger LOGGER = LogManager.getLogger();
 
-
     public static GameProfile readGameProfile(CompoundNBT compound) {
         String s = null;
         String s1 = null;

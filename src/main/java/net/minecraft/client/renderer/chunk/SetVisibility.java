@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.chunk;
 
-import java.util.BitSet;
 import java.util.Set;
 import net.minecraft.util.Direction;
 import net.minecraftforge.api.distmarker.Dist;
@@ -19,6 +18,17 @@ public class SetVisibility {
          }
       }
 
+   }
+
+   public void setManyVisible(int facingMask) {
+      for (int i = 0; i < COUNT_FACES; ++i) {
+         if ((facingMask & 1 << i) == 0) continue;
+         for (int j = 0; j < COUNT_FACES; ++j) {
+            if ((facingMask & 1 << j) != 0) {
+               this.setVisible(FACINGS[i], FACINGS[j], true);
+            }
+         }
+      }
    }
 
    public void setVisible(Direction facing, Direction facing2, boolean value) {

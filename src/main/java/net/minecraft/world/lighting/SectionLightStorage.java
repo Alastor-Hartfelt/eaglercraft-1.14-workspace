@@ -45,17 +45,14 @@ public abstract class SectionLightStorage<M extends LightDataMap<M>> extends Sec
       return this.getArray(sectionPosIn, true) != null;
    }
 
-   
    protected NibbleArray getArray(long sectionPosIn, boolean cached) {
       return this.getArray((M)(cached ? this.cachedLightData : this.uncachedLightData), sectionPosIn);
    }
 
-   
    protected NibbleArray getArray(M map, long sectionPosIn) {
       return map.getArray(sectionPosIn);
    }
 
-   
    public NibbleArray getArray(long sectionPosIn) {
       NibbleArray nibblearray = this.newArrays.get(sectionPosIn);
       return nibblearray != null ? nibblearray : this.getArray(sectionPosIn, false);
@@ -129,7 +126,7 @@ public abstract class SectionLightStorage<M extends LightDataMap<M>> extends Sec
             for(int j = -1; j <= 1; ++j) {
                for(int k = -1; k <= 1; ++k) {
                   for(int l = -1; l <= 1; ++l) {
-                     this.changedLightPositions.add(SectionPos.worldToSection(BlockPos.offset(sectionPosIn, k, l, j)));
+                     this.changedLightPositions.add(SectionPos.withOffset(sectionPosIn, k, l, j));
                   }
                }
             }
@@ -200,6 +197,14 @@ public abstract class SectionLightStorage<M extends LightDataMap<M>> extends Sec
                   this.cancelSectionUpdates(engine, j);
                   this.cachedLightData.setArray(j, nibblearray2);
                   this.dirtyCachedSections.add(j);
+
+                  for(int dx = -1; dx <= 1; ++dx) {
+                     for(int dy = -1; dy <= 1; ++dy) {
+                        for(int dz = -1; dz <= 1; ++dz) {
+                           this.changedLightPositions.add(SectionPos.withOffset(j, dx, dy, dz));
+                        }
+                     }
+                  }
                }
             }
          }

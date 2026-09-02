@@ -46,7 +46,6 @@ public class LootContext {
 
    }
 
-   
    public <T> T get(LootParameter<T> parameter) {
       return (T)this.parameters.get(parameter);
    }
@@ -151,7 +150,6 @@ public class LootContext {
          }
       }
 
-      
       public <T> T get(LootParameter<T> parameter) {
          return (T)this.field_216025_b.get(parameter);
       }

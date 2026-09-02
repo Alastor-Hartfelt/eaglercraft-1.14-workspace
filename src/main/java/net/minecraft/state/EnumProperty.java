@@ -61,7 +61,6 @@ public class EnumProperty<T extends Enum<T> & IStringSerializable> extends Prope
         return i;
     }
 
-
     public static <T extends Enum<T> & IStringSerializable> EnumProperty<T> create(String name, Class<T> clazz, Predicate<T> filter) {
         return create(name, clazz, Arrays.<T>stream(clazz.getEnumConstants()).filter(filter).collect(Collectors.toList()));
     }

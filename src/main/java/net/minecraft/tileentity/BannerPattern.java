@@ -87,7 +87,6 @@ public enum BannerPattern {
       return this.hashname;
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public static BannerPattern byHash(String hash) {
       for(BannerPattern bannerpattern : values()) {

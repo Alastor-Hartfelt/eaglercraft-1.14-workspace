@@ -14,7 +14,6 @@ import net.minecraft.world.server.ServerWorld;
 public class BlockStateInput implements Predicate<CachedBlockInfo> {
    private final BlockState state;
    private final Set<IProperty<?>> properties;
-   
    private final CompoundNBT tag;
 
    public BlockStateInput(BlockState stateIn, Set<IProperty<?>> propertiesIn,  CompoundNBT nbtIn) {

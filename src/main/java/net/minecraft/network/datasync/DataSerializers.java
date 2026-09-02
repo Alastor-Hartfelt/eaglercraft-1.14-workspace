@@ -303,7 +303,6 @@ public class DataSerializers {
       REGISTRY.add(serializer);
    }
 
-
    public static IDataSerializer<?> getSerializer(int id) {
       return REGISTRY.getByValue(id);
    }

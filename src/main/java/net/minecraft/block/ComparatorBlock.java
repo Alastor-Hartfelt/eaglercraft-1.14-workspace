@@ -77,7 +77,6 @@ public class ComparatorBlock extends RedstoneDiodeBlock implements ITileEntityPr
         return i;
     }
 
-
     private ItemFrameEntity findItemFrame(World worldIn, Direction facing, BlockPos pos) {
         List<ItemFrameEntity> list = worldIn.getEntitiesWithinAABB(ItemFrameEntity.class, new AxisAlignedBB((double) pos.getX(), (double) pos.getY(), (double) pos.getZ(), (double) (pos.getX() + 1), (double) (pos.getY() + 1), (double) (pos.getZ() + 1)), (p_210304_1_) -> {
             return p_210304_1_ != null && p_210304_1_.getHorizontalFacing() == facing;

@@ -6,9 +6,7 @@ import net.minecraft.client.renderer.entity.layers.ShulkerColorLayer;
 import net.minecraft.client.renderer.entity.model.ShulkerModel;
 import net.minecraft.entity.monster.ShulkerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -46,9 +44,10 @@ public class ShulkerRenderer extends MobRenderer<ShulkerEntity, ShulkerModel<Shu
             if (livingEntity.getClientTeleportInterp() > 0 && livingEntity.isAttachedToBlock()) {
                 BlockPos blockpos = livingEntity.getOldAttachPos();
                 BlockPos blockpos1 = livingEntity.getAttachmentPos();
-                Vec3d vec3d = new Vec3d((double) blockpos1.getX(), (double) blockpos1.getY(), (double) blockpos1.getZ());
-                Vec3d vec3d1 = new Vec3d((double) blockpos.getX(), (double) blockpos.getY(), (double) blockpos.getZ());
-                if (camera.isBoundingBoxInFrustum(new AxisAlignedBB(vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y, vec3d.z))) {
+                if (camera.isBoxInFrustum(Math.min(blockpos.getX(), blockpos1.getX()),
+                        Math.min(blockpos.getY(), blockpos1.getY()), Math.min(blockpos.getZ(), blockpos1.getZ()),
+                        Math.max(blockpos.getX(), blockpos1.getX()), Math.max(blockpos.getY(), blockpos1.getY()),
+                        Math.max(blockpos.getZ(), blockpos1.getZ()))) {
                     return true;
                 }
             }

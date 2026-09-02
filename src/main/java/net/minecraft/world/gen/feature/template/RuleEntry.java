@@ -37,7 +37,6 @@ public class RuleEntry {
         return this.outputState;
     }
 
-
     public CompoundNBT getOutputNbt() {
         return this.outputNbt;
     }

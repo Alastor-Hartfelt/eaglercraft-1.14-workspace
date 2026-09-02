@@ -14,7 +14,6 @@ public class FolderPackFinder implements IPackFinder {
 
     public <T extends ResourcePackInfo> void addPackInfosToMap(Map<String, T> nameToPackMap, ResourcePackInfo.IFactory<T> packInfoFactory) {
         if (!this.folder.dirExists()) {
-            /* mkdirs removed (         this.folder ) */
         }
 
         java.util.List<net.lax1dude.eaglercraft.internal.vfs2.VFile2> validPacks = new java.util.ArrayList<>();
@@ -26,7 +25,7 @@ public class FolderPackFinder implements IPackFinder {
                 if (relative.endsWith("/pack.mcmeta")) {
                     String dirName = relative.substring(0, relative.length() - 12);
                     if (!dirName.contains("/")) {
-                        validPacks.add(new net.lax1dude.eaglercraft.internal.vfs2.VFile2(folderPath, dirName));
+                        validPacks.add(new net.lax1dude.eaglercraft.internal.vfs2.VFile2(this.folder, dirName));
                     }
                 } else if (relative.endsWith(".zip") && !relative.contains("/")) {
                     validPacks.add(f);

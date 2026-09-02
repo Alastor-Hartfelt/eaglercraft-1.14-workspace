@@ -43,7 +43,6 @@ public abstract class AbstractOptionList<E extends AbstractOptionList.Entry<E>> 
             this.field_214380_a = p_setFocused_1_;
         }
 
-
         public IGuiEventListener getFocused() {
             return this.field_214380_a;
         }

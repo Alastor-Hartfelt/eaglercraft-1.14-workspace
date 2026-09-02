@@ -53,7 +53,6 @@ public abstract class Team {
       public final String name;
       public final int id;
 
-
       public static Team.CollisionRule getByName(String nameIn) {
          return nameMap.get(nameIn);
       }
@@ -81,7 +80,6 @@ public abstract class Team {
       }));
       public final String internalName;
       public final int id;
-
 
       public static Team.Visible getByName(String nameIn) {
          return nameMap.get(nameIn);

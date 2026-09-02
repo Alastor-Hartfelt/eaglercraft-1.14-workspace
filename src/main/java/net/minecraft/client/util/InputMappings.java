@@ -16,7 +16,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class InputMappings {
-   
    private static final MethodHandle field_224792_b;
    private static final int field_224793_c;
    public static final InputMappings.Input INPUT_INVALID;
@@ -44,18 +43,14 @@ public class InputMappings {
       return Keyboard.isKeyDown(Keyboard.getEaglerKeyFromGLFW(p_216506_2_));
    }
 
-
    public static boolean func_224790_a() {
       return  false;
    }
 
-
-   
    public static String func_216507_a(int p_216507_0_) {
       return Keyboard.getKeyName(net.lax1dude.eaglercraft.KeyboardConstants.getEaglerKeyFromGLFW(p_216507_0_));
    }
 
-   
    public static String func_216502_b(int p_216502_0_) {
       return Keyboard.getKeyName(net.lax1dude.eaglercraft.KeyboardConstants.getEaglerKeyFromGLFW(p_216502_0_));
    }
@@ -63,7 +58,6 @@ public class InputMappings {
    static {
       MethodHandle methodhandle = null;
       int i = 0;
-
 
       field_224792_b = methodhandle;
       field_224793_c = i;

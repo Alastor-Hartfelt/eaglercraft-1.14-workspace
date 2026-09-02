@@ -16,45 +16,37 @@ public class RandomPositionGenerator {
         return findRandomTargetBlock(entitycreatureIn, xz, y, (Vec3d) null);
     }
 
-
     public static Vec3d getLandPos(CreatureEntity creature, int maxXZ, int maxY) {
         return func_221024_a(creature, maxXZ, maxY, creature::getBlockPathWeight);
     }
 
-
     public static Vec3d func_221024_a(CreatureEntity p_221024_0_, int p_221024_1_, int p_221024_2_, ToDoubleFunction<BlockPos> p_221024_3_) {
         return generateRandomPos(p_221024_0_, p_221024_1_, p_221024_2_, (Vec3d) null, false, 0.0D, p_221024_3_);
     }
-
 
     public static Vec3d findRandomTargetBlockTowards(CreatureEntity entitycreatureIn, int xz, int y, Vec3d targetVec3) {
         Vec3d vec3d = targetVec3.subtract(entitycreatureIn.posX, entitycreatureIn.posY, entitycreatureIn.posZ);
         return findRandomTargetBlock(entitycreatureIn, xz, y, vec3d);
     }
 
-
     public static Vec3d findRandomTargetTowardsScaled(CreatureEntity p_203155_0_, int xz, int p_203155_2_, Vec3d p_203155_3_, double p_203155_4_) {
         Vec3d vec3d = p_203155_3_.subtract(p_203155_0_.posX, p_203155_0_.posY, p_203155_0_.posZ);
         return generateRandomPos(p_203155_0_, xz, p_203155_2_, vec3d, true, p_203155_4_, p_203155_0_::getBlockPathWeight);
     }
-
 
     public static Vec3d func_223548_b(CreatureEntity p_223548_0_, int p_223548_1_, int p_223548_2_, Vec3d p_223548_3_) {
         Vec3d vec3d = (new Vec3d(p_223548_0_.posX, p_223548_0_.posY, p_223548_0_.posZ)).subtract(p_223548_3_);
         return generateRandomPos(p_223548_0_, p_223548_1_, p_223548_2_, vec3d, false, (double) ((float) Math.PI / 2F), p_223548_0_::getBlockPathWeight);
     }
 
-
     public static Vec3d findRandomTargetBlockAwayFrom(CreatureEntity entitycreatureIn, int xz, int y, Vec3d targetVec3) {
         Vec3d vec3d = (new Vec3d(entitycreatureIn.posX, entitycreatureIn.posY, entitycreatureIn.posZ)).subtract(targetVec3);
         return findRandomTargetBlock(entitycreatureIn, xz, y, vec3d);
     }
 
-
     private static Vec3d findRandomTargetBlock(CreatureEntity entitycreatureIn, int xz, int y, Vec3d targetVec3) {
         return generateRandomPos(entitycreatureIn, xz, y, targetVec3, true, (double) ((float) Math.PI / 2F), entitycreatureIn::getBlockPathWeight);
     }
-
 
     private static Vec3d generateRandomPos(CreatureEntity creature, int p_191379_1_, int p_191379_2_, Vec3d p_191379_3_, boolean p_191379_4_, double p_191379_5_, ToDoubleFunction<BlockPos> p_191379_7_) {
         PathNavigator pathnavigator = creature.getNavigator();
@@ -116,7 +108,6 @@ public class RandomPositionGenerator {
             return null;
         }
     }
-
 
     private static BlockPos getBlockPos(Random p_203156_0_, int p_203156_1_, int p_203156_2_, Vec3d p_203156_3_, double p_203156_4_) {
         if (p_203156_3_ != null && !(p_203156_4_ >= Math.PI)) {

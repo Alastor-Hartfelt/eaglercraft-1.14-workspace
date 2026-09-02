@@ -61,7 +61,6 @@ public class JigsawTileEntity extends TileEntity {
       this.finalState = compound.getString("final_state");
    }
 
-
    public SUpdateTileEntityPacket getUpdatePacket() {
       return new SUpdateTileEntityPacket(this.pos, 12, this.getUpdateTag());
    }

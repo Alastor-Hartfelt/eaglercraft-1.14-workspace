@@ -13,6 +13,5 @@ public interface IAudioStream extends Closeable {
 
    ByteBuffer func_216453_b() throws IOException;
 
-
    ByteBuffer func_216455_a(int p_216455_1_) throws IOException;
 }

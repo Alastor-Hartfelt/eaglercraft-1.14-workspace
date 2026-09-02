@@ -8,7 +8,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import java.util.stream.Collectors;
 
 import net.lax1dude.eaglercraft.IOUtils;
@@ -271,7 +271,9 @@ public class AtlasTexture extends Texture implements ITickableTextureObject {
 
    public TextureAtlasSprite getSprite(ResourceLocation location) {
       TextureAtlasSprite textureatlassprite = this.mapUploadedSprites.get(location);
-      return textureatlassprite == null ? this.missingImage : textureatlassprite;
+      textureatlassprite = textureatlassprite == null ? this.missingImage : textureatlassprite;
+      textureatlassprite.markActive();
+      return textureatlassprite;
    }
 
    public void clear() {
@@ -282,7 +284,6 @@ public class AtlasTexture extends Texture implements ITickableTextureObject {
       this.mapUploadedSprites.clear();
       this.listAnimatedSprites.clear();
    }
-
 
    public void setEnablePBREagler(boolean enable) {
       this.isEaglerPBRMode = enable;

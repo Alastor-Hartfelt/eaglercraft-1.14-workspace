@@ -119,7 +119,6 @@ public class ChunkPrimer implements IChunk {
         this.lightPositions.add(lightPos.toImmutable());
     }
 
-
     public BlockState setBlockState(BlockPos pos, BlockState state, boolean isMoving) {
         int i = pos.getX();
         int j = pos.getY();
@@ -187,7 +186,6 @@ public class ChunkPrimer implements IChunk {
         return set;
     }
 
-
     public TileEntity getTileEntity(BlockPos pos) {
         return this.tileEntities.get(pos);
     }
@@ -239,7 +237,6 @@ public class ChunkPrimer implements IChunk {
         return this.sections;
     }
 
-
     public WorldLightManager getWorldLightManager() {
         return this.field_217334_e;
     }
@@ -274,7 +271,6 @@ public class ChunkPrimer implements IChunk {
 
     public void setLastSaveTime(long saveTime) {
     }
-
 
     public StructureStart getStructureStart(String stucture) {
         return this.structureStartMap.get(stucture);
@@ -381,7 +377,6 @@ public class ChunkPrimer implements IChunk {
     public CompoundNBT getDeferredTileEntity(BlockPos pos) {
         return this.deferredTileEntities.get(pos);
     }
-
 
     public CompoundNBT func_223134_j(BlockPos p_223134_1_) {
         TileEntity tileentity = this.getTileEntity(p_223134_1_);

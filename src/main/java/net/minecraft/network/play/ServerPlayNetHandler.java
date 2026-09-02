@@ -674,7 +674,7 @@ public class ServerPlayNetHandler implements IServerPlayNetHandler {
                             this.player.addMovementStat(this.player.posX - d0, this.player.posY - d1, this.player.posZ - d2);
                             if (!this.player.noClip && !this.player.isSleeping()) {
                                 boolean flag1 = this.func_223133_a(serverworld);
-                                if (flag2 && (flag || !flag1)) {
+                                if (flag2 && (flag || !flag1) && !this.func_217264_d()) {
                                     this.setPlayerLocation(d0, d1, d2, f, f1);
                                     return;
                                 }
@@ -828,7 +828,6 @@ public class ServerPlayNetHandler implements IServerPlayNetHandler {
         }
 
     }
-
 
     private net.lax1dude.eaglercraft.socket.protocol.client.GameProtocolMessageController eaglerMessageController = null;
 
@@ -988,6 +987,7 @@ public class ServerPlayNetHandler implements IServerPlayNetHandler {
     }
 
     public void processUseEntity(CUseEntityPacket packetIn) {
+        System.out.println("[DEBUG] Server received CUseEntityPacket! action=" + packetIn.getAction() + " entityId=" + packetIn.getEntityFromWorld(this.player.getServerWorld()));
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.player.getServerWorld());
         ServerWorld serverworld = this.server.getWorld(this.player.dimension);
         Entity entity = packetIn.getEntityFromWorld(serverworld);
@@ -1209,6 +1209,12 @@ public class ServerPlayNetHandler implements IServerPlayNetHandler {
     public void processClientSettings(CClientSettingsPacket packetIn) {
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.player.getServerWorld());
         this.player.handleClientSettings(packetIn);
+        if (this.server instanceof net.lax1dude.eaglercraft.sp.server.EaglerMinecraftServer) {
+            int viewDistance = net.minecraft.util.math.MathHelper.clamp(packetIn.getViewDistance(), 2, 32);
+            if (viewDistance != this.server.getPlayerList().getViewDistance()) {
+                this.server.getPlayerList().setViewDistance(viewDistance);
+            }
+        }
     }
 
     public void processCustomPayload(CCustomPayloadPacket packetIn) {

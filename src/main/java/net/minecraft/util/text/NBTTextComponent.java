@@ -28,7 +28,6 @@ public abstract class NBTTextComponent extends TextComponent implements ITargete
 
    protected final NBTPathArgument.NBTPath field_218680_d;
 
-
    private static NBTPathArgument.NBTPath func_218672_b(String p_218672_0_) {
       try {
          return (new NBTPathArgument()).parse(new StringReader(p_218672_0_));
@@ -97,7 +96,6 @@ public abstract class NBTTextComponent extends TextComponent implements ITargete
          this.field_218685_f = this.func_218682_b(this.field_218684_e);
       }
 
-
       private ILocationArgument func_218682_b(String p_218682_1_) {
          try {
             return BlockPosArgument.blockPos().parse(new StringReader(p_218682_1_));
@@ -111,7 +109,6 @@ public abstract class NBTTextComponent extends TextComponent implements ITargete
          this.field_218684_e = p_i51295_4_;
          this.field_218685_f = p_i51295_5_;
       }
-
 
       public String func_218683_k() {
          return this.field_218684_e;
@@ -162,7 +159,6 @@ public abstract class NBTTextComponent extends TextComponent implements ITargete
          this.field_218688_e = p_i51292_3_;
          this.field_218689_f = func_218686_b(p_i51292_3_);
       }
-
 
       private static EntitySelector func_218686_b(String p_218686_0_) {
          try {

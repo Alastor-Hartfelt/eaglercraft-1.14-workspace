@@ -58,7 +58,6 @@ public class FleeSunGoal extends Goal {
         this.creature.getNavigator().tryMoveToXYZ(this.shelterX, this.shelterY, this.shelterZ, this.movementSpeed);
     }
 
-
     protected Vec3d findPossibleShelter() {
         Random random = this.creature.getRNG();
         BlockPos blockpos = new BlockPos(this.creature.posX, this.creature.getBoundingBox().minY, this.creature.posZ);

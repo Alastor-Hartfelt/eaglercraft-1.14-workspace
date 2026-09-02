@@ -56,7 +56,6 @@ public class SimpleResource implements IResource {
       return this.metadataInputStream != null;
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public <T> T getMetadata(IMetadataSectionSerializer<T> serializer) {
       if (!this.hasMetadata()) {

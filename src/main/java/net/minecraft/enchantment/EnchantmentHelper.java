@@ -236,7 +236,6 @@ public class EnchantmentHelper {
       return getEnchantmentLevel(Enchantments.CHANNELING, stack) > 0;
    }
 
-
    public static Entry<EquipmentSlotType, ItemStack> func_222189_b(Enchantment p_222189_0_, LivingEntity p_222189_1_) {
       Map<EquipmentSlotType, ItemStack> map = p_222189_0_.getEntityEquipment(p_222189_1_);
       if (map.isEmpty()) {

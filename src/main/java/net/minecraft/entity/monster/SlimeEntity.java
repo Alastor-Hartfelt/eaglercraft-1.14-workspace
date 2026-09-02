@@ -273,7 +273,6 @@ public class SlimeEntity extends MobEntity implements IMob {
         this.isAirBorne = true;
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         int i = this.rand.nextInt(3);
         if (i < 2 && this.rand.nextFloat() < 0.5F * difficultyIn.getClampedAdditionalDifficulty()) {

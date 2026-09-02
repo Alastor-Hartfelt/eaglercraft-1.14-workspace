@@ -25,7 +25,6 @@ public interface DynamicOps<T> {
 
     Type<?> getType(T var1);
 
-
     Optional<Number> getNumberValue(T var1);
 
     default Number getNumberValue(T input, Number defaultValue) {

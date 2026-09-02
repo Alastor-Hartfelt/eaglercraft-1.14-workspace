@@ -18,6 +18,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class ArrowLayer<T extends LivingEntity, M extends EntityModel<T>> extends LayerRenderer<T, M> {
     private final EntityRendererManager field_215336_a;
+    private final Random random = new Random();
 
     public ArrowLayer(LivingRenderer<T, M> rendererIn) {
         super(rendererIn);
@@ -28,7 +29,8 @@ public class ArrowLayer<T extends LivingEntity, M extends EntityModel<T>> extend
         int i = entityIn.getArrowCountInEntity();
         if (i > 0) {
             Entity entity = new ArrowEntity(entityIn.world, entityIn.posX, entityIn.posY, entityIn.posZ);
-            Random random = new Random((long) entityIn.getEntityId());
+            Random random = this.random;
+            random.setSeed((long) entityIn.getEntityId());
             RenderHelper.disableStandardItemLighting();
 
             for (int j = 0; j < i; ++j) {

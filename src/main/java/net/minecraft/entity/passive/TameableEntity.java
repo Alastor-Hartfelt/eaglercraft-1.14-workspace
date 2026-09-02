@@ -146,7 +146,6 @@ public abstract class TameableEntity extends AnimalEntity {
 
     }
 
-
     public EaglercraftUUID getOwnerId() {
         return this.dataManager.get(OWNER_UNIQUE_ID).orElse((EaglercraftUUID) null);
     }
@@ -163,7 +162,6 @@ public abstract class TameableEntity extends AnimalEntity {
         }
 
     }
-
 
     public LivingEntity getOwner() {
         try {

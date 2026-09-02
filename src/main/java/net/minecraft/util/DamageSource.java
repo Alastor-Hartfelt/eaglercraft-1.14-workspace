@@ -130,11 +130,9 @@ public class DamageSource {
         this.damageType = damageTypeIn;
     }
 
-
     public Entity getImmediateSource() {
         return this.getTrueSource();
     }
-
 
     public Entity getTrueSource() {
         return null;
@@ -199,7 +197,6 @@ public class DamageSource {
         Entity entity = this.getTrueSource();
         return entity instanceof PlayerEntity && ((PlayerEntity) entity).abilities.isCreativeMode;
     }
-
 
     public Vec3d getDamageLocation() {
         return null;

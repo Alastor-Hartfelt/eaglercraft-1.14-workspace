@@ -86,7 +86,6 @@ public class TNTEntity extends Entity {
         this.setFuse(compound.getShort("Fuse"));
     }
 
-
     public LivingEntity getTntPlacedBy() {
         return this.tntPlacedBy;
     }

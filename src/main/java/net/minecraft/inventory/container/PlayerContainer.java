@@ -50,7 +50,6 @@ public class PlayerContainer extends RecipeBookContainer<CraftingInventory> {
                     return !itemstack.isEmpty() && !playerIn.isCreative() && EnchantmentHelper.hasBindingCurse(itemstack) ? false : super.canTakeStack(playerIn);
                 }
 
-
                 @OnlyIn(Dist.CLIENT)
                 public String getSlotTexture() {
                     return PlayerContainer.ARMOR_SLOT_TEXTURES[equipmentslottype.getIndex()];

@@ -22,7 +22,9 @@ public class EntityDataManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Map<Class<? extends Entity>, Integer> NEXT_ID_MAP = Maps.newHashMap();
     private final Entity entity;
-    private final Map<Integer, EntityDataManager.DataEntry<?>> entries = Maps.newHashMap();
+
+    private EntityDataManager.DataEntry<?>[] entries = new EntityDataManager.DataEntry<?>[8];
+    private int maxEntryId = -1;
     private boolean empty = true;
     private boolean dirty;
 
@@ -61,7 +63,7 @@ public class EntityDataManager {
         int i = key.getId();
         if (i > 254) {
             throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
-        } else if (this.entries.containsKey(i)) {
+        } else if (i < this.entries.length && this.entries[i] != null) {
             throw new IllegalArgumentException("Duplicate id value for " + i + "!");
         } else if (DataSerializers.getSerializerId(key.getSerializer()) < 0) {
             throw new IllegalArgumentException("Unregistered serializer " + key.getSerializer() + " for " + i + "!");
@@ -72,7 +74,20 @@ public class EntityDataManager {
 
     private <T> void setEntry(DataParameter<T> key, T value) {
         EntityDataManager.DataEntry<T> dataentry = new EntityDataManager.DataEntry<>(key, value);
-        this.entries.put(key.getId(), dataentry);
+        int id = key.getId();
+        if (id >= this.entries.length) {
+            int newLength = this.entries.length;
+            while (newLength <= id) {
+                newLength = Math.min(255, newLength << 1);
+            }
+            EntityDataManager.DataEntry<?>[] newEntries = new EntityDataManager.DataEntry<?>[newLength];
+            System.arraycopy(this.entries, 0, newEntries, 0, this.entries.length);
+            this.entries = newEntries;
+        }
+        this.entries[id] = dataentry;
+        if (id > this.maxEntryId) {
+            this.maxEntryId = id;
+        }
         this.empty = false;
     }
 
@@ -80,7 +95,8 @@ public class EntityDataManager {
 
         EntityDataManager.DataEntry<T> dataentry;
         try {
-            dataentry = (EntityDataManager.DataEntry<T>) this.entries.get(key.getId());
+            int id = key.getId();
+            dataentry = id < this.entries.length ? (EntityDataManager.DataEntry<T>) this.entries[id] : null;
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting synched entity data");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Synched entity data");
@@ -122,12 +138,15 @@ public class EntityDataManager {
         buf.writeByte(255);
     }
 
-
     public List<EntityDataManager.DataEntry<?>> getDirty() {
         List<EntityDataManager.DataEntry<?>> list = null;
         if (this.dirty) {
 
-            for (EntityDataManager.DataEntry<?> dataentry : this.entries.values()) {
+            for (int i = 0; i <= this.maxEntryId; ++i) {
+                EntityDataManager.DataEntry<?> dataentry = this.entries[i];
+                if (dataentry == null) {
+                    continue;
+                }
                 if (dataentry.isDirty()) {
                     dataentry.setDirty(false);
                     if (list == null) {
@@ -146,23 +165,28 @@ public class EntityDataManager {
 
     public void writeEntries(PacketBuffer buf) throws IOException {
 
-        for (EntityDataManager.DataEntry<?> dataentry : this.entries.values()) {
-            writeEntry(buf, dataentry);
+        for (int i = 0; i <= this.maxEntryId; ++i) {
+            EntityDataManager.DataEntry<?> dataentry = this.entries[i];
+            if (dataentry != null) {
+                writeEntry(buf, dataentry);
+            }
         }
 
         buf.writeByte(255);
     }
 
-
     public List<EntityDataManager.DataEntry<?>> getAll() {
         List<EntityDataManager.DataEntry<?>> list = null;
 
-        for (EntityDataManager.DataEntry<?> dataentry : this.entries.values()) {
-            if (list == null) {
-                list = Lists.newArrayList();
-            }
+        for (int i = 0; i <= this.maxEntryId; ++i) {
+            EntityDataManager.DataEntry<?> dataentry = this.entries[i];
+            if (dataentry != null) {
+                if (list == null) {
+                    list = Lists.newArrayList();
+                }
 
-            list.add(dataentry.copy());
+                list.add(dataentry.copy());
+            }
         }
 
         return list;
@@ -179,7 +203,6 @@ public class EntityDataManager {
             dataparameter.getSerializer().write(buf, entry.getValue());
         }
     }
-
 
     public static List<EntityDataManager.DataEntry<?>> readEntries(PacketBuffer buf) throws IOException {
         List<EntityDataManager.DataEntry<?>> list = null;
@@ -210,7 +233,8 @@ public class EntityDataManager {
     public void setEntryValues(List<EntityDataManager.DataEntry<?>> entriesIn) {
 
         for (EntityDataManager.DataEntry<?> dataentry : entriesIn) {
-            EntityDataManager.DataEntry<?> dataentry1 = this.entries.get(dataentry.getKey().getId());
+            int id = dataentry.getKey().getId();
+            EntityDataManager.DataEntry<?> dataentry1 = id < this.entries.length ? this.entries[id] : null;
             if (dataentry1 != null) {
                 this.setEntryValue(dataentry1, dataentry);
                 this.entity.notifyDataManagerChange(dataentry.getKey());
@@ -238,8 +262,11 @@ public class EntityDataManager {
     public void setClean() {
         this.dirty = false;
 
-        for (EntityDataManager.DataEntry<?> dataentry : this.entries.values()) {
-            dataentry.setDirty(false);
+        for (int i = 0; i <= this.maxEntryId; ++i) {
+            EntityDataManager.DataEntry<?> dataentry = this.entries[i];
+            if (dataentry != null) {
+                dataentry.setDirty(false);
+            }
         }
 
     }

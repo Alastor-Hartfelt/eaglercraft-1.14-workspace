@@ -742,7 +742,6 @@ public class WorldInfo {
       return this.enabledDataPacks;
    }
 
-
    public CompoundNBT getCustomBossEvents() {
       return this.customBossEvents;
    }

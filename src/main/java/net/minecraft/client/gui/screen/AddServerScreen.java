@@ -60,10 +60,6 @@ public class AddServerScreen extends Screen {
             this.serverData.setResourceMode(ServerData.ServerResourceMode.values()[(this.serverData.getResourceMode().ordinal() + 1) % ServerData.ServerResourceMode.values().length]);
             this.field_152176_i.setMessage(I18n.format("addServer.resourcePack") + ": " + this.serverData.getResourceMode().getMotd().getFormattedText());
         }));
-//      this.wispButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96, 200, 20, "Connection: " + (this.isWisp ? "Wisp (Vanilla Server)" : "Eaglercraft (Proxy)"), (btn) -> {
-//         this.isWisp = !this.isWisp;
-//         btn.setMessage("Connection: " + (this.isWisp ? "Wisp (Vanilla Server)" : "Eaglercraft (Proxy)"));
-//      }));
         this.field_195179_a = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, I18n.format("addServer.add"), (p_213030_1_) -> {
             this.func_195172_h();
         }));

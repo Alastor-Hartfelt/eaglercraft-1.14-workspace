@@ -52,7 +52,6 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
         this.spawnerLogic.tick();
     }
 
-
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, 1, this.getUpdateTag());
     }

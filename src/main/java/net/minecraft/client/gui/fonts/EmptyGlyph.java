@@ -15,7 +15,6 @@ public class EmptyGlyph extends TexturedGlyph {
     public void render(TextureManager textureManagerIn, boolean isItalic, float x, float y, BufferBuilder buffer, float red, float green, float blue, float alpha) {
     }
 
-
     public ResourceLocation getTextureLocation() {
         return null;
     }

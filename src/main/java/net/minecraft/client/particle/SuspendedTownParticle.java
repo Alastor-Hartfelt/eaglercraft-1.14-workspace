@@ -26,8 +26,9 @@ public class SuspendedTownParticle extends SpriteTexturedParticle {
    }
 
    public void move(double x, double y, double z) {
-      this.setBoundingBox(this.getBoundingBox().offset(x, y, z));
-      this.resetPositionToBB();
+      this.posX += x;
+      this.posY += y;
+      this.posZ += z;
    }
 
    public void tick() {

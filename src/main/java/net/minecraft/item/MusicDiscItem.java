@@ -68,7 +68,6 @@ public class MusicDiscItem extends Item {
         return new TranslationTextComponent(this.getTranslationKey() + ".desc");
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public static MusicDiscItem getBySound(SoundEvent soundIn) {
         return RECORDS.get(soundIn);

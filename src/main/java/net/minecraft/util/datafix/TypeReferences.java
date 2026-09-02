@@ -1,6 +1,5 @@
 package net.minecraft.util.datafix;
 
-
 public class TypeReferences {
    public static final TypeReference LEVEL = () -> {
       return "level";

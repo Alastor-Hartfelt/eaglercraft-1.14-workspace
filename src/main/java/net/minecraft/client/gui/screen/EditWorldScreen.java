@@ -1,14 +1,13 @@
 package net.minecraft.client.gui.screen;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import net.lax1dude.eaglercraft.internal.vfs2.VFile2;
+import net.eymenwsmc.gui.DataPacksScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.client.gui.toasts.ToastGui;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -39,42 +38,16 @@ public class EditWorldScreen extends Screen {
 
     protected void init() {
         this.mc.keyboardListener.enableRepeatEvents(true);
-        Button button = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 24 + 5, 200, 20, I18n.format("selectWorld.edit.resetIcon"), (p_214309_1_) -> {
-            SaveFormat saveformat1 = this.mc.getSaveLoader();
-            p_214309_1_.active = false;
-        }));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 48 + 5, 200, 20, I18n.format("selectWorld.edit.openFolder"), (p_214303_1_) -> {
-            SaveFormat saveformat1 = this.mc.getSaveLoader();
-            Util.getOSType().openFile(saveformat1.getFile(this.worldId, "icon.png").getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(saveformat1.getFile(this.worldId, "icon.png").getParent()) : null);
-        }));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72 + 5, 200, 20, I18n.format("selectWorld.edit.backup"), (p_214304_1_) -> {
-            SaveFormat saveformat1 = this.mc.getSaveLoader();
-            createBackup(saveformat1, this.worldId);
-            this.field_214311_b.accept(false);
-        }));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 5, 200, 20, I18n.format("selectWorld.edit.backupFolder"), (p_214302_1_) -> {
-            SaveFormat saveformat1 = this.mc.getSaveLoader();
-            VFile2 path = saveformat1.getBackupsFolder();
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 24 + 5, 200, 20, I18n.format("selectWorld.edit.dataPack"), (p_214309_1_) -> {
+            this.mc.displayGuiScreen(new DataPacksScreen(this, this.worldId));
 
-
-            Util.getOSType().openFile(path);
         }));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, I18n.format("selectWorld.edit.optimize"), (p_214310_1_) -> {
-            this.mc.displayGuiScreen(new ConfirmBackupScreen(this, (p_214305_1_, p_214305_2_) -> {
-                if (p_214305_1_) {
-                    createBackup(this.mc.getSaveLoader(), this.worldId);
-                }
-
-                this.mc.displayGuiScreen(new OptimizeWorldScreen(this.field_214311_b, this.worldId, this.mc.getSaveLoader(), p_214305_2_));
-            }, new TranslationTextComponent("optimizeWorld.confirm.title"), new TranslationTextComponent("optimizeWorld.confirm.description"), true));
-        }));
-        this.saveButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20, I18n.format("selectWorld.edit.save"), (p_214308_1_) -> {
+        this.saveButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 168 + 5, 98, 20, I18n.format("selectWorld.edit.save"), (p_214308_1_) -> {
             this.saveChanges();
         }));
-        this.addButton(new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, I18n.format("gui.cancel"), (p_214306_1_) -> {
+        this.addButton(new Button(this.width / 2 + 2, this.height / 4 + 168 + 5, 98, 20, I18n.format("gui.cancel"), (p_214306_1_) -> {
             this.field_214311_b.accept(false);
         }));
-        button.active = this.mc.getSaveLoader().getFile(this.worldId, "icon.png").exists();
         SaveFormat saveformat = this.mc.getSaveLoader();
         WorldInfo worldinfo = saveformat.getWorldInfo(this.worldId);
         String s = worldinfo == null ? "" : worldinfo.getWorldName();

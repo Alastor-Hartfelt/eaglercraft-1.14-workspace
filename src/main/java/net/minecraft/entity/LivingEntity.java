@@ -398,7 +398,6 @@ public abstract class LivingEntity extends Entity {
         return this.rand;
     }
 
-
     public LivingEntity getRevengeTarget() {
         return this.revengeTarget;
     }
@@ -411,7 +410,6 @@ public abstract class LivingEntity extends Entity {
         this.revengeTarget = livingBase;
         this.revengeTimer = this.ticksExisted;
     }
-
 
     public LivingEntity getLastAttackedEntity() {
         return this.lastAttackedEntity;
@@ -691,7 +689,6 @@ public abstract class LivingEntity extends Entity {
         return this.activePotionsMap.containsKey(potionIn);
     }
 
-
     public EffectInstance getActivePotionEffect(Effect potionIn) {
         return this.activePotionsMap.get(potionIn);
     }
@@ -728,7 +725,6 @@ public abstract class LivingEntity extends Entity {
     public boolean isEntityUndead() {
         return this.getCreatureAttribute() == CreatureAttribute.UNDEAD;
     }
-
 
     public EffectInstance removeActivePotionEffect(Effect potioneffectin) {
         return this.activePotionsMap.remove(potioneffectin);
@@ -981,7 +977,6 @@ public abstract class LivingEntity extends Entity {
         }
     }
 
-
     public DamageSource getLastDamageSource() {
         if (this.world.getGameTime() - this.lastDamageStamp > 40L) {
             this.lastDamageSource = null;
@@ -1131,11 +1126,9 @@ public abstract class LivingEntity extends Entity {
         }
     }
 
-
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         return SoundEvents.ENTITY_GENERIC_HURT;
     }
-
 
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_GENERIC_DEATH;
@@ -1290,7 +1283,6 @@ public abstract class LivingEntity extends Entity {
     public CombatTracker getCombatTracker() {
         return this.combatTracker;
     }
-
 
     public LivingEntity getAttackingEntity() {
         if (this.combatTracker.getBestAttacker() != null) {
@@ -2673,7 +2665,6 @@ public abstract class LivingEntity extends Entity {
         this.setPose(Pose.STANDING);
         this.clearBedPosition();
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public Direction getBedDirection() {

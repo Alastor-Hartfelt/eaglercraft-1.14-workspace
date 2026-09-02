@@ -102,7 +102,6 @@ public abstract class AbstractMinecartEntity extends Entity {
         this.dataManager.register(SHOW_BLOCK, false);
     }
 
-
     public AxisAlignedBB getCollisionBox(Entity entityIn) {
         return entityIn.canBePushed() ? entityIn.getBoundingBox() : null;
     }
@@ -452,7 +451,6 @@ public abstract class AbstractMinecartEntity extends Entity {
         this.setMotion(this.getMotion().mul(d0, 0.0D, d0));
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public Vec3d getPosOffset(double x, double y, double z, double offset) {
         int i = MathHelper.floor(x);
@@ -489,7 +487,6 @@ public abstract class AbstractMinecartEntity extends Entity {
             return null;
         }
     }
-
 
     public Vec3d getPos(double p_70489_1_, double p_70489_3_, double p_70489_5_) {
         int i = MathHelper.floor(p_70489_1_);

@@ -108,7 +108,6 @@ public abstract class LavaFluid extends FlowingFluid {
         return pos.getY() >= 0 && pos.getY() < 256 && !worldIn.isBlockLoaded(pos) ? false : worldIn.getBlockState(pos).getMaterial().isFlammable();
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public IParticleData getDripParticleData() {
         return ParticleTypes.DRIPPING_LAVA;

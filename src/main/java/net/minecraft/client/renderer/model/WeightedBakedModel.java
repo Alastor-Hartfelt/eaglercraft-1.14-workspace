@@ -62,7 +62,6 @@ public class WeightedBakedModel implements IBakedModel {
          return this;
       }
 
-
       public IBakedModel build() {
          if (this.listItems.isEmpty()) {
             return null;

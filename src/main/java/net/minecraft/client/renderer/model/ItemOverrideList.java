@@ -37,7 +37,6 @@ public class ItemOverrideList {
 
     }
 
-
     public IBakedModel getModelWithOverrides(IBakedModel model, ItemStack stack, World worldIn, LivingEntity entityIn) {
         if (!this.overrides.isEmpty()) {
             for (int i = 0; i < this.overrides.size(); ++i) {

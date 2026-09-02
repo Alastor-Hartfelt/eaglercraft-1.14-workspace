@@ -76,7 +76,6 @@ public class RaidManager extends WorldSavedData {
         }
     }
 
-
     public Raid badOmenTick(ServerPlayerEntity p_215170_1_) {
         if (p_215170_1_.isSpectator()) {
             return null;
@@ -176,7 +175,6 @@ public class RaidManager extends WorldSavedData {
     private int incrementNextId() {
         return ++this.nextAvailableId;
     }
-
 
     public Raid findRaid(BlockPos p_215174_1_, int distance) {
         Raid raid = null;

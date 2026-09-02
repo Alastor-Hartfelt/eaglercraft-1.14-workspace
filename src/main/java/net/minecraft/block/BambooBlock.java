@@ -63,7 +63,6 @@ public class BambooBlock extends Block implements IGrowable {
       return SHAPE_COLLISION.withOffset(vec3d.x, vec3d.y, vec3d.z);
    }
 
-
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       IFluidState ifluidstate = context.getWorld().getFluidState(context.getPos());
       if (!ifluidstate.isEmpty()) {

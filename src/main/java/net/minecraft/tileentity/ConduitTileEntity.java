@@ -68,7 +68,6 @@ public class ConduitTileEntity extends TileEntity implements ITickableTileEntity
         return compound;
     }
 
-
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, 5, this.getUpdateTag());
     }
@@ -212,7 +211,6 @@ public class ConduitTileEntity extends TileEntity implements ITickableTileEntity
         int k = this.pos.getZ();
         return (new AxisAlignedBB((double) i, (double) j, (double) k, (double) (i + 1), (double) (j + 1), (double) (k + 1))).grow(8.0D);
     }
-
 
     private LivingEntity findExistingTarget() {
         List<LivingEntity> list = this.world.getEntitiesWithinAABB(LivingEntity.class, this.getAreaOfEffect(), (p_205032_1_) -> {

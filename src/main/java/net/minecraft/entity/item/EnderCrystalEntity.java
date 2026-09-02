@@ -123,7 +123,6 @@ public class EnderCrystalEntity extends Entity {
         this.getDataManager().set(BEAM_TARGET, Optional.ofNullable(beamTarget));
     }
 
-
     public BlockPos getBeamTarget() {
         return this.getDataManager().get(BEAM_TARGET).orElse((BlockPos) null);
     }

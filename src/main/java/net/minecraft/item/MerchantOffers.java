@@ -19,7 +19,6 @@ public class MerchantOffers extends ArrayList<MerchantOffer> {
 
     }
 
-
     public MerchantOffer func_222197_a(ItemStack p_222197_1_, ItemStack p_222197_2_, int p_222197_3_) {
         if (p_222197_3_ > 0 && p_222197_3_ < this.size()) {
             MerchantOffer merchantoffer1 = this.get(p_222197_3_);

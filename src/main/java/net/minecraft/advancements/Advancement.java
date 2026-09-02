@@ -66,11 +66,9 @@ public class Advancement {
         return new Advancement.Builder(this.parent == null ? null : this.parent.getId(), this.display, this.rewards, this.criteria, this.requirements);
     }
 
-
     public Advancement getParent() {
         return this.parent;
     }
-
 
     public DisplayInfo getDisplay() {
         return this.display;

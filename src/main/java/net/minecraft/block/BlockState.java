@@ -297,7 +297,6 @@ public class BlockState extends StateHolder<Block, BlockState> implements IState
       return this.getBlock().needsPostProcessing(this, worldIn, pos);
    }
 
-
    public INamedContainerProvider getContainer(World worldIn, BlockPos pos) {
       return this.getBlock().getContainer(this, worldIn, pos);
    }
@@ -377,8 +376,6 @@ public class BlockState extends StateHolder<Block, BlockState> implements IState
 
       return blockstate;
    }
-
-
 
    static final class Cache {
       private static final Direction[] DIRECTIONS = Direction.values();

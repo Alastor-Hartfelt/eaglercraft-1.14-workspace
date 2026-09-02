@@ -10,7 +10,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class SQueryNBTResponsePacket implements IPacket<IClientPlayNetHandler> {
    private int transactionId;
-   
    private CompoundNBT tag;
 
    public SQueryNBTResponsePacket() {
@@ -40,7 +39,6 @@ public class SQueryNBTResponsePacket implements IPacket<IClientPlayNetHandler> {
       return this.transactionId;
    }
 
-   
    @OnlyIn(Dist.CLIENT)
    public CompoundNBT getTag() {
       return this.tag;

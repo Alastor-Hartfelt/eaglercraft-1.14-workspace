@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.lax1dude.eaglercraft.internal.EnumFireKeyboardEvent;
+import net.lax1dude.eaglercraft.internal.EnumTouchEvent;
 import net.lax1dude.eaglercraft.internal.teavm.TeaVMUtils;
 import net.lax1dude.eaglercraft.internal.teavm.VisualViewport;
 
@@ -37,6 +39,9 @@ import net.lax1dude.eaglercraft.internal.teavm.ClientMain;
 import net.lax1dude.eaglercraft.internal.teavm.EarlyLoadScreen;
 import net.lax1dude.eaglercraft.internal.teavm.InputEvent;
 import net.lax1dude.eaglercraft.internal.teavm.LegacyKeycodeTranslator;
+import net.lax1dude.eaglercraft.internal.teavm.OffsetTouch;
+import net.lax1dude.eaglercraft.internal.teavm.SortedTouchEvent;
+import net.lax1dude.eaglercraft.internal.teavm.TouchEvent;
 import net.lax1dude.eaglercraft.internal.teavm.WebGLBackBuffer;
 
 /**
@@ -158,6 +163,44 @@ public class PlatformInput {
 
 	public static int touchOffsetXTeaVM = 0;
 	public static int touchOffsetYTeaVM = 0;
+	private static HTMLElement touchKeyboardOpenZone = null;
+	private static int touchOpenZoneX = 0;
+	private static int touchOpenZoneY = 0;
+	private static int touchOpenZoneW = 0;
+	private static int touchOpenZoneH = 0;
+	private static HTMLFormElement touchKeyboardForm = null;
+	private static HTMLInputElement touchKeyboardField = null;
+	private static boolean shownTouchKeyboardEventWarning = false;
+	private static boolean shownLegacyTouchKeyboardWarning = false;
+	private static boolean showniOSReturnTouchKeyboardWarning = false;
+	private static double lastTouchKeyboardEvtA = 0.0;
+	private static double lastTouchKeyboardEvtB = 0.0;
+	private static double lastTouchKeyboardEvtC = 0.0;
+
+	private static EventListener<?> touchKeyboardOpenZone_touchstart = null;
+	private static EventListener<?> touchKeyboardOpenZone_touchend = null;
+	private static EventListener<?> touchKeyboardOpenZone_touchmove = null;
+
+	private static final List<SortedTouchEvent> touchEvents = new LinkedList<>();
+
+	private static SortedTouchEvent currentTouchState = null;
+	private static SortedTouchEvent currentTouchEvent = null;
+
+	private static final Map<Integer,Integer> touchIDtoUID = new HashMap<>();
+	private static int touchUIDnum = 0;
+
+	private static final SortedTouchEvent.ITouchUIDMapper touchUIDMapperCreate = (idx) -> {
+		Integer ret = touchIDtoUID.get(idx);
+		if(ret != null) return ret.intValue();
+		int r = touchUIDnum++;
+		touchIDtoUID.put(idx, r);
+		return r;
+	};
+
+	private static final SortedTouchEvent.ITouchUIDMapper touchUIDMapper = (idx) -> {
+		Integer ret = touchIDtoUID.get(idx);
+		return ret != null ? ret.intValue() : -1;
+	};
 
 	private static int windowWidth = -1;
 	private static int windowHeight = -1;
@@ -234,6 +277,33 @@ public class PlatformInput {
 		lastWasResizedVisualViewportW = -2;
 		lastWasResizedVisualViewportH = -2;
 		hasShownPressAnyKey = false;
+		touchOpenZoneX = 0;
+		touchOpenZoneY = 0;
+		touchOpenZoneW = 0;
+		touchOpenZoneH = 0;
+		touchKeyboardForm = null;
+		touchKeyboardField = null;
+		shownLegacyTouchKeyboardWarning = false;
+		shownTouchKeyboardEventWarning = false;
+		showniOSReturnTouchKeyboardWarning = false;
+		lastTouchKeyboardEvtA = 0.0;
+		lastTouchKeyboardEvtB = 0.0;
+		lastTouchKeyboardEvtC = 0.0;
+		touchKeyboardOpenZone = win.getDocument().createElement("div");
+		touchKeyboardOpenZone.getClassList().add("_eaglercraftX_keyboard_open_zone");
+		CSSStyleDeclaration decl = touchKeyboardOpenZone.getStyle();
+		decl.setProperty("display", "none");
+		decl.setProperty("position", "absolute");
+		decl.setProperty("background-color", "transparent");
+		decl.setProperty("top", "0px");
+		decl.setProperty("left", "0px");
+		decl.setProperty("width", "0px");
+		decl.setProperty("height", "0px");
+		decl.setProperty("z-index", "100");
+		decl.setProperty("touch-action", "pan-x pan-y");
+		decl.setProperty("-webkit-touch-callout", "none");
+		decl.setProperty("-webkit-tap-highlight-color", "rgba(255, 255, 255, 0)");
+		parent.appendChild(touchKeyboardOpenZone);
 		
 		PlatformRuntime.logger.info("Loading keyboard layout data");
 		
@@ -331,6 +401,79 @@ public class PlatformInput {
 			@Override
 			public void handleEvent(MouseEvent evt) {
 				isMouseOverWindow = false;
+			}
+		});
+		canvas.addEventListener("touchstart", touchstart = new EventListener<TouchEvent>() {
+			@Override
+			public void handleEvent(TouchEvent evt) {
+				evt.preventDefault();
+				evt.stopPropagation();
+				SortedTouchEvent sorted = new SortedTouchEvent(evt, touchUIDMapperCreate);
+				currentTouchState = sorted;
+				synchronized(touchEvents) {
+					touchEvents.add(sorted);
+					if(touchEvents.size() > 64) {
+						touchEvents.remove(0);
+					}
+				}
+				touchCloseDeviceKeyboard0(false);
+			}
+		});
+		canvas.addEventListener("touchend", touchend = new EventListener<TouchEvent>() {
+			@Override
+			public void handleEvent(TouchEvent evt) {
+				evt.preventDefault();
+				evt.stopPropagation();
+				SortedTouchEvent sorted = new SortedTouchEvent(evt, touchUIDMapper);
+				currentTouchState = sorted;
+				List<OffsetTouch> lst = sorted.getEventTouches();
+				int len = lst.size();
+				for (int i = 0; i < len; ++i) {
+					touchIDtoUID.remove(lst.get(i).touch.getIdentifier());
+				}
+				synchronized(touchEvents) {
+					touchEvents.add(sorted);
+					if(touchEvents.size() > 64) {
+						touchEvents.remove(0);
+					}
+				}
+			}
+		});
+		canvas.addEventListener("touchmove", touchmove = new EventListener<TouchEvent>() {
+			@Override
+			public void handleEvent(TouchEvent evt) {
+				evt.preventDefault();
+				evt.stopPropagation();
+				SortedTouchEvent sorted = new SortedTouchEvent(evt, touchUIDMapperCreate);
+				currentTouchState = sorted;
+				if(hasShownPressAnyKey) {
+					synchronized(touchEvents) {
+						touchEvents.add(sorted);
+						if(touchEvents.size() > 64) {
+							touchEvents.remove(0);
+						}
+					}
+				}
+			}
+		});
+		canvas.addEventListener("touchcancel", touchcancel = new EventListener<TouchEvent>() {
+			@Override
+			public void handleEvent(TouchEvent evt) {
+				SortedTouchEvent sorted = new SortedTouchEvent(evt, touchUIDMapper);
+				currentTouchState = sorted;
+				List<OffsetTouch> lst = sorted.getEventTouches();
+				int len = lst.size();
+				for (int i = 0; i < len; ++i) {
+					touchIDtoUID.remove(lst.get(i).touch.getIdentifier());
+				}
+				if(hasShownPressAnyKey) {
+					synchronized(touchEvents) {
+						touchEvents.add(sorted);
+						if(touchEvents.size() > 64) {
+							touchEvents.remove(0);
+						}
+					}
+				}
 			}
 		});
 		win.addEventListener("keydown", keydown = new EventListener<KeyboardEvent>() {
@@ -436,6 +579,28 @@ public class PlatformInput {
 						keyEvents.remove(0);
 					}
 				}
+			}
+		});
+		touchKeyboardOpenZone.addEventListener("touchstart", touchKeyboardOpenZone_touchstart = new EventListener<TouchEvent>() {
+			@Override
+			public void handleEvent(TouchEvent evt) {
+				evt.preventDefault();
+				evt.stopPropagation();
+			}
+		});
+		touchKeyboardOpenZone.addEventListener("touchend", touchKeyboardOpenZone_touchend = new EventListener<TouchEvent>() {
+			@Override
+			public void handleEvent(TouchEvent evt) {
+				evt.preventDefault();
+				evt.stopPropagation();
+				touchOpenDeviceKeyboard();
+			}
+		});
+		touchKeyboardOpenZone.addEventListener("touchmove", touchKeyboardOpenZone_touchmove = new EventListener<TouchEvent>() {
+			@Override
+			public void handleEvent(TouchEvent evt) {
+				evt.preventDefault();
+				evt.stopPropagation();
 			}
 		});
 		canvas.addEventListener("wheel", wheel = new EventListener<WheelEvent>() {
@@ -711,6 +876,9 @@ public class PlatformInput {
 
 	public static void update() {
 		update(0);
+	}
+
+	public static void pollEvents() {
 	}
 
 	private static double syncTimer = 0.0;
@@ -1020,6 +1188,29 @@ public class PlatformInput {
 		enableRepeatEvents = b;
 	}
 
+	
+
+	public static void keyboardFireEvent(EnumFireKeyboardEvent eventType, int eagKey, char keyChar) {
+		synchronized(keyEvents) {
+			switch(eventType) {
+			case KEY_DOWN:
+				keyEvents.add(new VKeyEvent(-1, 0, eagKey, keyChar, EVENT_KEY_DOWN));
+				break;
+			case KEY_UP:
+				keyEvents.add(new VKeyEvent(-1, 0, eagKey, '\0', EVENT_KEY_UP));
+				break;
+			case KEY_REPEAT:
+				keyEvents.add(new VKeyEvent(-1, 0, eagKey, keyChar, EVENT_KEY_REPEAT));
+				break;
+			default:
+				throw new UnsupportedOperationException();
+			}
+			if(keyEvents.size() > 64) {
+				keyEvents.remove(0);
+			}
+		}
+	}
+
 	public static boolean keyboardAreKeysLocked() {
 		return lockKeys;
 	}
@@ -1298,6 +1489,47 @@ public class PlatformInput {
 			}
 			vsyncSaveLockInterval = -1;
 		}
+		if(touchstart != null) {
+			canvas.removeEventListener("touchstart", touchstart);
+			touchstart = null;
+		}
+		if(touchmove != null) {
+			canvas.removeEventListener("touchmove", touchmove);
+			touchmove = null;
+		}
+		if(touchend != null) {
+			canvas.removeEventListener("touchend", touchend);
+			touchend = null;
+		}
+		if(touchcancel != null) {
+			canvas.removeEventListener("touchcancel", touchcancel);
+			touchcancel = null;
+		}
+		if(touchKeyboardField != null) {
+			touchKeyboardField.blur();
+			if(parent != null) {
+				parent.removeChild(touchKeyboardField);
+			}
+			touchKeyboardField = null;
+		}
+		if(touchKeyboardOpenZone != null) {
+			if(touchKeyboardOpenZone_touchstart != null) {
+				touchKeyboardOpenZone.removeEventListener("touchstart", touchKeyboardOpenZone_touchstart);
+				touchKeyboardOpenZone_touchstart = null;
+			}
+			if(touchKeyboardOpenZone_touchend != null) {
+				touchKeyboardOpenZone.removeEventListener("touchend", touchKeyboardOpenZone_touchend);
+				touchKeyboardOpenZone_touchend = null;
+			}
+			if(touchKeyboardOpenZone_touchmove != null) {
+				touchKeyboardOpenZone.removeEventListener("touchmove", touchKeyboardOpenZone_touchmove);
+				touchKeyboardOpenZone_touchmove = null;
+			}
+			if(parent != null) {
+				parent.removeChild(touchKeyboardOpenZone);
+			}
+			touchKeyboardOpenZone = null;
+		}
 		try {
 			callExitPointerLock(win.getDocument());
 		}catch(Throwable t) {
@@ -1370,6 +1602,7 @@ public class PlatformInput {
 	public static void clearEvenBuffers() {
 		mouseEvents.clear();
 		keyEvents.clear();
+		touchEvents.clear();
 	}
 
 	@JSBody(params = {}, script = "return window.matchMedia(\"(display-mode: fullscreen)\");")
@@ -1497,6 +1730,394 @@ public class PlatformInput {
 		}
 	}
 
+	public static boolean touchNext() {
+		currentTouchEvent = null;
+		return !touchEvents.isEmpty() && (currentTouchEvent = touchEvents.remove(0)) != null;
+	}
+
+	public static EnumTouchEvent touchGetEventType() {
+		return currentTouchEvent != null ? currentTouchEvent.type : null;
+	}
+
+	public static int touchGetEventTouchPointCount() {
+		return currentTouchEvent != null ? currentTouchEvent.getEventTouches().size() : 0;
+	}
+
+	public static int touchGetEventTouchX(int pointId) {
+		return currentTouchEvent != null ? currentTouchEvent.getEventTouches().get(pointId).posX : 0;
+	}
+
+	public static int touchGetEventTouchY(int pointId) {
+		return currentTouchEvent != null ? currentTouchEvent.getEventTouches().get(pointId).posY : 0;
+	}
+
+	public static float touchGetEventTouchRadiusMixed(int pointId) {
+		if(currentTouchEvent != null) {
+			return currentTouchEvent.getEventTouches().get(pointId).radius;
+		}else {
+			return 1.0f;
+		}
+	}
+
+	public static float touchGetEventTouchForce(int pointId) {
+		return currentTouchEvent != null ? (float)currentTouchEvent.getEventTouches().get(pointId).touch.getForceSafe(0.5) : 0.0f;
+	}
+
+	public static int touchGetEventTouchPointUID(int pointId) {
+		return currentTouchEvent != null ? currentTouchEvent.getEventTouches().get(pointId).eventUID : -1;
+	}
+
+	public static int touchPointCount() {
+		return currentTouchState != null ? currentTouchState.getTargetTouchesSize() : 0;
+	}
+
+	public static int touchPointX(int pointId) {
+		return currentTouchState != null ? currentTouchState.getTargetTouches().get(pointId).posX : -1;
+	}
+
+	public static int touchPointY(int pointId) {
+		return currentTouchState != null ? currentTouchState.getTargetTouches().get(pointId).posY : -1;
+	}
+
+	public static float touchRadiusX(int pointId) {
+		return currentTouchState != null ? (float)currentTouchState.getTargetTouches().get(pointId).touch.getRadiusXSafe(5.0 * windowDPI) : 1.0f;
+	}
+
+	public static float touchRadiusY(int pointId) {
+		return currentTouchState != null ? (float)currentTouchState.getTargetTouches().get(pointId).touch.getRadiusYSafe(5.0 * windowDPI) : 1.0f;
+	}
+
+	public static float touchRadiusMixed(int pointId) {
+		if(currentTouchState != null) {
+			return currentTouchState.getTargetTouches().get(pointId).radius;
+		}else {
+			return 1.0f;
+		}
+	}
+
+	public static float touchForce(int pointId) {
+		return currentTouchState != null ? (float)currentTouchState.getTargetTouches().get(pointId).touch.getForceSafe(0.5) : 0.0f;
+	}
+
+	public static int touchPointUID(int pointId) {
+		return currentTouchState != null ? currentTouchState.getTargetTouches().get(pointId).eventUID : -1;
+	}
+
+	// Note: this can't be called from the main loop, don't try
+	private static void touchOpenDeviceKeyboard() {
+		if(!touchIsDeviceKeyboardOpenMAYBE()) {
+			if(touchKeyboardField != null) {
+				touchKeyboardField.blur();
+				touchKeyboardField.setValue("");
+				PlatformRuntime.sleep(10);
+				if(touchKeyboardForm != null) {
+					touchKeyboardForm.removeChild(touchKeyboardField);
+				}else {
+					touchKeyboardField.delete();
+				}
+				touchKeyboardField = null;
+				if(touchKeyboardForm != null) {
+					parent.removeChild(touchKeyboardForm);
+					touchKeyboardForm = null;
+				}
+				return;
+			}
+			if(touchKeyboardForm != null) {
+				parent.removeChild(touchKeyboardForm);
+				touchKeyboardForm = null;
+			}
+			touchKeyboardForm = (HTMLFormElement) win.getDocument().createElement("form");
+			touchKeyboardForm.setAttribute("autocomplete", "off");
+			touchKeyboardForm.getClassList().add("_eaglercraftX_text_input_wrapper");
+			CSSStyleDeclaration decl = touchKeyboardForm.getStyle();
+			decl.setProperty("position", "absolute");
+			decl.setProperty("top", "0px");
+			decl.setProperty("left", "0px");
+			decl.setProperty("right", "0px");
+			decl.setProperty("bottom", "0px");
+			decl.setProperty("z-index", "-100");
+			decl.setProperty("margin", "0px");
+			decl.setProperty("padding", "0px");
+			decl.setProperty("border", "none");
+			touchKeyboardForm.addEventListener("submit", new EventListener<Event>() {
+				@Override
+				public void handleEvent(Event evt) {
+					evt.preventDefault();
+					evt.stopPropagation();
+					JSObject obj = evt.getTimeStamp();
+					if(obj != null && TeaVMUtils.isTruthy(obj)) {
+						double d = ((JSNumber)obj).doubleValue();
+						if(lastTouchKeyboardEvtA != 0.0 && (d - lastTouchKeyboardEvtA) < 10.0) {
+							return;
+						}
+						if(lastTouchKeyboardEvtB != 0.0 && (d - lastTouchKeyboardEvtB) < 10.0) {
+							return;
+						}
+						if(lastTouchKeyboardEvtC != 0.0 && (d - lastTouchKeyboardEvtC) < 10.0) {
+							return;
+						}
+						if(!showniOSReturnTouchKeyboardWarning) {
+							PlatformRuntime.logger.info("Note: Generating return keystroke from submit event on form, this browser probably doesn't generate keydown/beforeinput/input when enter/return is pressed on the on-screen keyboard");
+							showniOSReturnTouchKeyboardWarning = true;
+						}
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, KeyboardConstants.KEY_RETURN, '\n');
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, KeyboardConstants.KEY_RETURN, '\n');
+					}
+
+				}
+			});
+			touchKeyboardField = (HTMLInputElement) win.getDocument().createElement("input");
+			touchKeyboardField.setType("password");
+			touchKeyboardField.setValue(" ");
+			touchKeyboardField.getClassList().add("_eaglercraftX_text_input_element");
+			touchKeyboardField.setAttribute("autocomplete", "off");
+			decl = touchKeyboardField.getStyle();
+			decl.setProperty("position", "absolute");
+			decl.setProperty("top", "0px");
+			decl.setProperty("left", "0px");
+			decl.setProperty("right", "0px");
+			decl.setProperty("bottom", "0px");
+			decl.setProperty("z-index", "-100");
+			decl.setProperty("margin", "0px");
+			decl.setProperty("padding", "0px");
+			decl.setProperty("border", "none");
+			decl.setProperty("-webkit-touch-callout", "default");
+			touchKeyboardField.addEventListener("beforeinput", new EventListener<InputEvent>() {
+				@Override
+				public void handleEvent(InputEvent evt) {
+					if(touchKeyboardField != evt.getTarget()) return;
+					if(!shownTouchKeyboardEventWarning) {
+						PlatformRuntime.logger.info("Note: Caught beforeinput event from on-screen keyboard, browser probably does not generate global keydown/keyup events on text fields, or does not respond to cancelling keydown");
+						shownTouchKeyboardEventWarning = true;
+					}
+					JSObject obj = evt.getTimeStamp();
+					if(obj != null && TeaVMUtils.isTruthy(obj)) {
+						double d = ((JSNumber)obj).doubleValue();
+						if(lastTouchKeyboardEvtA != 0.0 && (d - lastTouchKeyboardEvtA) < 10.0) {
+							return;
+						}
+						lastTouchKeyboardEvtB = d;
+					}
+					evt.preventDefault();
+					evt.stopPropagation();
+					switch(evt.getInputType()) {
+					case "insertParagraph":
+					case "insertLineBreak":
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, KeyboardConstants.KEY_RETURN, '\n');
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, KeyboardConstants.KEY_RETURN, '\n');
+						break;
+					case "deleteWordBackward":
+					case "deleteSoftLineBackward":
+					case "deleteHardLineBackward":
+					case "deleteEntireSoftLine":
+					case "deleteContentBackward":
+					case "deleteContent":
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, KeyboardConstants.KEY_BACK, '\0');
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, KeyboardConstants.KEY_BACK, '\0');
+						break;
+					case "deleteWordForward":
+					case "deleteSoftLineForward":
+					case "deleteHardLineForward":
+					case "deleteContentForward":
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, KeyboardConstants.KEY_DELETE, '\0');
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, KeyboardConstants.KEY_DELETE, '\0');
+						break;
+					case "insertText":
+					case "insertCompositionText":
+					case "insertReplacementText":
+						String eventsToGenerate = evt.getData();
+						for(int i = 0, l = eventsToGenerate.length(); i < l; ++i) {
+							char c = eventsToGenerate.charAt(i);
+							int eag = KeyboardConstants.getEaglerKeyFromBrowser(asciiUpperToKeyLegacy(Character.toUpperCase(c)), 0);
+							keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, eag, c);
+							keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, eag, c);
+						}
+						break;
+					case "insertFromPaste":
+					case "insertFromPasteAsQuotation":
+					case "insertFromDrop":
+					case "insertFromYank":
+					case "insertLink":
+						synchronized(pastedStrings) {
+							pastedStrings.add(evt.getData());
+							if(pastedStrings.size() > 64) {
+								pastedStrings.remove(0);
+							}
+						}
+						break;
+					case "historyUndo":
+					case "historyRedo":
+					case "deleteByDrag":
+					case "deleteByCut":
+						break;
+					default:
+						PlatformRuntime.logger.info("Ignoring InputEvent.inputType \"" + "{}" + "\" from on-screen keyboard", evt.getInputType());
+						break;
+					}
+				}
+			});
+			touchKeyboardField.addEventListener("input", new EventListener<Event>() {
+				@Override
+				public void handleEvent(Event evt) {
+					if(touchKeyboardField != evt.getTarget()) return;
+					JSObject obj = evt.getTimeStamp();
+					if(!shownLegacyTouchKeyboardWarning) {
+						PlatformRuntime.logger.info("Note: Caught legacy input events from on-screen keyboard, browser could be outdated and doesn't support beforeinput event, or does not respond to cancelling beforeinput");
+						shownLegacyTouchKeyboardWarning = true;
+					}
+					if(obj != null && TeaVMUtils.isTruthy(obj)) {
+						double d = ((JSNumber)obj).doubleValue();
+						if(lastTouchKeyboardEvtA != 0.0 && (d - lastTouchKeyboardEvtA) < 10.0) {
+							return;
+						}
+						if(lastTouchKeyboardEvtB != 0.0 && (d - lastTouchKeyboardEvtB) < 10.0) {
+							return;
+						}
+						lastTouchKeyboardEvtC = d;
+					}
+					String val = touchKeyboardField.getValue();
+					int l = val.length();
+					if(l == 0) {
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, KeyboardConstants.KEY_BACK, '\0');
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, KeyboardConstants.KEY_BACK, '\0');
+					}else if(l == 1) {
+						char c = val.charAt(0);
+						int eag = KeyboardConstants.getEaglerKeyFromBrowser(asciiUpperToKeyLegacy(Character.toUpperCase(c)), 0);
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, eag, c);
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, eag, c);
+					}else {
+						val = val.trim();
+						l = val.length();
+						if(l == 0) {
+							keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, KeyboardConstants.KEY_SPACE, ' ');
+							keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, KeyboardConstants.KEY_SPACE, ' ');
+						}else {
+							char c = val.charAt(l - 1);
+							int eag = KeyboardConstants.getEaglerKeyFromBrowser(asciiUpperToKeyLegacy(Character.toUpperCase(c)), 0);
+							keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, eag, c);
+							keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, eag, c);
+						}
+					}
+					touchKeyboardField.setValue(" ");
+					setSelectionRange(touchKeyboardField, 1, 1);
+				}
+			});
+			touchKeyboardField.addEventListener("focus", new EventListener<Event>() {
+				@Override
+				public void handleEvent(Event evt) {
+					if(touchKeyboardField != evt.getTarget()) return;
+					touchKeyboardField.setValue(" ");
+					setSelectionRange(touchKeyboardField, 1, 1);
+				}
+			});
+			touchKeyboardField.addEventListener("select", new EventListener<Event>() {
+				@Override
+				public void handleEvent(Event evt) {
+					if(touchKeyboardField != evt.getTarget()) return;
+					evt.preventDefault();
+					evt.stopPropagation();
+					touchKeyboardField.setValue(" ");
+					setSelectionRange(touchKeyboardField, 1, 1);
+				}
+			});
+			touchKeyboardForm.appendChild(touchKeyboardField);
+			parent.appendChild(touchKeyboardForm);
+			touchKeyboardField.setValue(" ");
+			touchKeyboardField.focus();
+			touchKeyboardField.select();
+			setSelectionRange(touchKeyboardField, 1, 1);
+		}else {
+			touchCloseDeviceKeyboard0(false);
+		}
+	}
+
+	public static String touchGetPastedString() {
+		synchronized(pastedStrings) {
+			return pastedStrings.isEmpty() ? null : pastedStrings.remove(0);
+		}
+	}
+
+	public static void touchSetOpenKeyboardZone(int x, int y, int w, int h) {
+		if(w != 0 && h != 0) {
+			int xx = (int)(x / windowDPI);
+			int yy = (int)((windowHeight - y - h) / windowDPI);
+			int ww = (int)(w / windowDPI);
+			int hh = (int)(h / windowDPI);
+			if(xx != touchOpenZoneX || yy != touchOpenZoneY || ww != touchOpenZoneW || hh != touchOpenZoneH) {
+				CSSStyleDeclaration decl = touchKeyboardOpenZone.getStyle();
+				decl.setProperty("display", "block");
+				decl.setProperty("left", "" + xx + "px");
+				decl.setProperty("top", "" + yy + "px");
+				decl.setProperty("width", "" + ww + "px");
+				decl.setProperty("height", "" + hh + "px");
+				touchOpenZoneX = xx;
+				touchOpenZoneY = yy;
+				touchOpenZoneW = ww;
+				touchOpenZoneH = hh;
+			}
+		}else {
+			if(touchOpenZoneW != 0 || touchOpenZoneH != 0) {
+				CSSStyleDeclaration decl = touchKeyboardOpenZone.getStyle();
+				decl.setProperty("display", "none");
+				decl.setProperty("top", "0px");
+				decl.setProperty("left", "0px");
+				decl.setProperty("width", "0px");
+				decl.setProperty("height", "0px");
+			}
+			touchOpenZoneX = 0;
+			touchOpenZoneY = 0;
+			touchOpenZoneW = 0;
+			touchOpenZoneH = 0;
+		}
+	}
+
+	public static void touchCloseDeviceKeyboard() {
+		touchCloseDeviceKeyboard0(true);
+	}
+
+	private static void touchCloseDeviceKeyboard0(boolean sync) {
+		if(touchKeyboardField != null) {
+			touchKeyboardField.blur();
+			touchKeyboardField.setValue("");
+			if(sync) {
+				PlatformRuntime.sleep(10);
+				if(touchKeyboardForm != null) {
+					touchKeyboardForm.removeChild(touchKeyboardField);
+				}else {
+					touchKeyboardField.delete();
+				}
+				touchKeyboardField = null;
+			}else {
+				final HTMLInputElement el = touchKeyboardField;
+				final HTMLFormElement el2 = touchKeyboardForm;
+				Window.setTimeout(() -> {
+					if(el2 != null) {
+						el2.removeChild(el);
+						el2.delete();
+					}else {
+						el.delete();
+					}
+				}, 10);
+				touchKeyboardField = null;
+				touchKeyboardForm = null;
+				return;
+			}
+		}
+		if(touchKeyboardForm != null) {
+			if(parent != null) {
+				parent.removeChild(touchKeyboardForm);
+			}else {
+				touchKeyboardForm.delete();
+			}
+			touchKeyboardForm = null;
+		}
+	}
+
+	public static boolean touchIsDeviceKeyboardOpenMAYBE() {
+		return touchKeyboardField != null && isActiveElement(win.getDocument(), touchKeyboardField);
+	}
+
+
 	@JSBody(params = { "doc", "el" }, script = "return doc.activeElement === el;")
 	private static native boolean isActiveElement(HTMLDocument doc, HTMLElement el);
 
@@ -1512,6 +2133,19 @@ public class PlatformInput {
 			+ "} return { left: xx, top: yy };")
 	private static native TextRectangle getPositionOf(HTMLElement el);
 
+
+	
+
+	private static void updateTouchOffset() {
+		try {
+			TextRectangle bounds = getPositionOf(canvas);
+			touchOffsetXTeaVM = bounds.getLeft();
+			touchOffsetYTeaVM = bounds.getTop();
+		}catch(Throwable t) {
+			touchOffsetXTeaVM = 0;
+			touchOffsetYTeaVM = 0;
+		}
+	}
 
 	static void initWindowSize(int sw, int sh, float dpi) {
 		windowWidth = sw;

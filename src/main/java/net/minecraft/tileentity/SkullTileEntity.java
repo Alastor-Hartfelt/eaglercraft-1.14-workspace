@@ -76,12 +76,10 @@ public class SkullTileEntity extends TileEntity implements ITickableTileEntity {
         return this.dragonAnimated ? (float) this.dragonAnimatedTicks + p_184295_1_ : (float) this.dragonAnimatedTicks;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public GameProfile getPlayerProfile() {
         return this.playerProfile;
     }
-
 
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, 4, this.getUpdateTag());

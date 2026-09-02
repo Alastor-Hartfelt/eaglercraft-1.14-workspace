@@ -14,6 +14,7 @@ import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.ItemStack;
@@ -79,6 +80,7 @@ public class Explosion {
       double d3 = (1.0D - Math.floor(1.0D / d0) * d0) / 2.0D;
       double d4 = (1.0D - Math.floor(1.0D / d2) * d2) / 2.0D;
       if (!(d0 < 0.0D) && !(d1 < 0.0D) && !(d2 < 0.0D)) {
+         ISelectionContext context = LivingEntity.class.isAssignableFrom(p_222259_1_.getClass()) ? ISelectionContext.forEntity(p_222259_1_) : ISelectionContext.dummy();
          int i = 0;
          int j = 0;
 
@@ -89,7 +91,7 @@ public class Explosion {
                   double d6 = MathHelper.lerp((double)f1, axisalignedbb.minY, axisalignedbb.maxY);
                   double d7 = MathHelper.lerp((double)f2, axisalignedbb.minZ, axisalignedbb.maxZ);
                   Vec3d vec3d = new Vec3d(d5 + d3, d6, d7 + d4);
-                  if (p_222259_1_.world.rayTraceBlocks(new RayTraceContext(vec3d, p_222259_0_, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, p_222259_1_)).getType() == RayTraceResult.Type.MISS) {
+                  if (p_222259_1_.world.rayTraceBlocks(new RayTraceContext(vec3d, p_222259_0_, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, context)).getType() == RayTraceResult.Type.MISS) {
                      ++i;
                   }
 
@@ -267,7 +269,6 @@ public class Explosion {
    public Map<PlayerEntity, Vec3d> getPlayerKnockbackMap() {
       return this.playerKnockbackMap;
    }
-
 
    public LivingEntity getExplosivePlacedBy() {
       if (this.exploder == null) {

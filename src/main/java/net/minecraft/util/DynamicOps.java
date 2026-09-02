@@ -6,5 +6,4 @@ public interface DynamicOps<T> {
     T createMap(Map<Object, Object> collect);
 
     T createString(String string);
-    // Dummy interface, gerektiğinde metod eklenir
-} 
+}

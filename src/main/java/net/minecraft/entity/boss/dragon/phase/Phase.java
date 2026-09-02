@@ -39,7 +39,6 @@ public abstract class Phase implements IPhase {
       return 0.6F;
    }
 
-   
    public Vec3d getTargetLocation() {
       return null;
    }

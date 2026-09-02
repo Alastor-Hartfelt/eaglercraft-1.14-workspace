@@ -49,7 +49,6 @@ public class EndSpikeFeatureConfig implements IFeatureConfig {
       return this.spikes;
    }
 
-
    public BlockPos func_214668_c() {
       return this.crystalBeamTarget;
    }

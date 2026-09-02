@@ -9,5 +9,4 @@ import java.nio.ByteBuffer;
 public class ClipboardHelper {
     private final ByteBuffer field_216490_a = ByteBuffer.allocateDirect(1024);
 
-
 }

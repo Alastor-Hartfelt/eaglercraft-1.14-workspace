@@ -23,7 +23,6 @@ public class NPCMerchant implements IMerchant {
       this.merchantInventory = new MerchantInventory(this);
    }
 
-
    public PlayerEntity getCustomer() {
       return this.customer;
    }

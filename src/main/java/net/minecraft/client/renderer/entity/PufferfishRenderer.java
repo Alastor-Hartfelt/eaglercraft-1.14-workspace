@@ -24,7 +24,6 @@ public class PufferfishRenderer extends MobRenderer<PufferfishEntity, EntityMode
       this.field_203772_j = 3;
    }
 
-
    protected ResourceLocation getEntityTexture(PufferfishEntity entity) {
       return field_203771_a;
    }

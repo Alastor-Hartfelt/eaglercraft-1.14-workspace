@@ -36,11 +36,9 @@ public class NetworkManager {
         this.direction = packetDirection;
     }
 
-
     public void setConnectionState(ProtocolType newState) {
         this.packetState = newState;
     }
-
 
     private static <T extends INetHandler> void processPacket(IPacket<T> p_197664_0_, INetHandler p_197664_1_) {
         p_197664_0_.processPacket((T) p_197664_1_);
@@ -54,11 +52,9 @@ public class NetworkManager {
 
     public void sendPacket(IPacket<?> packetIn) {
 
-
     }
 
     private void dispatchPacket(IPacket<?> inPacket) {
-
 
     }
 
@@ -109,8 +105,6 @@ public class NetworkManager {
 
     public void enableEncryption(Object key) {
         this.isEncrypted = true;
-        // this.channel.pipeline().addBefore("splitter", "decrypt", new NettyEncryptingDecoder(CryptManager.createNetCipherInstance(2, key)));
-        // this.channel.pipeline().addBefore("prepender", "encrypt", new NettyEncryptingEncoder(CryptManager.createNetCipherInstance(1, key)));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -130,7 +124,6 @@ public class NetworkManager {
         return this.packetListener;
     }
 
-
     public ITextComponent getExitMessage() {
         return this.terminationReason;
     }
@@ -139,7 +132,6 @@ public class NetworkManager {
     }
 
     public void setCompressionThreshold(int threshold) {
-
 
     }
 
@@ -171,10 +163,8 @@ public class NetworkManager {
         return this.field_211397_t;
     }
 
-
     static class QueuedPacket {
         private final IPacket<?> packet;
-
 
         public QueuedPacket(IPacket<?> p_i48604_1_) {
             this.packet = p_i48604_1_;

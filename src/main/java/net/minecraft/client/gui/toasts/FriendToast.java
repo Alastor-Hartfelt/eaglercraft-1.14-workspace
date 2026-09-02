@@ -70,28 +70,23 @@ public class FriendToast implements IToast {
 
         Minecraft mc = toastGui.getMinecraft();
         int toastHeight = getToastHeight();
-        int midH = toastHeight - BORDER * 2; // stretchable middle height
+        int midH = toastHeight - BORDER * 2; 
 
-        // Draw 3-slice background: top border, middle stretch, bottom border
         mc.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
         GlStateManager.color3f(1.0F, 1.0F, 1.0F);
 
-        // Top 4px strip (full width)
         AbstractGui.blit(0, 0, TOAST_WIDTH, BORDER,
                 0.0F, 0.0F, TOAST_WIDTH, BORDER,
                 TOAST_WIDTH, TOAST_TEX_H);
 
-        // Middle stretchable section (texture: 24px tall, stretches to midH)
         AbstractGui.blit(0, BORDER, TOAST_WIDTH, midH,
                 0.0F, (float) BORDER, TOAST_WIDTH, TOAST_TEX_H - BORDER * 2,
                 TOAST_WIDTH, TOAST_TEX_H);
 
-        // Bottom 4px strip
         AbstractGui.blit(0, BORDER + midH, TOAST_WIDTH, BORDER,
                 0.0F, (float) (TOAST_TEX_H - BORDER), TOAST_WIDTH, BORDER,
                 TOAST_WIDTH, TOAST_TEX_H);
 
-        // Draw player face
         int textLeft = TEXT_LEFT_NO_FACE;
         if (hasFace()) {
             ResourceLocation skinLoc;
@@ -109,7 +104,6 @@ public class FriendToast implements IToast {
             textLeft = TEXT_LEFT_WITH_FACE;
         }
 
-        // Draw message lines, vertically centered in the content area
         int contentHeight = Math.max(this.messageLines.size(), 2) * LINE_SPACING;
         int totalTextHeight = this.messageLines.size() * LINE_SPACING;
         int textTop = PADDING_TOP + (contentHeight - totalTextHeight) / 2;
@@ -123,15 +117,10 @@ public class FriendToast implements IToast {
                 ? IToast.Visibility.SHOW : IToast.Visibility.HIDE;
     }
 
-    /**
-     * Add a FriendToast to the toast GUI.
-     */
     public static void add(ToastGui toastGui, String message,
                            @Nullable String skinLocation, @Nullable String username) {
         toastGui.add(new FriendToast(message, skinLocation, username));
     }
-
-    // -- Convenience helpers for friend events --
 
     public static void showInviteSent(Minecraft mc, String targetName,
                                       @Nullable String skinLocation) {

@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.Entity;
@@ -76,7 +76,6 @@ public class EntityAnchorArgument implements ArgumentType<EntityAnchorArgument.T
             this.name = nameIn;
             this.offsetFunc = offsetFuncIn;
         }
-
 
         public static EntityAnchorArgument.Type getByName(String nameIn) {
             return BY_NAME.get(nameIn);

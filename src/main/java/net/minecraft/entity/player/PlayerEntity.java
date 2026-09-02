@@ -570,16 +570,13 @@ public abstract class PlayerEntity extends LivingEntity {
         return SoundEvents.ENTITY_PLAYER_DEATH;
     }
 
-
     public ItemEntity dropItem(boolean dropAll) {
         return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !this.inventory.getCurrentItem().isEmpty() ? this.inventory.getCurrentItem().getCount() : 1), false, true);
     }
 
-
     public ItemEntity dropItem(ItemStack itemStackIn, boolean unused) {
         return this.dropItem(itemStackIn, false, unused);
     }
-
 
     public ItemEntity dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         if (droppedItem.isEmpty()) {
@@ -1884,7 +1881,6 @@ public abstract class PlayerEntity extends LivingEntity {
         OTHER_PROBLEM,
         NOT_SAFE(new TranslationTextComponent("block.minecraft.bed.not_safe"));
 
-
         private final ITextComponent message;
 
         private SleepResult() {
@@ -1895,9 +1891,17 @@ public abstract class PlayerEntity extends LivingEntity {
             this.message = msg;
         }
 
-
         public ITextComponent getMessage() {
             return this.message;
         }
     }
+
+	public boolean getItemShouldUseOnTouchEagler() {
+		if (isHandActive()) {
+			return getActiveItemStack().getItem().shouldUseOnTouchEagler(getActiveItemStack());
+		} else {
+			ItemStack st = getHeldItemMainhand();
+			return !st.isEmpty() && st.getItem().shouldUseOnTouchEagler(st);
+		}
+	}
 }

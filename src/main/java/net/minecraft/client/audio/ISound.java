@@ -9,7 +9,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public interface ISound {
     ResourceLocation getSoundLocation();
 
-
     SoundEventAccessor createAccessor(SoundHandler handler);
 
     Sound getSound();

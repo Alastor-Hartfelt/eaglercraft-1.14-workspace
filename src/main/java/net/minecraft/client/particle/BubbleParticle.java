@@ -31,7 +31,7 @@ public class BubbleParticle extends SpriteTexturedParticle {
             this.motionX *= (double) 0.85F;
             this.motionY *= (double) 0.85F;
             this.motionZ *= (double) 0.85F;
-            if (!this.world.getFluidState(new BlockPos(this.posX, this.posY, this.posZ)).isTagged(FluidTags.WATER)) {
+            if (!this.world.getFluidState(this.getCurrentBlockPos()).isTagged(FluidTags.WATER)) {
                 this.setExpired();
             }
 

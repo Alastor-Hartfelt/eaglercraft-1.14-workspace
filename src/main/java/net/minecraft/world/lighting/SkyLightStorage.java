@@ -257,7 +257,7 @@ public class SkyLightStorage extends SectionLightStorage<SkyLightStorage.Storage
             return false;
          } else {
             int l = (this.cachedLightData).field_215653_c.get(k);
-            return SectionPos.toWorld(l) == i + 16;
+            return l == SectionPos.extractY(j) + 1;
          }
       }
    }

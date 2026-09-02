@@ -16,7 +16,6 @@ public class WaterAvoidingRandomWalkingGoal extends RandomWalkingGoal {
       this.probability = probabilityIn;
    }
 
-
    protected Vec3d getPosition() {
       if (this.creature.isInWaterOrBubbleColumn()) {
          Vec3d vec3d = RandomPositionGenerator.getLandPos(this.creature, 15, 7);

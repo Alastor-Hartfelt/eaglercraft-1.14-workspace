@@ -41,7 +41,6 @@ public class BlockPartFace {
             return JSONUtils.getString(object, "texture");
         }
 
-
         private Direction parseCullFace(JsonObject object) {
             String s = JSONUtils.getString(object, "cullface", "");
             return Direction.byName(s);

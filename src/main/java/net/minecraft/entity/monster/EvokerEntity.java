@@ -110,7 +110,6 @@ public class EvokerEntity extends SpellcastingIllagerEntity {
         this.wololoTarget = wololoTargetIn;
     }
 
-
     private SheepEntity getWololoTarget() {
         return this.wololoTarget;
     }

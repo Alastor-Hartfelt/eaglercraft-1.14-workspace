@@ -36,7 +36,6 @@ public class NetworkSettingsButton extends Widget {
         int w = mc.fontRenderer.getStringWidth(text);
         boolean hover = mouseX > 1 && mouseY > 1 && mouseX < (w * 3 / 4) + 7 && mouseY < 12;
         if(hover) {
-            // PlatformInput.setCursorType(EnumCursorType.HAND);
         }
 
         mc.fontRenderer.drawString(TextFormatting.UNDERLINE + text, 5, 5, hover ? 0xFFEEEE22 : 0xFFCCCCCC);

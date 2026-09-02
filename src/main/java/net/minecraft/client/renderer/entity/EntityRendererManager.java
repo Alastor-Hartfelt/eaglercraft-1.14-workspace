@@ -282,7 +282,6 @@ public class EntityRendererManager {
       return (U)entityrenderer;
    }
 
-
    public <T extends Entity, U extends EntityRenderer<T>> U getRenderer(T entityIn) {
       if (entityIn instanceof AbstractClientPlayerEntity) {
          String s = ((AbstractClientPlayerEntity)entityIn).getSkinType();

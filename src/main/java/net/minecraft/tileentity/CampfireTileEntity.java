@@ -131,7 +131,6 @@ public class CampfireTileEntity extends TileEntity implements IClearable, ITicka
         return compound;
     }
 
-
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.pos, 13, this.getUpdateTag());
     }

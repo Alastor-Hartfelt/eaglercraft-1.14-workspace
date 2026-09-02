@@ -40,7 +40,6 @@ public class HoldingPatternPhase extends Phase {
         this.targetLocation = null;
     }
 
-
     public Vec3d getTargetLocation() {
         return this.targetLocation;
     }

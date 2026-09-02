@@ -26,11 +26,17 @@ import org.teavm.jso.JSObject;
 import org.teavm.jso.JSProperty;
 import org.teavm.jso.browser.Window;
 import org.teavm.jso.core.JSArrayReader;
+import org.teavm.jso.core.JSString;
 import org.teavm.jso.dom.html.HTMLCanvasElement;
 import org.teavm.jso.dom.html.HTMLElement;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import net.lax1dude.eaglercraft.KeyboardConstants;
+import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.BetterJSStringConverter;
 import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.LegacyKeycodeTranslator;
+import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.SortedTouchEvent;
 import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.WASMGCClientConfigAdapter;
 import net.lax1dude.eaglercraft.internal.wasm_gc_teavm.WebGLBackBuffer;
 
@@ -62,6 +68,31 @@ public class PlatformInput {
 	private static VKeyEvent currentKeyEvent = null;
 	private static boolean[] buttonStates = new boolean[8];
 	private static boolean[] keyStates = new boolean[256];
+
+	private static int touchOpenZoneX = 0;
+	private static int touchOpenZoneY = 0;
+	private static int touchOpenZoneW = 0;
+	private static int touchOpenZoneH = 0;
+
+	private static final List<SortedTouchEvent> touchEvents = new LinkedList<>();
+	private static SortedTouchEvent currentTouchEvent = null;
+	private static SortedTouchEvent currentTouchState = null;
+
+	private static final BiMap<Integer,Integer> touchIDtoUID = HashBiMap.create();
+	private static int touchUIDnum = 0;
+
+	private static final SortedTouchEvent.ITouchUIDMapper touchUIDMapperCreate = (idx) -> {
+		Integer ret = touchIDtoUID.get(idx);
+		if(ret != null) return ret.intValue();
+		int r = touchUIDnum++;
+		touchIDtoUID.put(idx, r);
+		return r;
+	};
+
+	private static final SortedTouchEvent.ITouchUIDMapper touchUIDMapper = (idx) -> {
+		Integer ret = touchIDtoUID.get(idx);
+		return ret != null ? ret.intValue() : -1;
+	};
 
 	private static int functionKeyModifier = KeyboardConstants.KEY_F;
 
@@ -231,6 +262,42 @@ public class PlatformInput {
 
 	}
 
+	private static final int EVENT_TOUCH_START = 0;
+	private static final int EVENT_TOUCH_MOVE = 1;
+	private static final int EVENT_TOUCH_END = 2;
+
+	private interface JSTouchEvent extends JSObject {
+
+		@JSProperty
+		int getEventType();
+
+		@JSProperty
+		JSArrayReader<SortedTouchEvent.JSTouchPoint> getChangedTouches();
+
+		@JSProperty
+		JSArrayReader<SortedTouchEvent.JSTouchPoint> getTargetTouches();
+
+	}
+
+	private static final int EVENT_TOUCH_KEYBOARD_ABSOLUTE = 0;
+	private static final int EVENT_TOUCH_KEYBOARD_CODEPOINTS = 1;
+
+	private interface JSTouchKeyboardEvent extends JSObject {
+
+		@JSProperty
+		int getEventType();
+
+		@JSProperty
+		int getAbsoluteCode();
+
+		@JSProperty
+		char getAbsoluteChar();
+
+		@JSProperty
+		JSString getCodepoints();
+
+	}
+
 	private static final int EVENT_RESIZE_WINDOW = 1;
 	private static final int EVENT_RESIZE_VISUAL_VIEWPORT = 2;
 	private static final int EVENT_RESIZE_DPI = 4;
@@ -265,6 +332,9 @@ public class PlatformInput {
 
 	private static final int EVENT_INPUT_MOUSE = 0;
 	private static final int EVENT_INPUT_KEYBOARD = 1;
+	private static final int EVENT_INPUT_TOUCH = 2;
+	private static final int EVENT_INPUT_TOUCH_KEYBOARD = 3;
+	private static final int EVENT_INPUT_TOUCH_PASTE = 4;
 	private static final int EVENT_INPUT_FOCUS = 5;
 	private static final int EVENT_INPUT_BLUR = 6;
 	private static final int EVENT_INPUT_MOUSE_ENTER = 7;
@@ -368,6 +438,59 @@ public class PlatformInput {
 					}
 				}
 				keyEvents.add(new VKeyEvent(ww, loc, eag, c, type));
+				break;
+			}
+			case EVENT_INPUT_TOUCH: {
+				JSTouchEvent obj = evt.getEventObj();
+				switch(obj.getEventType()) {
+				case EVENT_TOUCH_START:
+					handleWindowFocus();
+					touchEvents.add(currentTouchState = SortedTouchEvent.createTouchEvent(EnumTouchEvent.TOUCHSTART, obj.getChangedTouches(),
+							obj.getTargetTouches(), touchUIDMapperCreate, windowHeight, windowDPI));
+					break;
+				case EVENT_TOUCH_MOVE:
+					touchEvents.add(currentTouchState = SortedTouchEvent.createTouchEvent(EnumTouchEvent.TOUCHMOVE, obj.getChangedTouches(),
+							obj.getTargetTouches(), touchUIDMapper, windowHeight, windowDPI));
+					break;
+				case EVENT_TOUCH_END:
+					currentTouchState = SortedTouchEvent.createTouchEvent(EnumTouchEvent.TOUCHEND, obj.getChangedTouches(),
+							obj.getTargetTouches(), touchUIDMapper, windowHeight, windowDPI);
+					List<SortedTouchEvent.TouchPoint> lst = currentTouchState.getEventTouches();
+					int len = lst.size();
+					BiMap<Integer,Integer> inv = touchIDtoUID.inverse();
+					for (int i = 0; i < len; ++i) {
+						inv.remove(lst.get(i).uid);
+					}
+					touchEvents.add(currentTouchState);
+					break;
+				}
+				break;
+			}
+			case EVENT_INPUT_TOUCH_KEYBOARD: {
+				JSTouchKeyboardEvent obj2 = evt.getEventObj();
+				switch(obj2.getEventType()) {
+					case EVENT_TOUCH_KEYBOARD_ABSOLUTE: {
+						int code = obj2.getAbsoluteCode();
+						char character = obj2.getAbsoluteChar();
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, code, character);
+						keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, code, character);
+						break;
+					}
+					case EVENT_TOUCH_KEYBOARD_CODEPOINTS: {
+						JSString eventsToGenerate = obj2.getCodepoints();
+						for(int i = 0, l = eventsToGenerate.getLength(); i < l; ++i) {
+							char c = (char)eventsToGenerate.charCodeAt(i);
+							int eag = KeyboardConstants.getEaglerKeyFromBrowser(asciiUpperToKeyLegacy(Character.toUpperCase(c)), 0);
+							keyboardFireEvent(EnumFireKeyboardEvent.KEY_DOWN, eag, c);
+							keyboardFireEvent(EnumFireKeyboardEvent.KEY_UP, eag, c);
+						}
+						break;
+					}
+				}
+				break;
+			}
+			case EVENT_INPUT_TOUCH_PASTE: {
+				pastedStrings.add(BetterJSStringConverter.stringFromJS(evt.getEventObj()));
 				break;
 			}
 			case EVENT_INPUT_FOCUS: {
@@ -496,6 +619,10 @@ public class PlatformInput {
 		PlatformRuntime.pollJSEventsAfterSleep();
 	}
 
+	public static void pollEvents() {
+		PlatformRuntime.pollJSEventsAfterSleep();
+	}
+
 	@Import(module = "platformInput", name = "updateCanvasSize")
 	private static native void updateCanvasSize(int width, int height);
 
@@ -549,6 +676,22 @@ public class PlatformInput {
 		}
 		currentKeyEvent = null;
 		return !keyEvents.isEmpty() && (currentKeyEvent = keyEvents.remove(0)) != null;
+	}
+
+	public static void keyboardFireEvent(EnumFireKeyboardEvent eventType, int eagKey, char keyChar) {
+		switch(eventType) {
+		case KEY_DOWN:
+			keyEvents.add(new VKeyEvent(-1, 0, eagKey, keyChar, EVENT_KEY_DOWN));
+			break;
+		case KEY_UP:
+			keyEvents.add(new VKeyEvent(-1, 0, eagKey, '\0', EVENT_KEY_UP));
+			break;
+		case KEY_REPEAT:
+			keyEvents.add(new VKeyEvent(-1, 0, eagKey, keyChar, EVENT_KEY_REPEAT));
+			break;
+		default:
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	public static boolean keyboardGetEventKeyState() {
@@ -867,6 +1010,84 @@ public class PlatformInput {
 		mouseEvents.clear();
 		keyEvents.clear();
 	}
+
+	public static boolean touchNext() {
+		currentTouchEvent = null;
+		return !touchEvents.isEmpty() && (currentTouchEvent = touchEvents.remove(0)) != null;
+	}
+
+	public static EnumTouchEvent touchGetEventType() {
+		return currentTouchEvent != null ? currentTouchEvent.type : null;
+	}
+
+	public static int touchGetEventTouchPointCount() {
+		return currentTouchEvent != null ? currentTouchEvent.getEventTouches().size() : 0;
+	}
+
+	public static int touchGetEventTouchX(int pointId) {
+		return currentTouchEvent != null ? currentTouchEvent.getEventTouches().get(pointId).pointX : 0;
+	}
+
+	public static int touchGetEventTouchY(int pointId) {
+		return currentTouchEvent != null ? currentTouchEvent.getEventTouches().get(pointId).pointY : 0;
+	}
+
+	public static float touchGetEventTouchRadiusMixed(int pointId) {
+		if(currentTouchEvent != null) {
+			return currentTouchEvent.getEventTouches().get(pointId).radius;
+		}else {
+			return 1.0f;
+		}
+	}
+
+	public static float touchGetEventTouchForce(int pointId) {
+		return currentTouchEvent != null ? (float)currentTouchEvent.getEventTouches().get(pointId).force : 0.0f;
+	}
+
+	public static int touchGetEventTouchPointUID(int pointId) {
+		return currentTouchEvent != null ? currentTouchEvent.getEventTouches().get(pointId).uid : -1;
+	}
+
+	public static int touchPointCount() {
+		return currentTouchState != null ? currentTouchState.getTargetTouchesSize() : 0;
+	}
+
+	public static int touchPointX(int pointId) {
+		return currentTouchState != null ? currentTouchState.getTargetTouches().get(pointId).pointX : -1;
+	}
+
+	public static int touchPointY(int pointId) {
+		return currentTouchState != null ? currentTouchState.getTargetTouches().get(pointId).pointY : -1;
+	}
+
+	public static float touchRadiusMixed(int pointId) {
+		if(currentTouchState != null) {
+			return currentTouchState.getTargetTouches().get(pointId).radius;
+		}else {
+			return 1.0f;
+		}
+	}
+
+	public static float touchForce(int pointId) {
+		return currentTouchState != null ? (float)currentTouchState.getTargetTouches().get(pointId).force : 0.0f;
+	}
+
+	public static int touchPointUID(int pointId) {
+		return currentTouchState != null ? currentTouchState.getTargetTouches().get(pointId).uid : -1;
+	}
+
+	public static String touchGetPastedString() {
+		return pastedStrings.isEmpty() ? null : pastedStrings.remove(0);
+	}
+
+	@Import(module = "platformInput", name = "touchSetOpenKeyboardZone")
+	public static native void touchSetOpenKeyboardZone(int x, int y, int w, int h);
+
+	@Import(module = "platformInput", name = "touchCloseDeviceKeyboard")
+	public static native void touchCloseDeviceKeyboard();
+
+	@Import(module = "platformInput", name = "touchIsDeviceKeyboardOpenMAYBE")
+	public static native boolean touchIsDeviceKeyboardOpenMAYBE();
 
 	@Import(module = "platformInput", name = "supportsFullscreen")
 	private static native boolean supportsFullscreen0();

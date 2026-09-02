@@ -131,7 +131,6 @@ public class VillagerTrades {
             this.field_221231_e = p_i50525_5_;
         }
 
-
         public MerchantOffer getOffer(Entity p_221182_1_, Random p_221182_2_) {
             World world = p_221182_1_.world;
             BlockPos blockpos = world.findNearestStructure(this.field_221228_b, new BlockPos(p_221182_1_), 100, true);
@@ -164,7 +163,6 @@ public class VillagerTrades {
             this.field_221192_c = p_i50538_2_;
             this.field_221193_d = p_i50538_3_;
         }
-
 
         public MerchantOffer getOffer(Entity p_221182_1_, Random p_221182_2_) {
             if (p_221182_1_ instanceof IVillagerDataHolder) {
@@ -290,7 +288,6 @@ public class VillagerTrades {
             this.field_221207_h = 0.05F;
         }
 
-
         public MerchantOffer getOffer(Entity p_221182_1_, Random p_221182_2_) {
             return new MerchantOffer(new ItemStack(Items.EMERALD, this.field_221202_c), new ItemStack(this.field_221200_a.getItem(), this.field_221201_b), new ItemStack(this.field_221203_d.getItem(), this.field_221204_e), this.field_221205_f, this.field_221206_g, this.field_221207_h);
         }
@@ -346,7 +343,6 @@ public class VillagerTrades {
             this.field_221216_c = p_i50527_3_;
             this.field_221217_d = 0.05F;
         }
-
 
         public MerchantOffer getOffer(Entity p_221182_1_, Random p_221182_2_) {
             ItemStack itemstack = new ItemStack(Items.SUSPICIOUS_STEW, 1);

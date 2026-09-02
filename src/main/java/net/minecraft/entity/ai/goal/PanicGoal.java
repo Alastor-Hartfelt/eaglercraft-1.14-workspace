@@ -61,7 +61,6 @@ public class PanicGoal extends Goal {
         return !this.creature.getNavigator().noPath();
     }
 
-
     protected BlockPos getRandPos(IBlockReader worldIn, Entity entityIn, int horizontalRange, int verticalRange) {
         BlockPos blockpos = new BlockPos(entityIn);
         int i = blockpos.getX();

@@ -1,11 +1,17 @@
 package net.lax1dude.eaglercraft.profile;
 
+import net.lax1dude.eaglercraft.EaglerInputStream;
+import net.lax1dude.eaglercraft.EaglerOutputStream;
 import net.lax1dude.eaglercraft.EaglercraftUUID;
 import net.lax1dude.eaglercraft.Random;
 import net.lax1dude.eaglercraft.opengl.ImageData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -223,6 +229,10 @@ public class EaglerProfile {
         return username;
     }
 
+    public static boolean isDefaultUsername(String str) {
+        return str.toLowerCase().matches("^(yeeish|yee|yeer|yeeler|eagler|eagl|darver|darvler|vool|vigg|deev|yigg|yeeg){2}\\d{2,4}$");
+    }
+
     public static ResourceLocation getActiveSkinResourceLocation() {
         if (presetSkinId == -1) {
             if (customSkinId >= 0 && customSkinId < GuiScreenEditProfile.customSkins.size()) {
@@ -324,6 +334,133 @@ public class EaglerProfile {
 //				addSkin(s2, n.getByteArray(s2), false);
 //			}
 //		}
+    }
+
+    public static byte[] write() {
+        CompoundNBT profile = new CompoundNBT();
+        profile.putInt("presetSkin", presetSkinId);
+        profile.putInt("customSkin", customSkinId);
+        profile.putInt("presetCape", presetCapeId);
+        profile.putInt("customCape", GuiScreenEditProfile.customCapeId);
+        profile.putString("username", username);
+        ListNBT skinsList = new ListNBT();
+        for (int i = 0, l = GuiScreenEditProfile.customSkins.size(); i < l; ++i) {
+            GuiScreenEditProfile.CustomSkin sk = GuiScreenEditProfile.customSkins.get(i);
+            CompoundNBT skin = new CompoundNBT();
+            skin.putString("name", sk.name);
+            skin.putByteArray("data", sk.data);
+            skin.putByte("model", (byte) sk.model.id);
+            skinsList.add(skin);
+        }
+        profile.put("skins", skinsList);
+        ListNBT capesList = new ListNBT();
+        for (int i = 0, l = GuiScreenEditProfile.customCapes.size(); i < l; ++i) {
+            GuiScreenEditProfile.CustomCape cp = GuiScreenEditProfile.customCapes.get(i);
+            CompoundNBT cape = new CompoundNBT();
+            cape.putString("name", cp.name);
+            cape.putByteArray("data", cp.data);
+            capesList.add(cape);
+        }
+        profile.put("capes", capesList);
+        EaglerOutputStream bao = new EaglerOutputStream();
+        try {
+            CompressedStreamTools.writeCompressed(profile, bao);
+        } catch (IOException e) {
+            return null;
+        }
+        return bao.toByteArray();
+    }
+
+    public static void read(byte[] profileStorage) {
+        if (profileStorage == null) {
+            return;
+        }
+
+        CompoundNBT profile;
+        try {
+            profile = CompressedStreamTools.readCompressed(new EaglerInputStream(profileStorage));
+        } catch (IOException ex) {
+            return;
+        }
+
+        if (profile == null || profile.isEmpty()) {
+            return;
+        }
+
+        presetSkinId = profile.getInt("presetSkin");
+        customSkinId = profile.getInt("customSkin");
+
+        if (profile.contains("presetCape", 99)) presetCapeId = profile.getInt("presetCape");
+        if (profile.contains("customCape", 99)) GuiScreenEditProfile.customCapeId = profile.getInt("customCape");
+
+        String loadUsername = profile.getString("username").trim();
+
+        if (!loadUsername.isEmpty()) {
+            username = loadUsername.replaceAll("[^A-Za-z0-9]", "_");
+        }
+
+        GuiScreenEditProfile.customSkins.clear();
+
+        ListNBT skinsList = profile.getList("skins", 10);
+        for (int i = 0, l = skinsList.size(); i < l; ++i) {
+            CompoundNBT skin = skinsList.getCompound(i);
+            String skinName = skin.getString("name");
+            byte[] skinData = skin.getByteArray("data");
+            if (skinData.length != 16384) continue;
+            for (int y = 20; y < 32; ++y) {
+                for (int x = 16; x < 40; ++x) {
+                    skinData[(y << 8) | (x << 2)] = (byte) 0xff;
+                }
+            }
+            int skinModel = skin.getByte("model");
+            GuiScreenEditProfile.CustomSkin newSkin = new GuiScreenEditProfile.CustomSkin(skinName, skinData);
+            newSkin.model = SkinModel.getModelFromId(skinModel);
+            GuiScreenEditProfile.customSkins.add(newSkin);
+        }
+
+        if (profile.contains("capes", 9)) {
+            GuiScreenEditProfile.customCapes.clear();
+            ListNBT capesList = profile.getList("capes", 10);
+            for (int i = 0, l = capesList.size(); i < l; ++i) {
+                CompoundNBT cape = capesList.getCompound(i);
+                String capeName = cape.getString("name");
+                byte[] capeData = cape.getByteArray("data");
+                if (capeData.length != 1173) continue;
+                GuiScreenEditProfile.customCapes.add(new GuiScreenEditProfile.CustomCape(capeName, capeData));
+            }
+        }
+
+        if (presetSkinId == -1) {
+            if (customSkinId < 0 || customSkinId >= GuiScreenEditProfile.customSkins.size()) {
+                presetSkinId = 0;
+                customSkinId = -1;
+            }
+        } else {
+            customSkinId = -1;
+            if (presetSkinId < 0 || presetSkinId >= DefaultSkins.defaultSkinsMap.length) {
+                presetSkinId = 0;
+            }
+        }
+        GuiScreenEditProfile.customSkinId = customSkinId;
+
+        if (presetCapeId == -1) {
+            if (GuiScreenEditProfile.customCapeId < 0 || GuiScreenEditProfile.customCapeId >= GuiScreenEditProfile.customCapes.size()) {
+                presetCapeId = 0;
+                GuiScreenEditProfile.customCapeId = -1;
+            }
+        } else {
+            GuiScreenEditProfile.customCapeId = -1;
+            if (presetCapeId < 0 || presetCapeId >= DefaultCapes.defaultCapesMap.length) {
+                presetCapeId = 0;
+            }
+        }
+    }
+
+    public static void save() {
+        byte[] b = write();
+        if (b != null) {
+            net.lax1dude.eaglercraft.EagRuntime.setStorage("p", b);
+        }
     }
 
     public enum EnumSkinType {

@@ -32,7 +32,6 @@ public class PlayerProfileCache {
     protected final Gson gson;
     private final VFile2 usercacheFile;
 
-
     public PlayerProfileCache(GameProfileRepository profileRepoIn, VFile2 usercacheFileIn) {
         this.profileRepo = profileRepoIn;
         this.usercacheFile = usercacheFileIn;
@@ -97,7 +96,6 @@ public class PlayerProfileCache {
         this.save();
     }
 
-
     public GameProfile getGameProfileForUsername(String username) {
         String s = username.toLowerCase(Locale.ROOT);
         PlayerProfileCache.ProfileEntry playerprofilecache$profileentry = this.usernameToProfileEntryMap.get(s);
@@ -123,7 +121,6 @@ public class PlayerProfileCache {
         this.save();
         return playerprofilecache$profileentry == null ? null : playerprofilecache$profileentry.getGameProfile();
     }
-
 
     public GameProfile getProfileByUUID(EaglercraftUUID uuid) {
         PlayerProfileCache.ProfileEntry playerprofilecache$profileentry = this.uuidToProfileEntryMap.get(uuid);
@@ -151,7 +148,6 @@ public class PlayerProfileCache {
 
         try {
             if (this.usercacheFile != null) {
-                /* mkdirs removed (            (this.usercacheFile.getParent() != null ? new net.lax1dude.eaglercraft.internal.vfs2.VFile2(this.usercacheFile.getParent()) : null) ) */
                 bufferedwriter = new BufferedWriter(new java.io.OutputStreamWriter(this.usercacheFile.getOutputStream()));
                 bufferedwriter.write(s);
             }

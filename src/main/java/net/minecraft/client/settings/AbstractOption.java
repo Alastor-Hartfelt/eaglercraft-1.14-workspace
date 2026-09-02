@@ -10,8 +10,11 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ChatVisibility;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.lax1dude.eaglercraft.EagRuntime;
+import net.lax1dude.eaglercraft.internal.EnumPlatformType;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class AbstractOption {
@@ -144,6 +147,7 @@ public abstract class AbstractOption {
     }, (p_216579_0_, p_216579_1_) -> {
         p_216579_0_.renderDistanceChunks = p_216579_1_.intValue();
         Minecraft.getInstance().worldRenderer.setDisplayListEntitiesDirty();
+        p_216579_0_.sendSettingsToServer();
     }, (p_216664_0_, p_216664_1_) -> {
         double d0 = p_216664_1_.get(p_216664_0_);
         return p_216664_1_.getDisplayString() + I18n.format("options.chunks", (int) d0);
@@ -242,6 +246,16 @@ public abstract class AbstractOption {
     }, (p_216621_0_, p_216621_1_) -> {
         p_216621_0_.showXYZ = p_216621_1_;
     });
+    public static final BooleanOption SHOW_WORLD_HUD = new BooleanOption("Show World HUD", (p_216619_0_) -> {
+        return p_216619_0_.hudWorld;
+    }, (p_216621_0_, p_216621_1_) -> {
+        p_216621_0_.hudWorld = p_216621_1_;
+    });
+    public static final BooleanOption SHOW_STATS_HUD = new BooleanOption("Show Stats HUD", (p_216619_0_) -> {
+        return p_216619_0_.hudStats;
+    }, (p_216621_0_, p_216621_1_) -> {
+        p_216621_0_.hudStats = p_216621_1_;
+    });
     public static final SliderPercentageOption UPDATES_PER_FRAME = new SliderPercentageOption("Chunk Updates", 1.0D, 4.0D, 1.0F, (p_216672_0_) -> {
         return (double) p_216672_0_.updatesPerFrame;
     }, (p_216608_0_, p_216608_1_) -> {
@@ -249,30 +263,6 @@ public abstract class AbstractOption {
     }, (p_216645_0_, p_216645_1_) -> {
         double d0 = p_216645_1_.get(p_216645_0_);
         return p_216645_1_.getDisplayString() + (int) d0;
-    });
-    public static final SliderPercentageOption PARTICLE_LIMIT = new SliderPercentageOption("Particle Limit", 512.0D, 16384.0D, 1.0F, (p_216672_0_) -> {
-        return (double) p_216672_0_.particleLimit;
-    }, (p_216608_0_, p_216608_1_) -> {
-        p_216608_0_.particleLimit = p_216608_1_.intValue();
-    }, (p_216645_0_, p_216645_1_) -> {
-        double d0 = p_216645_1_.get(p_216645_0_);
-        return p_216645_1_.getDisplayString() + (int) d0;
-    });
-    public static final SliderPercentageOption TILEENTITY_RENDER_DIST = new SliderPercentageOption("TileEntity Dist", 1024.0D, 4096.0D, 1.0F, (p_216672_0_) -> {
-        return p_216672_0_.tileEntityRenderDistSq;
-    }, (p_216608_0_, p_216608_1_) -> {
-        p_216608_0_.tileEntityRenderDistSq = p_216608_1_;
-    }, (p_216645_0_, p_216645_1_) -> {
-        double d0 = p_216645_1_.get(p_216645_0_);
-        return p_216645_1_.getDisplayString() + (int) Math.sqrt(d0) + "m";
-    });
-    public static final SliderPercentageOption ENTITY_RENDER_DIST = new SliderPercentageOption("Entity Dist", 16.0D, 64.0D, 1.0F, (p_216672_0_) -> {
-        return p_216672_0_.entityRenderDistMul;
-    }, (p_216608_0_, p_216608_1_) -> {
-        p_216608_0_.entityRenderDistMul = p_216608_1_;
-    }, (p_216645_0_, p_216645_1_) -> {
-        double d0 = p_216645_1_.get(p_216645_0_);
-        return p_216645_1_.getDisplayString() + (int) d0 + "m";
     });
     public static final BooleanOption FAST_ENTITY_RENDER = new BooleanOption("Fast Entity Render", (p_216619_0_) -> {
         return p_216619_0_.fastEntityRender;
@@ -284,20 +274,25 @@ public abstract class AbstractOption {
     }, (p_216621_0_, p_216621_1_) -> {
         p_216621_0_.fastTileEntityRender = p_216621_1_;
     });
-    public static final BooleanOption REDUCE_PARTICLES = new BooleanOption("Reduce Particles", (p_216619_0_) -> {
-        return p_216619_0_.reduceParticles;
-    }, (p_216621_0_, p_216621_1_) -> {
-        p_216621_0_.reduceParticles = p_216621_1_;
-    });
     public static final BooleanOption SOCIAL_FEATURES = new BooleanOption("Social Features", (p_216619_0_) -> {
         return p_216619_0_.socialFeatures;
     }, (p_216621_0_, p_216621_1_) -> {
         p_216621_0_.socialFeatures = p_216621_1_;
     });
+    public static final BooleanOption PROFANITY_FILTER = new BooleanOption("options.profanityFilterButton", (p_216619_0_) -> {
+        return p_216619_0_.enableProfanityFilter;
+    }, (p_216621_0_, p_216621_1_) -> {
+        p_216621_0_.enableProfanityFilter = p_216621_1_;
+    });
     public static final BooleanOption DISABLE_WEATHER = new BooleanOption("Disable Weather", (p_216619_0_) -> {
         return p_216619_0_.disableWeather;
     }, (p_216621_0_, p_216621_1_) -> {
         p_216621_0_.disableWeather = p_216621_1_;
+    });
+    public static final BooleanOption FOG = new BooleanOption("Fog", (settings) -> {
+        return settings.fog;
+    }, (settings, enabled) -> {
+        settings.fog = enabled;
     });
     public static final BooleanOption CHUNK_FIX = new BooleanOption("Chunk Lag Fix", (p_216619_0_) -> {
         return p_216619_0_.chunkFix;
@@ -337,7 +332,15 @@ public abstract class AbstractOption {
             Minecraft.getInstance().mainWindow.setVsync(p_216635_0_.vsync);
         }
 
-    });
+    }) {
+        public String func_216743_c(GameSettings options) {
+            String s = super.func_216743_c(options);
+            if (EagRuntime.getPlatformType() == EnumPlatformType.WASM_GC && !this.get(options)) {
+                return TextFormatting.RED + s;
+            }
+            return s;
+        }
+    };
     public static final BooleanOption ENTITY_SHADOWS = new BooleanOption("options.entityShadows", (p_216576_0_) -> {
         return p_216576_0_.entityShadows;
     }, (p_216588_0_, p_216588_1_) -> {

@@ -55,7 +55,6 @@ public class Region implements IWorldReader {
       return this.world.getLightSubtracted(pos, amount);
    }
 
-
    public IChunk getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull) {
       int i = x - this.chunkX;
       int j = z - this.chunkZ;
@@ -104,7 +103,6 @@ public class Region implements IWorldReader {
    public Dimension getDimension() {
       return this.world.getDimension();
    }
-
 
    public TileEntity getTileEntity(BlockPos pos) {
       IChunk ichunk = this.getChunk(pos);

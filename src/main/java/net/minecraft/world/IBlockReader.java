@@ -49,7 +49,6 @@ public interface IBlockReader {
         });
     }
 
-
     default BlockRayTraceResult func_217296_a(Vec3d p_217296_1_, Vec3d p_217296_2_, BlockPos p_217296_3_, VoxelShape p_217296_4_, BlockState p_217296_5_) {
         BlockRayTraceResult blockraytraceresult = p_217296_4_.rayTrace(p_217296_1_, p_217296_2_, p_217296_3_);
         if (blockraytraceresult != null) {

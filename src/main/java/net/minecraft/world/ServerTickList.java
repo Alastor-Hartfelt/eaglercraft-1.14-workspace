@@ -128,7 +128,6 @@ public class ServerTickList<T> implements ITickList<T> {
       return list == null ? Collections.emptyList() : list;
    }
 
-   
    private List<NextTickListEntry<T>> func_223187_a( List<NextTickListEntry<T>> p_223187_1_, Collection<NextTickListEntry<T>> p_223187_2_, MutableBoundingBox p_223187_3_, boolean p_223187_4_) {
       Iterator<NextTickListEntry<T>> iterator = p_223187_2_.iterator();
 

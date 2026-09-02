@@ -49,7 +49,6 @@ public class LANHostConnectingScreen extends Screen {
             if (code != null) {
                 SingleplayerServerController.configureLAN(GameType.getByName(this.gameMode), this.allowCheats);
 
-                // If Online mode, notify the socials server so friends can see "Request to Join"
                 if (isOnline) {
                     NetworkHandler.openWorld(code, worldName);
                     this.mc.ingameGUI.getChatGUI().printChatMessage(new StringTextComponent(

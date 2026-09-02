@@ -35,7 +35,6 @@ public class DoublePlantBlock extends BushBlock {
       }
    }
 
-
    public BlockState getStateForPlacement(BlockItemUseContext context) {
       BlockPos blockpos = context.getPos();
       return blockpos.getY() < 255 && context.getWorld().getBlockState(blockpos.up()).isReplaceable(context) ? super.getStateForPlacement(context) : null;

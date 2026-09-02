@@ -92,7 +92,6 @@ public interface IFluidState extends IStateHolder<IFluidState> {
         return this.getFluid().getBlockState(this);
     }
 
-
     @OnlyIn(Dist.CLIENT)
     default IParticleData getDripParticleData() {
         return this.getFluid().getDripParticleData();

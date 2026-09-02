@@ -107,7 +107,6 @@ public class OcelotEntity extends AnimalEntity {
     public void fall(float distance, float damageMultiplier) {
     }
 
-
     protected SoundEvent getAmbientSound() {
         return SoundEvents.ENTITY_OCELOT_AMBIENT;
     }
@@ -230,7 +229,6 @@ public class OcelotEntity extends AnimalEntity {
         }
 
     }
-
 
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);

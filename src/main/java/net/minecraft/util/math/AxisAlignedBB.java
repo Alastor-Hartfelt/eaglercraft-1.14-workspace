@@ -249,7 +249,6 @@ public class AxisAlignedBB {
       }
    }
 
-
    public static BlockRayTraceResult rayTrace(Iterable<AxisAlignedBB> boxes, Vec3d start, Vec3d end, BlockPos pos) {
       double[] adouble = new double[]{1.0D};
       Direction direction = null;
@@ -268,7 +267,6 @@ public class AxisAlignedBB {
          return new BlockRayTraceResult(start.add(d3 * d0, d3 * d1, d3 * d2), direction, pos, false);
       }
    }
-
 
    private static Direction func_197741_a(AxisAlignedBB aabb, Vec3d p_197741_1_, double[] p_197741_2_,  Direction facing, double p_197741_4_, double p_197741_6_, double p_197741_8_) {
       if (p_197741_4_ > 1.0E-5D) {
@@ -291,7 +289,6 @@ public class AxisAlignedBB {
 
       return facing;
    }
-
 
    private static Direction func_197740_a(double[] p_197740_0_,  Direction p_197740_1_, double p_197740_2_, double p_197740_4_, double p_197740_6_, double p_197740_8_, double p_197740_10_, double p_197740_12_, double p_197740_14_, double p_197740_16_, Direction p_197740_18_, double p_197740_19_, double p_197740_21_, double p_197740_23_) {
       double d0 = (p_197740_8_ - p_197740_19_) / p_197740_2_;

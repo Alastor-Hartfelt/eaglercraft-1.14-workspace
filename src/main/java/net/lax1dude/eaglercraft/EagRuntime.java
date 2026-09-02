@@ -346,8 +346,7 @@ public class EagRuntime {
     }
 
     public static void showDebugConsole() {
-        // TODO: Add debug console
-        // PlatformApplication.showDebugConsole();
+        PlatformApplication.showDebugConsole();
     }
 
     public static long steadyTimeMillis() {

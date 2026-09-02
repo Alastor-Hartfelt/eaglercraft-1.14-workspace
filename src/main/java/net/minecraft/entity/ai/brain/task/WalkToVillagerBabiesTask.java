@@ -91,7 +91,6 @@ public class WalkToVillagerBabiesTask extends Task<CreatureEntity> {
       return p_220495_1_.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).get();
    }
 
-
    private LivingEntity func_220500_b(LivingEntity p_220500_1_) {
       return p_220500_1_.getBrain().getMemory(MemoryModuleType.VISIBLE_VILLAGER_BABIES).get().stream().filter((p_220507_2_) -> {
          return this.func_220499_a(p_220500_1_, p_220507_2_);

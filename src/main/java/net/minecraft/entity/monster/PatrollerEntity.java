@@ -61,7 +61,6 @@ public abstract class PatrollerEntity extends MonsterEntity {
       return true;
    }
 
-   
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason,  ILivingEntityData spawnDataIn,  CompoundNBT dataTag) {
       if (reason != SpawnReason.PATROL && reason != SpawnReason.EVENT && reason != SpawnReason.STRUCTURE && this.rand.nextFloat() < 0.06F && this.canBeLeader()) {
          this.patrolLeader = true;

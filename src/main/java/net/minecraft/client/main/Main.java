@@ -37,8 +37,6 @@ public class Main {
       return p_224732_0_ != null ? OptionalInt.of(p_224732_0_) : OptionalInt.empty();
    }
 
-
-
    private static boolean isNotEmpty(String str) {
       return str != null && !str.isEmpty();
    }

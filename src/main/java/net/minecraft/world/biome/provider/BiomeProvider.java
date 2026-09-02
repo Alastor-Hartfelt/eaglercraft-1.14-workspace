@@ -41,7 +41,6 @@ public abstract class BiomeProvider {
 
     public abstract Set<Biome> getBiomesInSquare(int centerX, int centerZ, int sideLength);
 
-
     public abstract BlockPos findBiomePosition(int x, int z, int range, List<Biome> biomes, Random random);
 
     public float func_222365_c(int p_222365_1_, int p_222365_2_) {

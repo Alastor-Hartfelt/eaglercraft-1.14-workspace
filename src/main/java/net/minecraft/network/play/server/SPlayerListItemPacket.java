@@ -201,7 +201,6 @@ public class SPlayerListItemPacket implements IPacket<IClientPlayNetHandler> {
             return this.gamemode;
         }
 
-
         public ITextComponent getDisplayName() {
             return this.displayName;
         }

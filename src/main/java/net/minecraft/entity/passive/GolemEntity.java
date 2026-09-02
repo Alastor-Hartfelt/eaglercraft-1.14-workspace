@@ -14,17 +14,14 @@ public abstract class GolemEntity extends CreatureEntity {
    public void fall(float distance, float damageMultiplier) {
    }
 
-   
    protected SoundEvent getAmbientSound() {
       return null;
    }
 
-   
    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
       return null;
    }
 
-   
    protected SoundEvent getDeathSound() {
       return null;
    }

@@ -61,7 +61,6 @@ public class SUpdateScorePacket implements IPacket<IClientPlayNetHandler> {
         return this.name;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public String getObjectiveName() {
         return this.objective;

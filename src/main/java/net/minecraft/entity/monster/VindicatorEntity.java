@@ -108,7 +108,6 @@ public class VindicatorEntity extends AbstractIllagerEntity {
         return SoundEvents.ENTITY_VINDICATOR_CELEBRATE;
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         ILivingEntityData ilivingentitydata = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
         ((GroundPathNavigator) this.getNavigator()).setBreakDoors(true);

@@ -76,7 +76,6 @@ public class NetherPortalBlock extends Block {
       }
    }
 
-
    public NetherPortalBlock.Size isPortal(IWorld p_201816_1_, BlockPos p_201816_2_) {
       NetherPortalBlock.Size netherportalblock$size = new NetherPortalBlock.Size(p_201816_1_, p_201816_2_, Direction.Axis.X);
       if (netherportalblock$size.isValid() && netherportalblock$size.portalBlockCount == 0) {

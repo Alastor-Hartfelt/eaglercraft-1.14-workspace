@@ -40,7 +40,7 @@ public class Frustum implements ICamera {
     }
 
     public Frustum(ClippingHelper clippingHelperIn) {
-        this(); // Ignore ClippingHelper, use BetterFrustum
+        this(); 
     }
 
     public void setPosition(double xIn, double yIn, double zIn) {

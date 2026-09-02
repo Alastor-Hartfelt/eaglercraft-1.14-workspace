@@ -58,7 +58,6 @@ public class BedBlock extends HorizontalBlock implements ITileEntityProvider {
         return state.get(PART) == BedPart.FOOT ? this.color.getMapColor() : MaterialColor.WOOL;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public static Direction func_220174_a(IBlockReader p_220174_0_, BlockPos p_220174_1_) {
         BlockState blockstate = p_220174_0_.getBlockState(p_220174_1_);
@@ -82,12 +81,10 @@ public class BedBlock extends HorizontalBlock implements ITileEntityProvider {
                     player.sendStatusMessage(new TranslationTextComponent("block.minecraft.bed.occupied"), true);
                     return true;
                 } else {
-//               player.trySleep(pos).ifLeft((p_220173_1_) -> {
-//                  if (p_220173_1_ != null) {
-//                     player.sendStatusMessage(new TranslationTextComponent(""), true);
-//                  }
-//
-//               });
+                    PlayerEntity.SleepResult sleepResult = player.trySleep(pos).left().orElse(null);
+                    if (sleepResult != null && sleepResult.getMessage() != null) {
+                        player.sendStatusMessage(sleepResult.getMessage(), true);
+                    }
                     return true;
                 }
             } else {
@@ -154,7 +151,6 @@ public class BedBlock extends HorizontalBlock implements ITileEntityProvider {
 
         super.onBlockHarvested(worldIn, pos, state, player);
     }
-
 
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         Direction direction = context.getPlacementHorizontalFacing();

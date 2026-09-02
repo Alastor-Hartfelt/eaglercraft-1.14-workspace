@@ -277,7 +277,7 @@ public class FriendsOverlayScreen extends Screen {
         if (this.currentTab != null && this.currentTab.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
-        if (keyCode == 256) {
+        if (Screen.isCloseKey(keyCode, scanCode)) {
             this.mc.displayGuiScreen(this.backgroundScreen);
             return true;
         }

@@ -235,7 +235,6 @@ public class FoxEntity extends AnimalEntity {
         return foxentity;
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         Biome biome = worldIn.getBiome(new BlockPos(this));
         FoxEntity.Type foxentity$type = FoxEntity.Type.getTypeByBiome(biome);
@@ -575,7 +574,6 @@ public class FoxEntity extends AnimalEntity {
 
     }
 
-
     protected SoundEvent getAmbientSound() {
         if (this.isSleeping()) {
             return SoundEvents.ENTITY_FOX_SLEEP;
@@ -591,11 +589,9 @@ public class FoxEntity extends AnimalEntity {
         }
     }
 
-
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         return SoundEvents.ENTITY_FOX_HURT;
     }
-
 
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_FOX_DEATH;

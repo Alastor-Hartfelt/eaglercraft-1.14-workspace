@@ -119,11 +119,9 @@ public class CookingRecipeBuilder {
             return this.id;
         }
 
-
         public JsonObject getAdvancementJson() {
             return this.advancementBuilder.serialize();
         }
-
 
         public ResourceLocation getAdvancementID() {
             return this.advancementId;

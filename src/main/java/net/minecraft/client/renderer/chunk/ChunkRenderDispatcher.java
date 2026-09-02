@@ -8,12 +8,12 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import java.util.List;
 import java.util.Queue;
 
-import net.lax1dude.eaglercraft.EagRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.RegionRenderCacheBuilder;
 import net.minecraft.client.renderer.VertexBufferUploader;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.DefaultUncaughtExceptionHandler;
@@ -28,10 +28,12 @@ import org.apache.logging.log4j.Logger;
 public class ChunkRenderDispatcher {
    private static final Logger LOGGER = LogManager.getLogger();
 
+   private static final int TASK_QUEUE_LIMIT_PER_WORKER = 2;
+
    private final int countRenderBuilders;
    private final List<Thread> listWorkerThreads = Lists.newArrayList();
    private final List<ChunkRenderWorker> listThreadedWorkers = Lists.newArrayList();
-   private final Queue<ChunkRenderTask> queueChunkUpdates = new java.util.LinkedList<>();
+   private final Queue<ChunkRenderTask> queueChunkUpdates = new java.util.ArrayDeque<>();
    private final Queue<RegionRenderCacheBuilder> queueFreeRenderBuilders;
    private final WorldVertexBufferUploader worldVertexUploader = new WorldVertexBufferUploader();
    private final VertexBufferUploader vertexUploader = new VertexBufferUploader();
@@ -40,38 +42,9 @@ public class ChunkRenderDispatcher {
    private Vec3d field_217672_l = Vec3d.ZERO;
 
    public ChunkRenderDispatcher(boolean p_i51518_1_) {
-      int i = Math.min(4, Math.max(1, (int)((double) EagRuntime.maxMemory() * 0.15D) / 10485760 - 1));
-      int j = 69;
-      int k = p_i51518_1_ ? j : Math.min(j, 4);
-      int l = Math.max(1, Math.min(k * 2, i));
       this.renderWorker = new ChunkRenderWorker(this, new RegionRenderCacheBuilder());
-      List<RegionRenderCacheBuilder> list = Lists.newArrayListWithExpectedSize(l);
-
-      try {
-         for(int i1 = 0; i1 < l; ++i1) {
-            list.add(new RegionRenderCacheBuilder());
-         }
-      } catch (OutOfMemoryError var11) {
-         LOGGER.warn("Allocated only {}/{} buffers", list.size(), l);
-         int j1 = list.size() * 2 / 3;
-
-         for(int k1 = 0; k1 < j1; ++k1) {
-            list.remove(list.size() - 1);
-         }
-
-         System.gc();
-      }
-
-      this.countRenderBuilders = list.size();
+      this.countRenderBuilders = 0;
       this.queueFreeRenderBuilders = new java.util.LinkedList<>();
-      this.queueFreeRenderBuilders.addAll(list);
-      int l1 = Math.min(k, this.countRenderBuilders);
-      if (l1 > 1) {
-         for(int i2 = 0; i2 < l1; ++i2) {
-            ChunkRenderWorker chunkrenderworker = new ChunkRenderWorker(this);
-         }
-      }
-
    }
 
    public String getDebugInfo() {
@@ -86,6 +59,10 @@ public class ChunkRenderDispatcher {
       return this.field_217672_l;
    }
 
+   public int getSchedulingBudget() {
+      return Math.max(0, TASK_QUEUE_LIMIT_PER_WORKER - this.queueChunkUpdates.size());
+   }
+
    public boolean runChunkUploads(long finishTimeNano) {
       boolean flag = false;
       int processedTasks = 0;
@@ -93,11 +70,12 @@ public class ChunkRenderDispatcher {
       while(true) {
          boolean flag1 = false;
          if (this.listWorkerThreads.isEmpty()) {
-            ChunkRenderTask chunkrendertask = this.queueChunkUpdates.poll();
+            ChunkRenderTask chunkrendertask = this.pollPendingChunkUpdate();
             if (chunkrendertask != null) {
                try {
                   this.renderWorker.processTask(chunkrendertask);
                   flag1 = true;
+                  flag = true;
                   ++processedTasks;
                } catch (InterruptedException var9) {
                   LOGGER.warn("Skipped task due to interrupt");
@@ -129,14 +107,21 @@ public class ChunkRenderDispatcher {
    }
 
    public boolean updateChunkLater(ChunkRender chunkRenderer) {
-      // lock removed
+
+      if (chunkRenderer.trySetEmptyCompiledChunk()) {
+         return true;
+      }
+
+      if (this.getSchedulingBudget() <= 0) {
+         return false;
+      }
 
       boolean flag1;
       try {
          ChunkRenderTask chunkrendertask = chunkRenderer.makeCompileTaskChunk();
-         chunkrendertask.addFinishRunnable(() -> {
-            this.queueChunkUpdates.remove(chunkrendertask);
-         });
+         if (chunkrendertask == null) {
+            return true;
+         }
          boolean flag = this.queueChunkUpdates.offer(chunkrendertask);
          if (!flag) {
             chunkrendertask.finish();
@@ -144,18 +129,19 @@ public class ChunkRenderDispatcher {
 
          flag1 = flag;
       } finally {
-         // unlock removed
       }
 
       return flag1;
    }
 
    public boolean updateChunkNow(ChunkRender chunkRenderer) {
-      // lock removed
 
       boolean flag;
       try {
          ChunkRenderTask chunkrendertask = chunkRenderer.makeCompileTaskChunk();
+         if (chunkrendertask == null) {
+            return true;
+         }
 
          try {
             this.renderWorker.processTask(chunkrendertask);
@@ -165,7 +151,6 @@ public class ChunkRenderDispatcher {
 
          flag = true;
       } finally {
-         // unlock removed
       }
 
       return flag;
@@ -197,11 +182,21 @@ public class ChunkRenderDispatcher {
    }
 
    public ChunkRenderTask getNextChunkUpdate() throws InterruptedException {
-      return this.queueChunkUpdates.poll();
+      return this.pollPendingChunkUpdate();
+   }
+
+   private ChunkRenderTask pollPendingChunkUpdate() {
+      ChunkRenderTask task;
+      while ((task = this.queueChunkUpdates.poll()) != null && task.isFinished()) {
+      }
+      return task;
    }
 
    public boolean updateTransparencyLater(ChunkRender chunkRenderer) {
-      // lock removed
+
+      if (this.getSchedulingBudget() <= 0) {
+         return false;
+      }
 
       boolean flag;
       try {
@@ -211,12 +206,8 @@ public class ChunkRenderDispatcher {
             return flag;
          }
 
-         chunkrendertask.addFinishRunnable(() -> {
-            this.queueChunkUpdates.remove(chunkrendertask);
-         });
          flag = this.queueChunkUpdates.offer(chunkrendertask);
       } finally {
-         // unlock removed
       }
 
       return flag;
@@ -224,7 +215,9 @@ public class ChunkRenderDispatcher {
 
    public ListenableFuture<Void> uploadChunk(BlockRenderLayer layerIn, BufferBuilder builderIn, ChunkRender renderChunkIn, CompiledChunk compiledChunkIn, double distanceSqIn) {
       if (Minecraft.getInstance().isOnExecutionThread()) {
-         if (GLX.useVbo()) {
+         if (renderChunkIn instanceof ChunkRenderContainer) {
+            ((ChunkRenderContainer) renderChunkIn).upload(layerIn, builderIn);
+         } else if (GLX.useVbo()) {
             this.uploadVertexBuffer(builderIn, renderChunkIn.getVertexBufferByLayer(layerIn.ordinal()));
          } else {
             this.func_217670_a(builderIn, ((ListedChunkRender)renderChunkIn).getDisplayList(layerIn, compiledChunkIn));
@@ -278,7 +271,6 @@ public class ChunkRenderDispatcher {
       for(ChunkRenderWorker chunkrenderworker : this.listThreadedWorkers) {
          chunkrenderworker.notifyToStop();
       }
-
 
       this.queueFreeRenderBuilders.clear();
    }

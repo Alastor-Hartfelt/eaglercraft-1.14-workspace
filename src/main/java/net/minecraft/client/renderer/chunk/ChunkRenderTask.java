@@ -35,7 +35,6 @@ public class ChunkRenderTask {
         return this.renderChunk;
     }
 
-
     public ChunkRenderCache takeChunkRenderCache() {
         ChunkRenderCache chunkrendercache = this.chunkRenderCache;
         this.chunkRenderCache = null;

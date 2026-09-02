@@ -257,7 +257,6 @@ public class IllusionerEntity extends SpellcastingIllagerEntity implements IRang
             IllusionerEntity.this.addPotionEffect(new EffectInstance(Effects.INVISIBILITY, 1200));
         }
 
-
         protected SoundEvent getSpellPrepareSound() {
             return SoundEvents.ENTITY_ILLUSIONER_PREPARE_MIRROR;
         }

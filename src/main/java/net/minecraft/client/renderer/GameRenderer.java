@@ -4,7 +4,10 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 import net.lax1dude.eaglercraft.EagRuntime;
 import net.lax1dude.eaglercraft.Random;
 import net.lax1dude.eaglercraft.opengl.EaglercraftGPU;
@@ -86,6 +89,8 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
    private static final Logger LOGGER = LogManager.getLogger();
    private static final ResourceLocation RAIN_TEXTURES = new ResourceLocation("textures/environment/rain.png");
    private static final ResourceLocation SNOW_TEXTURES = new ResourceLocation("textures/environment/snow.png");
+   private static final Predicate<Entity> MOUSE_OVER_PREDICATE = entity ->
+         !entity.isSpectator() && entity.canBeCollidedWith();
    private final Minecraft mc;
    private final IResourceManager resourceManager;
    private final Random random = new Random();
@@ -107,6 +112,8 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
    private int rainSoundCounter;
    private final float[] rainXCoords = new float[1024];
    private final float[] rainYCoords = new float[1024];
+   private final BlockPos.MutableBlockPos weatherRenderPos = new BlockPos.MutableBlockPos();
+   private final List<Entity> mouseOverCandidates = new ArrayList<>(16);
    private final FogRenderer fogRenderer;
    private boolean debugView;
    private double cameraZoom = 1.0D;
@@ -156,6 +163,10 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
       this.lightmapTexture.close();
       this.mapItemRenderer.close();
       this.stopUseShader();
+   }
+
+   public ICamera getRenderFrustum() {
+      return this.cachedFrustum;
    }
 
    public boolean isShaderActive() {
@@ -307,10 +318,12 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
             Vec3d vec3d1 = entity.getLook(1.0F);
             Vec3d vec3d2 = vec3d.add(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0);
             float f = 1.0F;
-            AxisAlignedBB axisalignedbb = entity.getBoundingBox().expand(vec3d1.scale(d0)).grow(1.0D, 1.0D, 1.0D);
-            EntityRayTraceResult entityraytraceresult = ProjectileHelper.func_221273_a(entity, vec3d, vec3d2, axisalignedbb, (p_215312_0_) -> {
-               return !p_215312_0_.isSpectator() && p_215312_0_.canBeCollidedWith();
-            }, d1);
+            AxisAlignedBB axisalignedbb = entity.getBoundingBox().expand(vec3d1.x * d0,
+                  vec3d1.y * d0, vec3d1.z * d0).grow(1.0D, 1.0D, 1.0D);
+            this.mouseOverCandidates.clear();
+            this.mc.world.getEntitiesInAABBexcluding(entity, axisalignedbb, MOUSE_OVER_PREDICATE, this.mouseOverCandidates);
+            EntityRayTraceResult entityraytraceresult = ProjectileHelper.func_221273_a(entity, vec3d, vec3d2,
+                  this.mouseOverCandidates, d1);
             if (entityraytraceresult != null) {
                Entity entity1 = entityraytraceresult.getEntity();
                Vec3d vec3d3 = entityraytraceresult.getHitVec();
@@ -524,7 +537,7 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
                   this.timeWorldIcon = Util.milliTime();
                }
                if (this.timeWorldIcon != 0L && Util.milliTime() > this.timeWorldIcon + 7000L) {
-                  this.timeWorldIcon = 0L; // Mark as taken
+                  this.timeWorldIcon = 0L; 
                   this.createWorldIcon();
                }
             } else {
@@ -626,7 +639,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
             try (NativeImage nativeimage1 = new NativeImage(128, 128, false)) {
                nativeimage.resizeSubRectToBilinear(k, l, i, j, nativeimage1);
-               
                int[] pixels = nativeimage1.makePixelArray();
                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
                for(int p = 0; p < pixels.length; p++) {
@@ -637,7 +649,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
                   baos.write((c >> 24) & 0xFF);
                }
                net.peyton.eagler.fs.WorldsDB.newVFile(folderName, "icon.raw").setAllBytes(baos.toByteArray());
-               
             } catch (Exception ioexception) {
                LOGGER.warn("Couldn't save auto screenshot", (Throwable)ioexception);
             } finally {
@@ -754,12 +765,13 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
       this.mc.getProfiler().endStartSection("terrain_setup");
       worldrenderer.setupTerrain(activerenderinfo, icamera, this.frameCount++, this.mc.player.isSpectator());
       this.mc.getProfiler().endStartSection("updatechunks");
-      this.mc.worldRenderer.updateChunks(nanoTime);
+      this.mc.worldRenderer.updateChunks(Util.nanoTime() + 2_000_000L);
       this.mc.getProfiler().endStartSection("terrain");
       GlStateManager.matrixMode(5888);
       GlStateManager.pushMatrix();
       this.enableLightmap();
       GlStateManager.disableAlphaTest();
+      GlStateManager.disableBlend();
       worldrenderer.renderBlockLayer(BlockRenderLayer.SOLID, activerenderinfo);
       GlStateManager.enableAlphaTest();
       worldrenderer.renderBlockLayer(BlockRenderLayer.CUTOUT_MIPPED, activerenderinfo);
@@ -876,7 +888,7 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
       if (f != 0.0F) {
          this.random.setSeed((long)this.rendererUpdateCount * 312987231L);
          IWorldReader iworldreader = this.mc.world;
-         BlockPos blockpos = new BlockPos(this.activeRender.getProjectedView());
+         BlockPos blockpos = this.activeRender.getBlockPos();
          int i = 10;
          double d0 = 0.0D;
          double d1 = 0.0D;
@@ -971,7 +983,7 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
          float f1 = (float)this.rendererUpdateCount + partialTicks;
          bufferbuilder.setTranslation(-d0, -d1, -d2);
          GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = this.weatherRenderPos;
 
          for(int k1 = k - i1; k1 <= k + i1; ++k1) {
             for(int l1 = i - i1; l1 <= i + i1; ++l1) {
@@ -1266,15 +1278,11 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
       this.mc.worldRenderer.setupTerrain(activerenderinfo, icamera, this.frameCount++, this.mc.player.isSpectator());
 
-      // clear some state:
-
       GlStateManager.enableCull();
       GlStateManager.matrixMode(5888);
       GlStateManager.pushMatrix();
       GlStateManager.disableAlphaTest();
       GlStateManager.disableBlend();
-
-      // =============== G-BUFFER TERRAIN PASS =============== //
 
       EaglerDeferredPipeline.instance.beginDrawDeferred();
       EaglerDeferredPipeline.instance.beginDrawMainGBuffer();
@@ -1294,8 +1302,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
       GlStateManager.matrixMode(5888);
       GlStateManager.popMatrix();
       if (wavingBlocks) DeferredStateManager.disableDrawWavingBlocks();
-
-      // =============== G-BUFFER ENTITIES PASS =============== //
 
       EaglerDeferredPipeline.instance.beginDrawMainGBufferEntities();
       if (conf.is_rendering_dynamicLights) {
@@ -1328,8 +1334,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
       EaglerDeferredPipeline.instance.endDrawMainGBuffer();
 
-      // =============== SUN ANGLE CALCULATION =============== //
-
       GlStateManager.matrixMode(5888);
       GlStateManager.pushMatrix();
       GlStateManager.loadIdentity();
@@ -1353,8 +1357,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
          DeferredStateManager.setCurrentSunAngle(tmpVec4f_1);
          celestialAngle = 270.0f;
       }
-
-      // =============== SHADOW MAPS LOD0 =============== //
 
       if (conf.is_rendering_shadowsSun_clamped > 0) {
          if (conf.is_rendering_shadowsColored) {
@@ -1657,6 +1659,7 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
                this.mc.getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
                this.mc.worldRenderer.renderBlockLayerShadow(BlockRenderLayer.SOLID, aabb3, shadowCullAdapter3);
                GlStateManager.enableAlphaTest();
+               GlStateManager.alphaFunc(516, 0.5F);
                this.mc.worldRenderer.renderBlockLayerShadow(BlockRenderLayer.CUTOUT_MIPPED, aabb3, shadowCullAdapter3);
                this.mc.worldRenderer.renderBlockLayerShadow(BlockRenderLayer.CUTOUT, aabb3, shadowCullAdapter3);
                this.mc.getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
@@ -1677,8 +1680,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
       GlStateManager.matrixMode(5888);
       GlStateManager.popMatrix();
-
-      // =============== DYNAMIC LIGHT FOR HELD ITEM =============== //
 
       if (conf.is_rendering_dynamicLights && entity != null && this.mc.gameSettings.thirdPersonView == 0) {
          if (entity instanceof LivingEntity) {
@@ -1702,8 +1703,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
       EaglerDeferredPipeline.instance.combineGBuffersAndIlluminate();
 
-      // =============== ENVIRONMENT MAP RENDERING =============== //
-
       if (conf.is_rendering_useEnvMap) {
          DeferredStateManager.forwardCallbackHandler = null;
          EaglerDeferredPipeline.instance.beginDrawEnvMap();
@@ -1711,6 +1710,7 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
          EaglerDeferredPipeline.instance.beginDrawEnvMapTop(entity.getEyeHeight());
          EaglerDeferredPipeline.instance.beginDrawEnvMapSolid();
+         GlStateManager.disableAlphaTest();
          this.mc.getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
          this.mc.worldRenderer.renderParaboloidBlockLayer(BlockRenderLayer.SOLID, (double)partialTicks, 1, entity);
          GlStateManager.enableAlphaTest();
@@ -1739,6 +1739,7 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
          EaglerDeferredPipeline.instance.beginDrawEnvMapBottom(entity.getEyeHeight());
          EaglerDeferredPipeline.instance.beginDrawEnvMapSolid();
+         GlStateManager.disableAlphaTest();
          this.mc.getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
          this.mc.worldRenderer.renderParaboloidBlockLayer(BlockRenderLayer.SOLID, (double)partialTicks, -1, entity);
          GlStateManager.enableAlphaTest();
@@ -1768,8 +1769,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
          EaglerDeferredPipeline.instance.endDrawEnvMap();
       }
 
-      // =============== REALISTIC WATER MASK =============== //
-
       if (conf.is_rendering_realisticWater) {
          EaglerDeferredPipeline.instance.beginDrawRealisticWaterMask();
          this.enableLightmap();
@@ -1777,8 +1776,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
          this.disableLightmap();
          EaglerDeferredPipeline.instance.endDrawRealisticWaterMask();
       }
-
-      // =============== FOG SETUP =============== //
 
       int dim = this.mc.world.dimension.getType().getId();
       float ff;
@@ -1792,7 +1789,9 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
          ff = 1.0f;
       }
 
-      if (entity instanceof LivingEntity && ((LivingEntity)entity).isPotionActive(Effects.BLINDNESS)) {
+      if (!this.mc.gameSettings.fog) {
+         DeferredStateManager.disableFog();
+      } else if (entity instanceof LivingEntity && ((LivingEntity)entity).isPotionActive(Effects.BLINDNESS)) {
          float f1 = 5.0F;
          int i = ((LivingEntity) entity).getActivePotionEffect(Effects.BLINDNESS).getDuration();
          if (i < 20) {
@@ -1829,8 +1828,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
          }
          DeferredStateManager.enableFogExp(ds, true, 1.0f, 1.0f, 1.0f, 1.0f, ff, ff, ff, 1.0f);
       }
-
-      // =============== HDR TRANSLUCENT PASS =============== //
 
       EaglerDeferredPipeline.instance.beginDrawHDRTranslucent();
       DeferredStateManager.setDefaultMaterialConstants();
@@ -1870,7 +1867,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
       EaglerDeferredPipeline.instance.endDrawMainGBufferDestroyProgress();
 
-      // Render alpha-layer particles
       GlStateManager.pushMatrix();
       net.lax1dude.eaglercraft.opengl.ext.deferred.DeferredStateManager.setHDRTranslucentPassBlendFunc();
       net.lax1dude.eaglercraft.opengl.ext.deferred.DeferredStateManager.reportForwardRenderObjectPosition2(0.0f, 0.0f, 0.0f);
@@ -1881,8 +1877,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
       GlStateManager.popMatrix();
       GlStateManager.enableBlend();
       GlStateManager.depthMask(true);
-
-      // =============== GLASS HIGHLIGHTS =============== //
 
       if (conf.is_rendering_useEnvMap) {
          EaglerDeferredPipeline.instance.beginDrawGlassHighlights();
@@ -1929,9 +1923,6 @@ public class GameRenderer implements AutoCloseable, IResourceManagerReloadListen
 
       EaglerDeferredPipeline.instance.endDrawDeferred();
 
-      // =============== POST-DEFERRED (BLOCK OUTLINE, NAMETAGS, WORLD BORDER) =============== //
-
-      // Reset lightmap texture matrix
       GlStateManager.matrixMode(5890);
       GlStateManager.loadIdentity();
       GlStateManager.matrixMode(5888);

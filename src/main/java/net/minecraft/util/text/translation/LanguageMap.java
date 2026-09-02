@@ -36,7 +36,7 @@ public class LanguageMap {
             JsonObject jsonobject = JSONUtils.getJsonObject(jsonelement, "strings");
 
             for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
-                String s = NUMERIC_VARIABLE_PATTERN.matcher(JSONUtils.getString(entry.getValue(), entry.getKey())).replaceAll("%$1s");
+                String s = NUMERIC_VARIABLE_PATTERN.matcher(JSONUtils.getString(entry.getValue(), entry.getKey())).replaceAll("%s"); 
                 this.languageList.put(entry.getKey(), s);
             }
 

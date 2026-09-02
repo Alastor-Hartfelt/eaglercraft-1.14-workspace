@@ -126,7 +126,6 @@ public class BlockModelDefinition {
          return map;
       }
 
-      
       protected Multipart parseMultipart(JsonDeserializationContext deserializationContext, JsonObject object) {
          if (!object.has("multipart")) {
             return null;

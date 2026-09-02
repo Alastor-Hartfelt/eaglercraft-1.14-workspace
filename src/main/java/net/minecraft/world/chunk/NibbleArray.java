@@ -1,6 +1,5 @@
 package net.minecraft.world.chunk;
 
-
 public class NibbleArray {
 
     protected byte[] data;

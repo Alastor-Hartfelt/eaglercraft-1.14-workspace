@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.model;
 
-import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.lax1dude.eaglercraft.Random;
 import net.minecraft.block.BlockState;
@@ -40,31 +39,37 @@ public class MultipartBakedModel implements IBakedModel {
     public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
         if (state == null) {
             return Collections.emptyList();
-        } else {
-            List<IBakedModel> models = this.modelCache.get(state);
+        }
+
+        List<IBakedModel> models;
+
+        synchronized (this.modelCache) {
+            models = this.modelCache.get(state);
+
             if (models == null) {
                 models = new ArrayList<>(this.selectors.size());
 
-                for (int i = 0; i < this.selectors.size(); ++i) {
-                    Pair<Predicate<BlockState>, IBakedModel> pair = this.selectors.get(i);
-                    if (pair.getLeft().test(state)) {
+                for (Pair<Predicate<BlockState>, IBakedModel> pair : this.selectors) {
+                    if ((pair.getLeft()).test(state)) {
                         models.add(pair.getRight());
                     }
                 }
 
                 this.modelCache.put(state, models);
             }
-
-            List<BakedQuad> list = Lists.newArrayList();
-            long k = rand.nextLong();
-
-            for (int j = 0, len = models.size(); j < len; ++j) {
-                rand.setSeed(k);
-                list.addAll(models.get(j).getQuads(state, side, rand));
-            }
-
-            return list;
         }
+
+        List<BakedQuad> list = new ArrayList<>();
+
+        long seed = rand.nextLong();
+
+        for (IBakedModel model : models) {
+            rand.setSeed(seed);
+
+            list.addAll(model.getQuads(state, side, rand));
+        }
+
+        return list;
     }
 
     public boolean isAmbientOcclusion() {
@@ -93,7 +98,7 @@ public class MultipartBakedModel implements IBakedModel {
 
     @OnlyIn(Dist.CLIENT)
     public static class Builder {
-        private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors = Lists.newArrayList();
+        private final List<Pair<Predicate<BlockState>, IBakedModel>> selectors = new ArrayList<>();
 
         public void putModel(Predicate<BlockState> predicate, IBakedModel model) {
             this.selectors.add(Pair.of(predicate, model));

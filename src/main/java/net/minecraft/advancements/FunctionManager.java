@@ -10,8 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.eymenwsmc.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import net.eymenwsmc.java.CompletableFuture;
 
 import net.lax1dude.eaglercraft.IOUtils;
 import net.lax1dude.eaglercraft.internal.vfs2.EaglerFileSystemException;
@@ -172,7 +171,6 @@ public class FunctionManager implements IResourceManagerReloadListener {
       this.tickFunctions.addAll(this.tagCollection.getOrCreate(TICK_TAG_ID).getAllElements());
       this.loadFunctionsRun = true;
    }
-
 
    private FunctionObject load(FunctionObject function,  Throwable error, ResourceLocation id) {
       if (error != null) {

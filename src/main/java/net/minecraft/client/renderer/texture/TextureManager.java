@@ -3,7 +3,7 @@ package net.minecraft.client.renderer.texture;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.TextureUtil;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.gui.widget.Widget;
@@ -124,8 +124,9 @@ public class TextureManager implements ITickable, IFutureReloadListener {
     }
 
     public void deleteTexture(ResourceLocation textureLocation) {
-        ITextureObject itextureobject = this.getTexture(textureLocation);
+        ITextureObject itextureobject = this.mapTextureObjects.remove(textureLocation);
         if (itextureobject != null) {
+            this.listTickables.remove(itextureobject);
             TextureUtil.releaseTextureId(itextureobject.getGlTextureId());
         }
 

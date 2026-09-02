@@ -106,7 +106,6 @@ public class SoundHandler extends ReloadListener<SoundHandler.Loader> {
       this.sndManager.reload();
    }
 
-
    protected static Map<String, SoundList> getSoundMap(InputStream p_175085_0_) {
       Map<String, SoundList> finalMap = com.google.common.collect.Maps.newHashMap();
       try {
@@ -141,7 +140,6 @@ public class SoundHandler extends ReloadListener<SoundHandler.Loader> {
          return true;
       }
    }
-
 
    public SoundEventAccessor getAccessor(ResourceLocation location) {
       return this.soundRegistry.get(location);

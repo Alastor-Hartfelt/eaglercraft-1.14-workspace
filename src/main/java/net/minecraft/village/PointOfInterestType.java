@@ -102,7 +102,6 @@ public class PointOfInterestType {
         return this.name;
     }
 
-
     public SoundEvent getWorkSound() {
         return this.workSound;
     }

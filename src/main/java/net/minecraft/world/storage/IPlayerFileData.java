@@ -6,6 +6,5 @@ import net.minecraft.nbt.CompoundNBT;
 public interface IPlayerFileData {
    void writePlayerData(PlayerEntity player);
 
-
    CompoundNBT readPlayerData(PlayerEntity player);
 }

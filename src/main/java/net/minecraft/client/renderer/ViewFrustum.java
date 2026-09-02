@@ -105,7 +105,6 @@ public class ViewFrustum {
                 }
             }
         }
-        this.updateNeighborChunks();
     }
 
     private int getBaseCoordinate(int midBlocksIn, int countBlocksIn, int chunksIn) {
@@ -125,7 +124,6 @@ public class ViewFrustum {
         ChunkRender chunkrender = this.renderChunks[this.getIndex(i, j, k)];
         chunkrender.setNeedsUpdate(rerenderOnMainThread);
     }
-
 
     protected ChunkRender getRenderChunk(BlockPos pos) {
         int i = MathHelper.intFloorDiv(pos.getX(), 16);

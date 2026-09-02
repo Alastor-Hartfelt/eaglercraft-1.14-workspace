@@ -140,7 +140,6 @@ public class SkeletonHorseEntity extends AbstractHorseEntity {
         }
     }
 
-
     public AgeableEntity createChild(AgeableEntity ageable) {
         return EntityType.SKELETON_HORSE.create(this.world);
     }

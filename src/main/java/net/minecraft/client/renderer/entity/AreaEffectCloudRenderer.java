@@ -11,7 +11,6 @@ public class AreaEffectCloudRenderer extends EntityRenderer<AreaEffectCloudEntit
       super(manager);
    }
 
-
    protected ResourceLocation getEntityTexture(AreaEffectCloudEntity entity) {
       return null;
    }

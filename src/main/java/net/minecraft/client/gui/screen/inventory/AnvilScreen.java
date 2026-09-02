@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screen.inventory;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerInventory;
@@ -57,7 +58,7 @@ public class AnvilScreen extends ContainerScreen<RepairContainer> implements ICo
     }
 
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (p_keyPressed_1_ == 256) {
+        if (Screen.isCloseKey(p_keyPressed_1_, p_keyPressed_2_)) {
             this.mc.player.closeScreen();
         }
 

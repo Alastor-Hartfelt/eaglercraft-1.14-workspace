@@ -155,7 +155,6 @@ public class OverworldDimension extends Dimension {
       }
    }
 
-
    public BlockPos findSpawn(ChunkPos chunkPosIn, boolean checkValid) {
       for(int i = chunkPosIn.getXStart(); i <= chunkPosIn.getXEnd(); ++i) {
          for(int j = chunkPosIn.getZStart(); j <= chunkPosIn.getZEnd(); ++j) {
@@ -168,7 +167,6 @@ public class OverworldDimension extends Dimension {
 
       return null;
    }
-
 
    public BlockPos findSpawn(int posX, int posZ, boolean checkValid) {
       BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(posX, 0, posZ);

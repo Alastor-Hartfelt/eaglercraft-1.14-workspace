@@ -5,10 +5,11 @@ import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import io.netty.buffer.Unpooled;
-import net.eymenwsmc.CompletableFuture;
+import net.eymenwsmc.java.CompletableFuture;
 import net.lax1dude.eaglercraft.EaglercraftUUID;
 import net.lax1dude.eaglercraft.Random;
 import net.lax1dude.eaglercraft.internal.vfs2.VFile2;
+import net.lax1dude.eaglercraft.voice.VoiceClientController;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.block.Block;
 import net.minecraft.client.ClientBrandRetriever;
@@ -198,6 +199,8 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
         this.skinCache.destroy();
         this.capeCache.destroy();
         this.notifManager.destroy();
+        VoiceClientController.handleServerDisconnect();
+        net.lax1dude.eaglercraft.PauseMenuCustomizeState.reset();
     }
 
     public RecipeManager getRecipeManager() {
@@ -232,6 +235,13 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
         this.client.playerController.setGameType(packetIn.getGameType());
         this.client.gameSettings.sendSettingsToServer();
         this.netManager.sendPacket(new CCustomPayloadPacket(CCustomPayloadPacket.BRAND, (new PacketBuffer(Unpooled.buffer())).writeString(ClientBrandRetriever.getClientModName())));
+        if (VoiceClientController.isClientSupported()) {
+            if (eaglerMessageController != null) {
+                VoiceClientController.initializeVoiceClient(this::sendEaglerMessage, eaglerMessageController.protocol.ver);
+            } else {
+                VoiceClientController.initializeVoiceClient(null, -1);
+            }
+        }
         this.client.getMinecraftGame().func_216814_a();
     }
 
@@ -570,8 +580,8 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
             this.world.addEntitiesToChunk(chunk);
         }
 
-        for (int k = 0; k < 16; ++k) {
-            this.world.markSurroundingsForRerender(i, k, j);
+        if (chunk != null && !packetIn.isFullChunk()) {
+            this.client.worldRenderer.scheduleChunkSectionsForRebuild(i, j, packetIn.getAvailableSections());
         }
 
         for (CompoundNBT compoundnbt : packetIn.getTileEntityTags()) {
@@ -593,7 +603,6 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
         WorldLightManager worldlightmanager = clientchunkprovider.getLightManager();
 
         for (int k = 0; k < 16; ++k) {
-            this.world.markSurroundingsForRerender(i, k, j);
             worldlightmanager.updateSectionStatus(SectionPos.of(i, k, j), true);
         }
 
@@ -809,7 +818,7 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
             this.world = new ClientWorld(this, new WorldSettings(0L, packetIn.getGameType(), false, this.client.world.getWorldInfo().isHardcore(), packetIn.getWorldType()), packetIn.getDimension(), this.field_217287_m, this.client.getProfiler(), this.client.worldRenderer);
             this.world.setScoreboard(scoreboard);
             this.client.loadWorld(this.world);
-            this.client.displayGuiScreen(new DownloadTerrainScreen());
+            this.client.displayGuiScreen((Screen) null);
         }
 
         this.world.setInitialSpawnLocation();
@@ -1387,7 +1396,6 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
                     VFile2 file2 = new VFile2(file1, s2);
                     if (file2.exists()) {
                         this.func_217283_a(CResourcePackStatusPacket.Action.ACCEPTED);
-                        // downloading packs is stubbed
                         return;
                     }
                 } catch (UnsupportedEncodingException var8) {
@@ -1399,7 +1407,6 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
                 ServerData serverdata = this.client.getCurrentServerData();
                 if (serverdata != null && serverdata.getResourceMode() == ServerData.ServerResourceMode.ENABLED) {
                     this.func_217283_a(CResourcePackStatusPacket.Action.ACCEPTED);
-                    // downloading packs is stubbed
                 } else if (serverdata != null && serverdata.getResourceMode() != ServerData.ServerResourceMode.PROMPT) {
                     this.func_217283_a(CResourcePackStatusPacket.Action.DECLINED);
                 } else {
@@ -1413,7 +1420,6 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
                                 }
 
                                 this.func_217283_a(CResourcePackStatusPacket.Action.ACCEPTED);
-                                // downloading packs is stubbed
                             } else {
                                 if (serverdata1 != null) {
                                     serverdata1.setResourceMode(ServerData.ServerResourceMode.DISABLED);
@@ -1507,7 +1513,6 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
             if (SCustomPayloadPlayPacket.BRAND.equals(resourcelocation)) {
                 this.client.player.setServerBrand(packetbuffer.readString(32767));
             } else if (SCustomPayloadPlayPacket.REGISTER.equals(resourcelocation) || SCustomPayloadPlayPacket.UNREGISTER.equals(resourcelocation)) {
-                // silently ignore minecraft:register and minecraft:unregister
             } else if (SCustomPayloadPlayPacket.DEBUG_PATH.equals(resourcelocation)) {
                 int i = packetbuffer.readInt();
                 float f = packetbuffer.readFloat();
@@ -1891,11 +1896,9 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
         return this.playerInfoMap.values();
     }
 
-
     public NetworkPlayerInfo getPlayerInfo(EaglercraftUUID uniqueId) {
         return this.playerInfoMap.get(uniqueId);
     }
-
 
     public NetworkPlayerInfo getPlayerInfo(String name) {
         for (NetworkPlayerInfo networkplayerinfo : this.playerInfoMap.values()) {

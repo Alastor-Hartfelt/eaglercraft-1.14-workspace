@@ -66,7 +66,6 @@ public abstract class AbstractClientPlayerEntity extends PlayerEntity {
       return this.getPlayerInfo() != null;
    }
 
-
    protected NetworkPlayerInfo getPlayerInfo() {
       if (this.playerInfo == null) {
          this.playerInfo = Minecraft.getInstance().getConnection().getPlayerInfo(this.getUniqueID());
@@ -88,7 +87,6 @@ public abstract class AbstractClientPlayerEntity extends PlayerEntity {
       return networkplayerinfo == null ? DefaultPlayerSkin.getDefaultSkin(this.getUniqueID()) : networkplayerinfo.getLocationSkin();
    }
 
-
    public ResourceLocation getLocationCape() {
       if (net.lax1dude.eaglercraft.profile.EaglerProfile.getPlayerUUID().equals(this.getUniqueID()) || this == Minecraft.getInstance().player) {
           return net.lax1dude.eaglercraft.profile.EaglerProfile.getActiveCapeResourceLocation();
@@ -100,7 +98,6 @@ public abstract class AbstractClientPlayerEntity extends PlayerEntity {
    public boolean isPlayerInfoSet() {
       return this.getPlayerInfo() != null;
    }
-
 
    public ResourceLocation getLocationElytra() {
       NetworkPlayerInfo networkplayerinfo = this.getPlayerInfo();

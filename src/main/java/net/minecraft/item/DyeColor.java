@@ -107,7 +107,6 @@ public enum DyeColor implements IStringSerializable {
         return p_204271_1_;
     }
 
-
     @OnlyIn(Dist.CLIENT)
     public static DyeColor byFireworkColor(int p_196058_0_) {
         return BY_FIREWORK_COLOR.get(p_196058_0_);

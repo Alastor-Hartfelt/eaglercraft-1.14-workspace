@@ -292,7 +292,6 @@ public class HorseEntity extends AbstractHorseEntity {
         return stack.getItem() instanceof HorseArmorItem;
     }
 
-
     public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
         int i;

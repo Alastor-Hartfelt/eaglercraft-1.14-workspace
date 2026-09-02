@@ -37,7 +37,6 @@ public class CheckerboardBiomeProvider extends BiomeProvider {
         return abiome;
     }
 
-
     public BlockPos findBiomePosition(int x, int z, int range, List<Biome> biomes, Random random) {
         return null;
     }

@@ -48,7 +48,6 @@ public class FireBlock extends Block {
         return this.isValidPosition(stateIn, worldIn, currentPos) ? this.getStateForPlacement(worldIn, currentPos).with(AGE, stateIn.get(AGE)) : Blocks.AIR.getDefaultState();
     }
 
-
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         return this.getStateForPlacement(context.getWorld(), context.getPos());
     }

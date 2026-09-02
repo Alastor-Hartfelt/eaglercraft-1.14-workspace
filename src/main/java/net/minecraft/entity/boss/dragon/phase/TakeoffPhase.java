@@ -76,7 +76,6 @@ public class TakeoffPhase extends Phase {
 
    }
 
-
    public Vec3d getTargetLocation() {
       return this.targetLocation;
    }

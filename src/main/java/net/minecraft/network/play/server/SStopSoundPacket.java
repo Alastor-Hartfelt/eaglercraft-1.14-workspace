@@ -52,12 +52,10 @@ public class SStopSoundPacket implements IPacket<IClientPlayNetHandler> {
 
    }
 
-
    @OnlyIn(Dist.CLIENT)
    public ResourceLocation getName() {
       return this.name;
    }
-
 
    @OnlyIn(Dist.CLIENT)
    public SoundCategory getCategory() {

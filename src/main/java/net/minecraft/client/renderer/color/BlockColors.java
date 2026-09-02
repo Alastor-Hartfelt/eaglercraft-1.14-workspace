@@ -27,7 +27,6 @@ public class BlockColors {
     private final ObjectIntIdentityMap<IBlockColor> colors = new ObjectIntIdentityMap<>(32);
     private final Map<Block, Set<IProperty<?>>> field_225311_b = Maps.newHashMap();
 
-    //nigga swaprb heheheheheeheheheghheheheheheheheehhh
     public static BlockColors init() {
         BlockColors blockcolors = new BlockColors();
         blockcolors.register((p_210234_0_, p_210234_1_, p_210234_2_, p_210234_3_) -> {
@@ -56,7 +55,7 @@ public class BlockColors {
 
         blockcolors.register((p_210226_0_, p_210226_1_, p_210226_2_, p_210226_3_) -> {
             int color = p_210226_1_ != null && p_210226_2_ != null ? BiomeColors.getWaterColor(p_210226_1_, p_210226_2_) : -1;
-            return swapRB(color);
+            return color;
         }, Blocks.WATER, Blocks.BUBBLE_COLUMN, Blocks.CAULDRON);
 
         blockcolors.register((p_210231_0_, p_210231_1_, p_210231_2_, p_210231_3_) -> {

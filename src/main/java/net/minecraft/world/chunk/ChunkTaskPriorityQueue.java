@@ -88,7 +88,6 @@ public class ChunkTaskPriorityQueue<T> {
         };
     }
 
-
     public Stream<Either<T, Runnable>> func_219417_a() {
         if (this.field_219423_e.size() >= this.field_219424_f) {
             return null;

@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 public class PngSizeInfo {
     public final int width;
     public final int height;

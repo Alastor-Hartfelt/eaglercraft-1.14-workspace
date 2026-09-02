@@ -421,7 +421,6 @@ public abstract class StructurePiece {
       this.boundingBox.offset(x, y, z);
    }
 
-
    public Direction getCoordBaseMode() {
       return this.field_74885_f;
    }

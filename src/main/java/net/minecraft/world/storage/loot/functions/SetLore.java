@@ -55,7 +55,6 @@ public class SetLore extends LootFunction {
         return stack;
     }
 
-
     private ListNBT func_215942_a(ItemStack p_215942_1_, boolean p_215942_2_) {
         CompoundNBT compoundnbt;
         if (p_215942_1_.hasTag()) {
