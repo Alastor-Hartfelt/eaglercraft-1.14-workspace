@@ -1,8 +1,26 @@
 #!/bin/sh
 set -eu
 
-# Build the same WASM-GC client bundle used by GitHub Actions.
-# Vercel's build environment provides Java; the project itself requires Java 17+.
+# Vercel's build image may have a newer Java (for example Java 24), while
+# this project explicitly requires a Java 17 toolchain. Download a local
+# Temurin 17 JDK so Gradle can satisfy that toolchain requirement.
+JDK_DIR=".vercel-jdk-17"
+JDK_URL="https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/eclipse"
+
+if [ ! -x "$JDK_DIR/bin/java" ]; then
+  echo "Java 17 not found; downloading Temurin JDK 17..."
+  rm -rf "$JDK_DIR" .vercel-jdk-17.tar.gz
+  mkdir -p "$JDK_DIR"
+  curl -L --fail --retry 3 "$JDK_URL" -o .vercel-jdk-17.tar.gz
+  tar -xzf .vercel-jdk-17.tar.gz --strip-components=1 -C "$JDK_DIR"
+  rm -f .vercel-jdk-17.tar.gz
+fi
+
+export JAVA_HOME="$(pwd)/$JDK_DIR"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+echo "Using Java:"
+java -version
 
 chmod +x ./gradlew
 
