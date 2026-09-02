@@ -1,0 +1,4 @@
+{
+  "buildCommand": "sh ./vercel-build.sh",
+  "outputDirectory": "target_teavm_wasm_gc/javascript_dist"
+}
